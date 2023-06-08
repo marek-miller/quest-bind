@@ -1,3 +1,3 @@
 # qst
 
-A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/).
+A thin and wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v0.3.5.

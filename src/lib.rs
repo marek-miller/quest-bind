@@ -1,33 +1,40 @@
 mod ffi;
+pub use ffi::{
+    bitEncoding as BitEncoding,
+    pauliOpType as PauliOpType,
+    phaseFunc as PhaseFunc,
+    phaseGateType as PhaseGateType,
+};
 
-// type Qreal = f64;
+pub type Qreal = f64;
+
+#[derive(Debug, Clone, Copy)]
+pub struct Complex {
+    pub real: Qreal,
+    pub imag: Qreal,
+}
 
 #[derive(Debug)]
-pub struct QuESTEnv(ffi::QuESTEnv);
+pub struct ComplexMatrix2(ffi::ComplexMatrix2);
 
-impl QuESTEnv {
-    #[must_use]
-    pub fn new() -> Self {
-        unsafe { QuESTEnv(ffi::createQuESTEnv()) }
-    }
+#[derive(Debug)]
+pub struct ComplexMatrix4(ffi::ComplexMatrix4);
 
-    pub fn destroy(self) {
-        unsafe { ffi::destroyQuESTEnv(self.0) }
-    }
+#[derive(Debug)]
+pub struct ComplexMatrixN(ffi::ComplexMatrixN);
 
-    /// Print report to standard output
-    pub fn report(&self) {
-        unsafe {
-            ffi::reportQuESTEnv(self.0);
-        }
-    }
+#[derive(Debug, Copy, Clone)]
+pub struct Vector {
+    pub x: Qreal,
+    pub y: Qreal,
+    pub z: Qreal,
 }
 
-impl Default for QuESTEnv {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+#[derive(Debug)]
+pub struct PauliHamil(ffi::PauliHamil);
+
+#[derive(Debug)]
+pub struct DiagonalOp(ffi::DiagonalOp);
 
 #[derive(Debug)]
 pub struct Qureg<'a> {
@@ -35,28 +42,62 @@ pub struct Qureg<'a> {
     reg: ffi::Qureg,
 }
 
-impl<'a> Qureg<'a> {
-    #[must_use]
-    pub fn new(
-        num_qubits: i32,
-        env: &'a QuESTEnv,
-    ) -> Self {
-        unsafe {
-            Qureg {
-                env,
-                reg: ffi::createQureg(num_qubits, env.0),
-            }
-        }
-    }
+#[derive(Debug)]
+pub struct QuESTEnv(ffi::QuESTEnv);
 
-    pub fn destroy(self) {
-        unsafe { ffi::destroyQureg(self.reg, self.env.0) }
+pub fn create_qureg(
+    num_qubits: i32,
+    env: &QuESTEnv,
+) -> Qureg<'_> {
+    let reg = unsafe { ffi::createQureg(num_qubits, env.0) };
+    Qureg {
+        env,
+        reg,
     }
+}
 
-    pub fn report(&self) {
-        unsafe {
-            ffi::reportState(self.reg);
-        }
+pub fn create_density_qureg(
+    num_qubits: i32,
+    env: &QuESTEnv,
+) -> Qureg {
+    let reg = unsafe { ffi::createDensityQureg(num_qubits, env.0) };
+    Qureg {
+        env,
+        reg,
+    }
+}
+
+pub fn create_clone_qureg(qureg: Qureg) -> Qureg {
+    let reg = unsafe { ffi::createCloneQureg(qureg.reg, qureg.env.0) };
+    Qureg {
+        env: qureg.env,
+        reg,
+    }
+}
+
+pub fn destroy_qureg(qureg: Qureg) {
+    unsafe { ffi::destroyQureg(qureg.reg, qureg.env.0) }
+}
+
+pub fn create_complex_matrix_n(num_qubits: i32) -> ComplexMatrixN {
+    ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
+}
+
+pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) {
+    unsafe { ffi::destroyComplexMatrixN(matr.0) }
+}
+
+pub fn init_complex_matrix_n(
+    m: &mut ComplexMatrixN,
+    real: &[&[Qreal]],
+    imag: &[&[Qreal]],
+) {
+    unsafe {
+        ffi::initComplexMatrixN(
+            m.0,
+            real[0].as_ptr() as *mut _,
+            imag[0].as_ptr() as *mut _,
+        )
     }
 }
 
@@ -69,5 +110,23 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 pub fn init_plus_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initPlusState(qureg.reg);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn init_complex_matrix_n_01() {
+        let mut m = create_complex_matrix_n(3);
+        init_complex_matrix_n(
+            &mut m,
+            &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]],
+            &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]],
+        );
+
+        destroy_complex_matrix_n(m);
     }
 }

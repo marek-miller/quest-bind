@@ -1,8 +1,9 @@
-//! FFI bindings for QuEST v3.5.0
+//! FFI bindings to libQuEST v3.5.0
 
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
+#![allow(clippy::upper_case_acronyms)]
 
 use std::ffi::{
     c_char,
@@ -12,7 +13,7 @@ use std::ffi::{
     c_ulong,
 };
 
-type qreal = c_double;
+pub type qreal = c_double;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -38,8 +39,8 @@ pub struct QASMLogger {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct ComplexArray {
-    real: *mut qreal,
-    imag: *mut qreal,
+    pub real: *mut qreal,
+    pub imag: *mut qreal,
 }
 
 #[repr(C)]
@@ -195,8 +196,8 @@ extern "C" {
 
     pub fn initComplexMatrixN(
         m: ComplexMatrixN,
-        real: *mut *mut f64,
-        imag: *mut *mut f64,
+        real: *mut *mut qreal,
+        imag: *mut *mut qreal,
     );
 
     pub fn createPauliHamil(
@@ -210,7 +211,7 @@ extern "C" {
 
     pub fn initPauliHamil(
         hamil: PauliHamil,
-        coeffs: *mut f64,
+        coeffs: *mut qreal,
         codes: *mut pauliOpType,
     );
 
@@ -228,8 +229,8 @@ extern "C" {
 
     pub fn initDiagonalOp(
         op: DiagonalOp,
-        real: *mut f64,
-        imag: *mut f64,
+        real: *mut qreal,
+        imag: *mut qreal,
     );
 
     pub fn initDiagonalOpFromPauliHamil(
@@ -245,8 +246,8 @@ extern "C" {
     pub fn setDiagonalOpElems(
         op: DiagonalOp,
         startInd: c_longlong,
-        real: *mut f64,
-        imag: *mut f64,
+        real: *mut qreal,
+        imag: *mut qreal,
         numElems: c_longlong,
     );
 
@@ -296,15 +297,15 @@ extern "C" {
 
     pub fn initStateFromAmps(
         qureg: Qureg,
-        reals: *mut f64,
-        imags: *mut f64,
+        reals: *mut qreal,
+        imags: *mut qreal,
     );
 
     pub fn setAmps(
         qureg: Qureg,
         startInd: c_longlong,
-        reals: *mut f64,
-        imags: *mut f64,
+        reals: *mut qreal,
+        imags: *mut qreal,
         numAmps: c_longlong,
     );
 
@@ -312,8 +313,8 @@ extern "C" {
         qureg: Qureg,
         startRow: c_longlong,
         startCol: c_longlong,
-        reals: *mut f64,
-        imags: *mut f64,
+        reals: *mut qreal,
+        imags: *mut qreal,
         numAmps: c_longlong,
     );
 
@@ -325,21 +326,21 @@ extern "C" {
     pub fn phaseShift(
         qureg: Qureg,
         targetQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn controlledPhaseShift(
         qureg: Qureg,
         idQubit1: c_int,
         idQubit2: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn multiControlledPhaseShift(
         qureg: Qureg,
         controlQubits: *mut c_int,
         numControlQubits: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn controlledPhaseFlip(
@@ -403,17 +404,17 @@ extern "C" {
     pub fn getRealAmp(
         qureg: Qureg,
         index: c_longlong,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn getImagAmp(
         qureg: Qureg,
         index: c_longlong,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn getProbAmp(
         qureg: Qureg,
         index: c_longlong,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn getDensityAmp(
         qureg: Qureg,
@@ -421,7 +422,7 @@ extern "C" {
         col: c_longlong,
     ) -> Complex;
 
-    pub fn calcTotalProb(qureg: Qureg) -> f64;
+    pub fn calcTotalProb(qureg: Qureg) -> qreal;
 
     pub fn compactUnitary(
         qureg: Qureg,
@@ -439,25 +440,25 @@ extern "C" {
     pub fn rotateX(
         qureg: Qureg,
         rotQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn rotateY(
         qureg: Qureg,
         rotQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn rotateZ(
         qureg: Qureg,
         rotQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn rotateAroundAxis(
         qureg: Qureg,
         rotQubit: c_int,
-        angle: f64,
+        angle: qreal,
         axis: Vector,
     );
 
@@ -465,28 +466,28 @@ extern "C" {
         qureg: Qureg,
         controlQubit: c_int,
         targetQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn controlledRotateY(
         qureg: Qureg,
         controlQubit: c_int,
         targetQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn controlledRotateZ(
         qureg: Qureg,
         controlQubit: c_int,
         targetQubit: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn controlledRotateAroundAxis(
         qureg: Qureg,
         controlQubit: c_int,
         targetQubit: c_int,
-        angle: f64,
+        angle: qreal,
         axis: Vector,
     );
 
@@ -563,10 +564,10 @@ extern "C" {
         qureg: Qureg,
         measureQubit: c_int,
         outcome: c_int,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn calcProbOfAllOutcomes(
-        outcomeProbs: *mut f64,
+        outcomeProbs: *mut qreal,
         qureg: Qureg,
         qubits: *mut c_int,
         numQubits: c_int,
@@ -576,7 +577,7 @@ extern "C" {
         qureg: Qureg,
         measureQubit: c_int,
         outcome: c_int,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn measure(
         qureg: Qureg,
@@ -586,7 +587,7 @@ extern "C" {
     pub fn measureWithStats(
         qureg: Qureg,
         measureQubit: c_int,
-        outcomeProb: *mut f64,
+        outcomeProb: *mut qreal,
     ) -> c_int;
 
     pub fn calcInnerProduct(
@@ -597,7 +598,7 @@ extern "C" {
     pub fn calcDensityInnerProduct(
         rho1: Qureg,
         rho2: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn seedQuESTDefault(env: *mut QuESTEnv);
 
@@ -629,55 +630,55 @@ extern "C" {
     pub fn mixDephasing(
         qureg: Qureg,
         targetQubit: c_int,
-        prob: f64,
+        prob: qreal,
     );
 
     pub fn mixTwoQubitDephasing(
         qureg: Qureg,
         qubit1: c_int,
         qubit2: c_int,
-        prob: f64,
+        prob: qreal,
     );
 
     pub fn mixDepolarising(
         qureg: Qureg,
         targetQubit: c_int,
-        prob: f64,
+        prob: qreal,
     );
 
     pub fn mixDamping(
         qureg: Qureg,
         targetQubit: c_int,
-        prob: f64,
+        prob: qreal,
     );
 
     pub fn mixTwoQubitDepolarising(
         qureg: Qureg,
         qubit1: c_int,
         qubit2: c_int,
-        prob: f64,
+        prob: qreal,
     );
 
     pub fn mixPauli(
         qureg: Qureg,
         targetQubit: c_int,
-        probX: f64,
-        probY: f64,
-        probZ: f64,
+        probX: qreal,
+        probY: qreal,
+        probZ: qreal,
     );
 
     pub fn mixDensityMatrix(
         combineQureg: Qureg,
-        prob: f64,
+        prob: qreal,
         otherQureg: Qureg,
     );
 
-    pub fn calcPurity(qureg: Qureg) -> f64;
+    pub fn calcPurity(qureg: Qureg) -> qreal;
 
     pub fn calcFidelity(
         qureg: Qureg,
         pureState: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn swapGate(
         qureg: Qureg,
@@ -704,7 +705,7 @@ extern "C" {
         qureg: Qureg,
         qubits: *mut c_int,
         numQubits: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn multiRotatePauli(
@@ -712,7 +713,7 @@ extern "C" {
         targetQubits: *mut c_int,
         targetPaulis: *mut pauliOpType,
         numTargets: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn multiControlledMultiRotateZ(
@@ -721,7 +722,7 @@ extern "C" {
         numControls: c_int,
         targetQubits: *mut c_int,
         numTargets: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn multiControlledMultiRotatePauli(
@@ -731,7 +732,7 @@ extern "C" {
         targetQubits: *mut c_int,
         targetPaulis: *mut pauliOpType,
         numTargets: c_int,
-        angle: f64,
+        angle: qreal,
     );
 
     pub fn calcExpecPauliProd(
@@ -740,21 +741,21 @@ extern "C" {
         pauliCodes: *mut pauliOpType,
         numTargets: c_int,
         workspace: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn calcExpecPauliSum(
         qureg: Qureg,
         allPauliCodes: *mut pauliOpType,
-        termCoeffs: *mut f64,
+        termCoeffs: *mut qreal,
         numSumTerms: c_int,
         workspace: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn calcExpecPauliHamil(
         qureg: Qureg,
         hamil: PauliHamil,
         workspace: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn twoQubitUnitary(
         qureg: Qureg,
@@ -853,7 +854,7 @@ extern "C" {
     pub fn calcHilbertSchmidtDistance(
         a: Qureg,
         b: Qureg,
-    ) -> f64;
+    ) -> qreal;
 
     pub fn setWeightedQureg(
         fac1: Complex,
@@ -867,7 +868,7 @@ extern "C" {
     pub fn applyPauliSum(
         inQureg: Qureg,
         allPauliCodes: *mut pauliOpType,
-        termCoeffs: *mut f64,
+        termCoeffs: *mut qreal,
         numSumTerms: c_int,
         outQureg: Qureg,
     );
@@ -881,7 +882,7 @@ extern "C" {
     pub fn applyTrotterCircuit(
         qureg: Qureg,
         hamil: PauliHamil,
-        time: f64,
+        time: qreal,
         order: c_int,
         reps: c_int,
     );
@@ -922,10 +923,10 @@ extern "C" {
 
     pub fn bindArraysToStackComplexMatrixN(
         numQubits: c_int,
-        re: *mut *mut f64,
-        im: *mut *mut f64,
-        reStorage: *mut *mut f64,
-        imStorage: *mut *mut f64,
+        re: *mut *mut qreal,
+        im: *mut *mut qreal,
+        reStorage: *mut *mut qreal,
+        imStorage: *mut *mut qreal,
     ) -> ComplexMatrixN;
 
     pub fn applyPhaseFunc(
@@ -933,8 +934,8 @@ extern "C" {
         qubits: *mut c_int,
         numQubits: c_int,
         encoding: bitEncoding,
-        coeffs: *mut f64,
-        exponents: *mut f64,
+        coeffs: *mut qreal,
+        exponents: *mut qreal,
         numTerms: c_int,
     );
 
@@ -943,11 +944,11 @@ extern "C" {
         qubits: *mut c_int,
         numQubits: c_int,
         encoding: bitEncoding,
-        coeffs: *mut f64,
-        exponents: *mut f64,
+        coeffs: *mut qreal,
+        exponents: *mut qreal,
         numTerms: c_int,
         overrideInds: *mut c_longlong,
-        overridePhases: *mut f64,
+        overridePhases: *mut qreal,
         numOverrides: c_int,
     );
 
@@ -957,8 +958,8 @@ extern "C" {
         numQubitsPerReg: *mut c_int,
         numRegs: c_int,
         encoding: bitEncoding,
-        coeffs: *mut f64,
-        exponents: *mut f64,
+        coeffs: *mut qreal,
+        exponents: *mut qreal,
         numTermsPerReg: *mut c_int,
     );
 
@@ -968,11 +969,11 @@ extern "C" {
         numQubitsPerReg: *mut c_int,
         numRegs: c_int,
         encoding: bitEncoding,
-        coeffs: *mut f64,
-        exponents: *mut f64,
+        coeffs: *mut qreal,
+        exponents: *mut qreal,
         numTermsPerReg: *mut c_int,
         overrideInds: *mut c_longlong,
-        overridePhases: *mut f64,
+        overridePhases: *mut qreal,
         numOverrides: c_int,
     );
 
@@ -993,7 +994,7 @@ extern "C" {
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
         overrideInds: *mut c_longlong,
-        overridePhases: *mut f64,
+        overridePhases: *mut qreal,
         numOverrides: c_int,
     );
 
@@ -1004,7 +1005,7 @@ extern "C" {
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
-        params: *mut f64,
+        params: *mut qreal,
         numParams: c_int,
     );
 
@@ -1015,10 +1016,10 @@ extern "C" {
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
-        params: *mut f64,
+        params: *mut qreal,
         numParams: c_int,
         overrideInds: *mut c_longlong,
-        overridePhases: *mut f64,
+        overridePhases: *mut qreal,
         numOverrides: c_int,
     );
 
