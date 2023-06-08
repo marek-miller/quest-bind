@@ -87,16 +87,34 @@ pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) {
     unsafe { ffi::destroyComplexMatrixN(matr.0) }
 }
 
+// pub fn init_complex_matrix_2();
+
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
 ) {
+    let n = m.0.numQubits as usize;
+    assert!(real.len() >= n);
+    assert!(imag.len() >= n);
+
+    let mut real_ptrs = Vec::with_capacity(n);
+    let mut imag_ptrs = Vec::with_capacity(n);
     unsafe {
+        // SAFETY:
+        // QuEST only copies data pointed to,
+        // so the references stay immutable.
+        for i in 0..n {
+            assert!(real[i].len() >= n);
+            real_ptrs.push(real[i].as_ptr() as *mut Qreal);
+            assert!(imag[i].len() >= n);
+            imag_ptrs.push(imag[i].as_ptr() as *mut Qreal);
+        }
+
         ffi::initComplexMatrixN(
             m.0,
-            real[0].as_ptr() as *mut _,
-            imag[0].as_ptr() as *mut _,
+            real_ptrs.as_mut_ptr(),
+            imag_ptrs.as_mut_ptr(),
         )
     }
 }
@@ -119,7 +137,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn init_complex_matrix_n_01() {
+    fn init_complex_matrix_n_02() {
+        let mut m = create_complex_matrix_n(2);
+        init_complex_matrix_n(
+            &mut m,
+            &[&[1., 2.], &[3., 4.]],
+            &[&[11., 12.], &[13., 14.]],
+        );
+
+        unsafe {
+            let row: &[&[f64; 2]; 2] = std::mem::transmute(*m.0.real);
+            assert_eq!(row, &[&[1., 2.,], &[3., 4.]]);
+        }
+        unsafe {
+            let row: &[&[f64; 2]; 2] = std::mem::transmute(*m.0.imag);
+            assert_eq!(row, &[&[11., 12.], &[13., 14.],]);
+        }
+        destroy_complex_matrix_n(m);
+    }
+
+    #[test]
+    fn init_complex_matrix_n_03() {
         let mut m = create_complex_matrix_n(3);
         init_complex_matrix_n(
             &mut m,
@@ -127,6 +165,17 @@ mod tests {
             &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]],
         );
 
+        unsafe {
+            let row: &[&[f64; 3]; 3] = std::mem::transmute(*m.0.real);
+            assert_eq!(row, &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]]);
+        }
+        unsafe {
+            let row: &[&[f64; 3]; 3] = std::mem::transmute(*m.0.imag);
+            assert_eq!(
+                row,
+                &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]]
+            );
+        }
         destroy_complex_matrix_n(m);
     }
 }
