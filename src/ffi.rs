@@ -168,20 +168,874 @@ pub struct QuESTEnv {
 
 #[link(name = "QuEST")]
 extern "C" {
-    pub fn createQuESTEnv() -> QuESTEnv;
-    pub fn reportQuESTEnv(env: QuESTEnv);
-    pub fn destroyQuESTEnv(env: QuESTEnv);
+
     pub fn createQureg(
         numQubits: c_int,
         env: QuESTEnv,
     ) -> Qureg;
+
+    pub fn createDensityQureg(
+        numQubits: c_int,
+        env: QuESTEnv,
+    ) -> Qureg;
+
+    pub fn createCloneQureg(
+        qureg: Qureg,
+        env: QuESTEnv,
+    ) -> Qureg;
+
     pub fn destroyQureg(
         qureg: Qureg,
         env: QuESTEnv,
     );
-    pub fn initZeroState(qureg: Qureg);
-    pub fn initPlusState(qureg: Qureg);
+
+    pub fn createComplexMatrixN(numQubits: c_int) -> ComplexMatrixN;
+
+    pub fn destroyComplexMatrixN(matr: ComplexMatrixN);
+
+    pub fn initComplexMatrixN(
+        m: ComplexMatrixN,
+        real: *mut *mut f64,
+        imag: *mut *mut f64,
+    );
+
+    pub fn createPauliHamil(
+        numQubits: c_int,
+        numSumTerms: c_int,
+    ) -> PauliHamil;
+
+    pub fn destroyPauliHamil(hamil: PauliHamil);
+
+    pub fn createPauliHamilFromFile(fn_: *mut c_char) -> PauliHamil;
+
+    pub fn initPauliHamil(
+        hamil: PauliHamil,
+        coeffs: *mut f64,
+        codes: *mut pauliOpType,
+    );
+
+    pub fn createDiagonalOp(
+        numQubits: c_int,
+        env: QuESTEnv,
+    ) -> DiagonalOp;
+
+    pub fn destroyDiagonalOp(
+        op: DiagonalOp,
+        env: QuESTEnv,
+    );
+
+    pub fn syncDiagonalOp(op: DiagonalOp);
+
+    pub fn initDiagonalOp(
+        op: DiagonalOp,
+        real: *mut f64,
+        imag: *mut f64,
+    );
+
+    pub fn initDiagonalOpFromPauliHamil(
+        op: DiagonalOp,
+        hamil: PauliHamil,
+    );
+
+    pub fn createDiagonalOpFromPauliHamilFile(
+        fn_: *mut c_char,
+        env: QuESTEnv,
+    ) -> DiagonalOp;
+
+    pub fn setDiagonalOpElems(
+        op: DiagonalOp,
+        startInd: c_longlong,
+        real: *mut f64,
+        imag: *mut f64,
+        numElems: c_longlong,
+    );
+
+    pub fn applyDiagonalOp(
+        qureg: Qureg,
+        op: DiagonalOp,
+    );
+
+    pub fn calcExpecDiagonalOp(
+        qureg: Qureg,
+        op: DiagonalOp,
+    ) -> Complex;
+
     pub fn reportState(qureg: Qureg);
+
+    pub fn reportStateToScreen(
+        qureg: Qureg,
+        env: QuESTEnv,
+        reportRank: c_int,
+    );
+
+    pub fn reportQuregParams(qureg: Qureg);
+
+    pub fn reportPauliHamil(hamil: PauliHamil);
+
+    pub fn getNumQubits(qureg: Qureg) -> c_int;
+
+    pub fn getNumAmps(qureg: Qureg) -> c_longlong;
+
+    pub fn initBlankState(qureg: Qureg);
+
+    pub fn initZeroState(qureg: Qureg);
+
+    pub fn initPlusState(qureg: Qureg);
+
+    pub fn initClassicalState(
+        qureg: Qureg,
+        stateInd: c_longlong,
+    );
+
+    pub fn initPureState(
+        qureg: Qureg,
+        pure_: Qureg,
+    );
+
+    pub fn initDebugState(qureg: Qureg);
+
+    pub fn initStateFromAmps(
+        qureg: Qureg,
+        reals: *mut f64,
+        imags: *mut f64,
+    );
+
+    pub fn setAmps(
+        qureg: Qureg,
+        startInd: c_longlong,
+        reals: *mut f64,
+        imags: *mut f64,
+        numAmps: c_longlong,
+    );
+
+    pub fn setDensityAmps(
+        qureg: Qureg,
+        startRow: c_longlong,
+        startCol: c_longlong,
+        reals: *mut f64,
+        imags: *mut f64,
+        numAmps: c_longlong,
+    );
+
+    pub fn cloneQureg(
+        targetQureg: Qureg,
+        copyQureg: Qureg,
+    );
+
+    pub fn phaseShift(
+        qureg: Qureg,
+        targetQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn controlledPhaseShift(
+        qureg: Qureg,
+        idQubit1: c_int,
+        idQubit2: c_int,
+        angle: f64,
+    );
+
+    pub fn multiControlledPhaseShift(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControlQubits: c_int,
+        angle: f64,
+    );
+
+    pub fn controlledPhaseFlip(
+        qureg: Qureg,
+        idQubit1: c_int,
+        idQubit2: c_int,
+    );
+
+    pub fn multiControlledPhaseFlip(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControlQubits: c_int,
+    );
+
+    pub fn sGate(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn tGate(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn createQuESTEnv() -> QuESTEnv;
+
+    pub fn destroyQuESTEnv(env: QuESTEnv);
+
+    pub fn syncQuESTEnv(env: QuESTEnv);
+
+    pub fn syncQuESTSuccess(successCode: c_int) -> c_int;
+
+    pub fn reportQuESTEnv(env: QuESTEnv);
+
+    pub fn getEnvironmentString(
+        env: QuESTEnv,
+        str: *mut c_char,
+    );
+
+    pub fn copyStateToGPU(qureg: Qureg);
+
+    pub fn copyStateFromGPU(qureg: Qureg);
+
+    pub fn copySubstateToGPU(
+        qureg: Qureg,
+        startInd: c_longlong,
+        numAmps: c_longlong,
+    );
+
+    pub fn copySubstateFromGPU(
+        qureg: Qureg,
+        startInd: c_longlong,
+        numAmps: c_longlong,
+    );
+
+    pub fn getAmp(
+        qureg: Qureg,
+        index: c_longlong,
+    ) -> Complex;
+
+    pub fn getRealAmp(
+        qureg: Qureg,
+        index: c_longlong,
+    ) -> f64;
+
+    pub fn getImagAmp(
+        qureg: Qureg,
+        index: c_longlong,
+    ) -> f64;
+
+    pub fn getProbAmp(
+        qureg: Qureg,
+        index: c_longlong,
+    ) -> f64;
+
+    pub fn getDensityAmp(
+        qureg: Qureg,
+        row: c_longlong,
+        col: c_longlong,
+    ) -> Complex;
+
+    pub fn calcTotalProb(qureg: Qureg) -> f64;
+
+    pub fn compactUnitary(
+        qureg: Qureg,
+        targetQubit: c_int,
+        alpha: Complex,
+        beta: Complex,
+    );
+
+    pub fn unitary(
+        qureg: Qureg,
+        targetQubit: c_int,
+        u: ComplexMatrix2,
+    );
+
+    pub fn rotateX(
+        qureg: Qureg,
+        rotQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn rotateY(
+        qureg: Qureg,
+        rotQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn rotateZ(
+        qureg: Qureg,
+        rotQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn rotateAroundAxis(
+        qureg: Qureg,
+        rotQubit: c_int,
+        angle: f64,
+        axis: Vector,
+    );
+
+    pub fn controlledRotateX(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn controlledRotateY(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn controlledRotateZ(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        angle: f64,
+    );
+
+    pub fn controlledRotateAroundAxis(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        angle: f64,
+        axis: Vector,
+    );
+
+    pub fn controlledCompactUnitary(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        alpha: Complex,
+        beta: Complex,
+    );
+
+    pub fn controlledUnitary(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+        u: ComplexMatrix2,
+    );
+
+    pub fn multiControlledUnitary(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControlQubits: c_int,
+        targetQubit: c_int,
+        u: ComplexMatrix2,
+    );
+
+    pub fn pauliX(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn pauliY(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn pauliZ(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn hadamard(
+        qureg: Qureg,
+        targetQubit: c_int,
+    );
+
+    pub fn controlledNot(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+    );
+
+    pub fn multiControlledMultiQubitNot(
+        qureg: Qureg,
+        ctrls: *mut c_int,
+        numCtrls: c_int,
+        targs: *mut c_int,
+        numTargs: c_int,
+    );
+
+    pub fn multiQubitNot(
+        qureg: Qureg,
+        targs: *mut c_int,
+        numTargs: c_int,
+    );
+
+    pub fn controlledPauliY(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit: c_int,
+    );
+
+    pub fn calcProbOfOutcome(
+        qureg: Qureg,
+        measureQubit: c_int,
+        outcome: c_int,
+    ) -> f64;
+
+    pub fn calcProbOfAllOutcomes(
+        outcomeProbs: *mut f64,
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubits: c_int,
+    );
+
+    pub fn collapseToOutcome(
+        qureg: Qureg,
+        measureQubit: c_int,
+        outcome: c_int,
+    ) -> f64;
+
+    pub fn measure(
+        qureg: Qureg,
+        measureQubit: c_int,
+    ) -> c_int;
+
+    pub fn measureWithStats(
+        qureg: Qureg,
+        measureQubit: c_int,
+        outcomeProb: *mut f64,
+    ) -> c_int;
+
+    pub fn calcInnerProduct(
+        bra: Qureg,
+        ket: Qureg,
+    ) -> Complex;
+
+    pub fn calcDensityInnerProduct(
+        rho1: Qureg,
+        rho2: Qureg,
+    ) -> f64;
+
+    pub fn seedQuESTDefault(env: *mut QuESTEnv);
+
+    pub fn seedQuEST(
+        env: *mut QuESTEnv,
+        seedArray: *mut c_ulong,
+        numSeeds: c_int,
+    );
+
+    pub fn getQuESTSeeds(
+        env: QuESTEnv,
+        seeds: *mut *mut c_ulong,
+        numSeeds: *mut c_int,
+    );
+
+    pub fn startRecordingQASM(qureg: Qureg);
+
+    pub fn stopRecordingQASM(qureg: Qureg);
+
+    pub fn clearRecordedQASM(qureg: Qureg);
+
+    pub fn printRecordedQASM(qureg: Qureg);
+
+    pub fn writeRecordedQASMToFile(
+        qureg: Qureg,
+        filename: *mut c_char,
+    );
+
+    pub fn mixDephasing(
+        qureg: Qureg,
+        targetQubit: c_int,
+        prob: f64,
+    );
+
+    pub fn mixTwoQubitDephasing(
+        qureg: Qureg,
+        qubit1: c_int,
+        qubit2: c_int,
+        prob: f64,
+    );
+
+    pub fn mixDepolarising(
+        qureg: Qureg,
+        targetQubit: c_int,
+        prob: f64,
+    );
+
+    pub fn mixDamping(
+        qureg: Qureg,
+        targetQubit: c_int,
+        prob: f64,
+    );
+
+    pub fn mixTwoQubitDepolarising(
+        qureg: Qureg,
+        qubit1: c_int,
+        qubit2: c_int,
+        prob: f64,
+    );
+
+    pub fn mixPauli(
+        qureg: Qureg,
+        targetQubit: c_int,
+        probX: f64,
+        probY: f64,
+        probZ: f64,
+    );
+
+    pub fn mixDensityMatrix(
+        combineQureg: Qureg,
+        prob: f64,
+        otherQureg: Qureg,
+    );
+
+    pub fn calcPurity(qureg: Qureg) -> f64;
+
+    pub fn calcFidelity(
+        qureg: Qureg,
+        pureState: Qureg,
+    ) -> f64;
+
+    pub fn swapGate(
+        qureg: Qureg,
+        qubit1: c_int,
+        qubit2: c_int,
+    );
+
+    pub fn sqrtSwapGate(
+        qureg: Qureg,
+        qb1: c_int,
+        qb2: c_int,
+    );
+
+    pub fn multiStateControlledUnitary(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        controlState: *mut c_int,
+        numControlQubits: c_int,
+        targetQubit: c_int,
+        u: ComplexMatrix2,
+    );
+
+    pub fn multiRotateZ(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubits: c_int,
+        angle: f64,
+    );
+
+    pub fn multiRotatePauli(
+        qureg: Qureg,
+        targetQubits: *mut c_int,
+        targetPaulis: *mut pauliOpType,
+        numTargets: c_int,
+        angle: f64,
+    );
+
+    pub fn multiControlledMultiRotateZ(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControls: c_int,
+        targetQubits: *mut c_int,
+        numTargets: c_int,
+        angle: f64,
+    );
+
+    pub fn multiControlledMultiRotatePauli(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControls: c_int,
+        targetQubits: *mut c_int,
+        targetPaulis: *mut pauliOpType,
+        numTargets: c_int,
+        angle: f64,
+    );
+
+    pub fn calcExpecPauliProd(
+        qureg: Qureg,
+        targetQubits: *mut c_int,
+        pauliCodes: *mut pauliOpType,
+        numTargets: c_int,
+        workspace: Qureg,
+    ) -> f64;
+
+    pub fn calcExpecPauliSum(
+        qureg: Qureg,
+        allPauliCodes: *mut pauliOpType,
+        termCoeffs: *mut f64,
+        numSumTerms: c_int,
+        workspace: Qureg,
+    ) -> f64;
+
+    pub fn calcExpecPauliHamil(
+        qureg: Qureg,
+        hamil: PauliHamil,
+        workspace: Qureg,
+    ) -> f64;
+
+    pub fn twoQubitUnitary(
+        qureg: Qureg,
+        targetQubit1: c_int,
+        targetQubit2: c_int,
+        u: ComplexMatrix4,
+    );
+
+    pub fn controlledTwoQubitUnitary(
+        qureg: Qureg,
+        controlQubit: c_int,
+        targetQubit1: c_int,
+        targetQubit2: c_int,
+        u: ComplexMatrix4,
+    );
+
+    pub fn multiControlledTwoQubitUnitary(
+        qureg: Qureg,
+        controlQubits: *mut c_int,
+        numControlQubits: c_int,
+        targetQubit1: c_int,
+        targetQubit2: c_int,
+        u: ComplexMatrix4,
+    );
+
+    pub fn multiQubitUnitary(
+        qureg: Qureg,
+        targs: *mut c_int,
+        numTargs: c_int,
+        u: ComplexMatrixN,
+    );
+
+    pub fn controlledMultiQubitUnitary(
+        qureg: Qureg,
+        ctrl: c_int,
+        targs: *mut c_int,
+        numTargs: c_int,
+        u: ComplexMatrixN,
+    );
+
+    pub fn multiControlledMultiQubitUnitary(
+        qureg: Qureg,
+        ctrls: *mut c_int,
+        numCtrls: c_int,
+        targs: *mut c_int,
+        numTargs: c_int,
+        u: ComplexMatrixN,
+    );
+
+    pub fn mixKrausMap(
+        qureg: Qureg,
+        target: c_int,
+        ops: *mut ComplexMatrix2,
+        numOps: c_int,
+    );
+
+    pub fn mixTwoQubitKrausMap(
+        qureg: Qureg,
+        target1: c_int,
+        target2: c_int,
+        ops: *mut ComplexMatrix4,
+        numOps: c_int,
+    );
+
+    pub fn mixMultiQubitKrausMap(
+        qureg: Qureg,
+        targets: *mut c_int,
+        numTargets: c_int,
+        ops: *mut ComplexMatrixN,
+        numOps: c_int,
+    );
+
+    pub fn mixNonTPKrausMap(
+        qureg: Qureg,
+        target: c_int,
+        ops: *mut ComplexMatrix2,
+        numOps: c_int,
+    );
+
+    pub fn mixNonTPTwoQubitKrausMap(
+        qureg: Qureg,
+        target1: c_int,
+        target2: c_int,
+        ops: *mut ComplexMatrix4,
+        numOps: c_int,
+    );
+
+    pub fn mixNonTPMultiQubitKrausMap(
+        qureg: Qureg,
+        targets: *mut c_int,
+        numTargets: c_int,
+        ops: *mut ComplexMatrixN,
+        numOps: c_int,
+    );
+
+    pub fn calcHilbertSchmidtDistance(
+        a: Qureg,
+        b: Qureg,
+    ) -> f64;
+
+    pub fn setWeightedQureg(
+        fac1: Complex,
+        qureg1: Qureg,
+        fac2: Complex,
+        qureg2: Qureg,
+        facOut: Complex,
+        out: Qureg,
+    );
+
+    pub fn applyPauliSum(
+        inQureg: Qureg,
+        allPauliCodes: *mut pauliOpType,
+        termCoeffs: *mut f64,
+        numSumTerms: c_int,
+        outQureg: Qureg,
+    );
+
+    pub fn applyPauliHamil(
+        inQureg: Qureg,
+        hamil: PauliHamil,
+        outQureg: Qureg,
+    );
+
+    pub fn applyTrotterCircuit(
+        qureg: Qureg,
+        hamil: PauliHamil,
+        time: f64,
+        order: c_int,
+        reps: c_int,
+    );
+
+    pub fn applyMatrix2(
+        qureg: Qureg,
+        targetQubit: c_int,
+        u: ComplexMatrix2,
+    );
+
+    pub fn applyMatrix4(
+        qureg: Qureg,
+        targetQubit1: c_int,
+        targetQubit2: c_int,
+        u: ComplexMatrix4,
+    );
+
+    pub fn applyMatrixN(
+        qureg: Qureg,
+        targs: *mut c_int,
+        numTargs: c_int,
+        u: ComplexMatrixN,
+    );
+
+    pub fn applyMultiControlledMatrixN(
+        qureg: Qureg,
+        ctrls: *mut c_int,
+        numCtrls: c_int,
+        targs: *mut c_int,
+        numTargs: c_int,
+        u: ComplexMatrixN,
+    );
+
+    pub fn invalidQuESTInputError(
+        errMsg: *const c_char,
+        errFunc: *const c_char,
+    );
+
+    pub fn bindArraysToStackComplexMatrixN(
+        numQubits: c_int,
+        re: *mut *mut f64,
+        im: *mut *mut f64,
+        reStorage: *mut *mut f64,
+        imStorage: *mut *mut f64,
+    ) -> ComplexMatrixN;
+
+    pub fn applyPhaseFunc(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubits: c_int,
+        encoding: bitEncoding,
+        coeffs: *mut f64,
+        exponents: *mut f64,
+        numTerms: c_int,
+    );
+
+    pub fn applyPhaseFuncOverrides(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubits: c_int,
+        encoding: bitEncoding,
+        coeffs: *mut f64,
+        exponents: *mut f64,
+        numTerms: c_int,
+        overrideInds: *mut c_longlong,
+        overridePhases: *mut f64,
+        numOverrides: c_int,
+    );
+
+    pub fn applyMultiVarPhaseFunc(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        coeffs: *mut f64,
+        exponents: *mut f64,
+        numTermsPerReg: *mut c_int,
+    );
+
+    pub fn applyMultiVarPhaseFuncOverrides(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        coeffs: *mut f64,
+        exponents: *mut f64,
+        numTermsPerReg: *mut c_int,
+        overrideInds: *mut c_longlong,
+        overridePhases: *mut f64,
+        numOverrides: c_int,
+    );
+
+    pub fn applyNamedPhaseFunc(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        functionNameCode: phaseFunc,
+    );
+
+    pub fn applyNamedPhaseFuncOverrides(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        functionNameCode: phaseFunc,
+        overrideInds: *mut c_longlong,
+        overridePhases: *mut f64,
+        numOverrides: c_int,
+    );
+
+    pub fn applyParamNamedPhaseFunc(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        functionNameCode: phaseFunc,
+        params: *mut f64,
+        numParams: c_int,
+    );
+
+    pub fn applyParamNamedPhaseFuncOverrides(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubitsPerReg: *mut c_int,
+        numRegs: c_int,
+        encoding: bitEncoding,
+        functionNameCode: phaseFunc,
+        params: *mut f64,
+        numParams: c_int,
+        overrideInds: *mut c_longlong,
+        overridePhases: *mut f64,
+        numOverrides: c_int,
+    );
+
+    pub fn applyFullQFT(qureg: Qureg);
+
+    pub fn applyQFT(
+        qureg: Qureg,
+        qubits: *mut c_int,
+        numQubits: c_int,
+    );
+
+    pub fn applyProjector(
+        qureg: Qureg,
+        qubit: c_int,
+        outcome: c_int,
+    );
+
 }
 
 #[cfg(test)]
