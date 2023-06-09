@@ -10,11 +10,13 @@ pub use ffi::{
 
 pub type Qreal = f64;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Complex {
-    pub real: Qreal,
-    pub imag: Qreal,
+#[derive(Debug, PartialEq)]
+pub enum Error {
+    InvalidQuESTInput { err_msg: String, err_func: String },
 }
+
+#[derive(Debug)]
+pub struct Complex(ffi::Complex);
 
 #[derive(Debug)]
 pub struct ComplexMatrix2(ffi::ComplexMatrix2);
@@ -25,12 +27,8 @@ pub struct ComplexMatrix4(ffi::ComplexMatrix4);
 #[derive(Debug)]
 pub struct ComplexMatrixN(ffi::ComplexMatrixN);
 
-#[derive(Debug, Copy, Clone)]
-pub struct Vector {
-    pub x: Qreal,
-    pub y: Qreal,
-    pub z: Qreal,
-}
+#[derive(Debug)]
+pub struct Vector(ffi::Vector);
 
 #[derive(Debug)]
 pub struct PauliHamil(ffi::PauliHamil);
@@ -40,6 +38,16 @@ pub struct DiagonalOp(ffi::DiagonalOp);
 
 #[derive(Debug)]
 pub struct Qureg(ffi::Qureg);
+
+impl Qureg {
+    pub fn is_density_matrix(&self) -> bool {
+        self.0.isDensityMatrix != 0
+    }
+
+    pub fn num_qubits_represented(&self) -> i32 {
+        self.0.numQubitsRepresented
+    }
+}
 
 #[derive(Debug)]
 pub struct QuESTEnv(ffi::QuESTEnv);

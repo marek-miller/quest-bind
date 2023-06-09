@@ -140,8 +140,8 @@ pub struct DiagonalOp {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Qureg {
-    isDensityMatrix:      c_int,
-    numQubitsRepresented: c_int,
+    pub isDensityMatrix:      c_int,
+    pub numQubitsRepresented: c_int,
     numQubitsInStateVec:  c_int,
     numAmpsPerChunk:      c_longlong,
     numAmpsTotal:         c_longlong,
