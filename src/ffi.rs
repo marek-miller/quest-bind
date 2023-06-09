@@ -197,8 +197,8 @@ extern "C" {
 
     pub fn initComplexMatrixN(
         m: ComplexMatrixN,
-        real: *mut *mut qreal,
-        imag: *mut *mut qreal,
+        real: *const *const qreal,
+        imag: *const *const qreal,
     );
 
     pub fn createPauliHamil(
@@ -212,8 +212,8 @@ extern "C" {
 
     pub fn initPauliHamil(
         hamil: PauliHamil,
-        coeffs: *mut qreal,
-        codes: *mut pauliOpType,
+        coeffs: *const qreal,
+        codes: *const pauliOpType,
     );
 
     pub fn createDiagonalOp(
@@ -230,8 +230,8 @@ extern "C" {
 
     pub fn initDiagonalOp(
         op: DiagonalOp,
-        real: *mut qreal,
-        imag: *mut qreal,
+        real: *const qreal,
+        imag: *const qreal,
     );
 
     pub fn initDiagonalOpFromPauliHamil(

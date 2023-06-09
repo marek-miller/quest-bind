@@ -94,21 +94,14 @@ pub fn init_complex_matrix_n(
     let mut real_ptrs = Vec::with_capacity(n);
     let mut imag_ptrs = Vec::with_capacity(n);
     unsafe {
-        // SAFETY:
-        // QuEST only copies data pointed to,
-        // so the references stay immutable.
         for i in 0..n {
             assert!(real[i].len() >= n);
-            real_ptrs.push(real[i].as_ptr() as *mut Qreal);
+            real_ptrs.push(real[i].as_ptr());
             assert!(imag[i].len() >= n);
-            imag_ptrs.push(imag[i].as_ptr() as *mut Qreal);
+            imag_ptrs.push(imag[i].as_ptr());
         }
 
-        ffi::initComplexMatrixN(
-            m.0,
-            real_ptrs.as_mut_ptr(),
-            imag_ptrs.as_mut_ptr(),
-        )
+        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr())
     }
 }
 
@@ -138,11 +131,8 @@ pub fn init_pauli_hamil(
     assert_eq!(codes.len(), hamil_len * hamil.0.numQubits as usize);
 
     unsafe {
-        // SAFETY:
-        // QuEST copies values of arrays supplied without modyfings them,
-        // so refs. can stay immutable.
-        let coeffs_ptr = coeffs.as_ptr() as *mut _;
-        let codes_ptr = codes.as_ptr() as *mut _;
+        let coeffs_ptr = coeffs.as_ptr();
+        let codes_ptr = codes.as_ptr();
         ffi::initPauliHamil(hamil.0, coeffs_ptr, codes_ptr);
     }
 }
@@ -174,11 +164,8 @@ pub fn init_diagonal_op(
     assert!(imag.len() >= 2usize.pow(op.0.numQubits as u32));
 
     unsafe {
-        // SAFETY:
-        // QuEST copies values of arrays using memcpy,
-        // so refs. can stay immutable.
-        let real_ptr = real.as_ptr() as *mut _;
-        let imag_ptr = imag.as_ptr() as *mut _;
+        let real_ptr = real.as_ptr();
+        let imag_ptr = imag.as_ptr();
         ffi::initDiagonalOp(op.0, real_ptr, imag_ptr)
     }
 }
