@@ -1,4 +1,4 @@
-//! FFI bindings to libQuEST v3.5.0
+//! FFI bindings to `libQuEST` v3.5.0
 
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
@@ -1073,7 +1073,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QASMLogger>())).buffer as *const _
+                std::ptr::addr_of!((*(::std::ptr::null::<QASMLogger>())).buffer)
                     as usize
             },
             0usize,
@@ -1086,8 +1086,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QASMLogger>())).bufferSize as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<QASMLogger>())).bufferSize
+                ) as usize
             },
             8usize,
             concat!(
@@ -1099,8 +1100,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QASMLogger>())).bufferFill as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<QASMLogger>())).bufferFill
+                ) as usize
             },
             12usize,
             concat!(
@@ -1112,8 +1114,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QASMLogger>())).isLogging as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<QASMLogger>())).isLogging
+                ) as usize
             },
             16usize,
             concat!(
@@ -1139,7 +1142,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexArray>())).real as *const _
+                std::ptr::addr_of!((*(::std::ptr::null::<ComplexArray>())).real)
                     as usize
             },
             0usize,
@@ -1152,7 +1155,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexArray>())).imag as *const _
+                std::ptr::addr_of!((*(::std::ptr::null::<ComplexArray>())).imag)
                     as usize
             },
             8usize,
@@ -1179,7 +1182,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Complex>())).real as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Complex>())).real)
+                    as usize
             },
             0usize,
             concat!(
@@ -1191,7 +1195,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Complex>())).imag as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Complex>())).imag)
+                    as usize
             },
             8usize,
             concat!(
@@ -1217,8 +1222,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrix2>())).real as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix2>())).real
+                ) as usize
             },
             0usize,
             concat!(
@@ -1230,8 +1236,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrix2>())).imag as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix2>())).imag
+                ) as usize
             },
             32usize,
             concat!(
@@ -1257,8 +1264,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrix4>())).real as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix4>())).real
+                ) as usize
             },
             0usize,
             concat!(
@@ -1270,8 +1278,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrix4>())).imag as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix4>())).imag
+                ) as usize
             },
             128usize,
             concat!(
@@ -1297,8 +1306,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrixN>())).numQubits as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrixN>())).numQubits
+                ) as usize
             },
             0usize,
             concat!(
@@ -1310,8 +1320,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrixN>())).real as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrixN>())).real
+                ) as usize
             },
             8usize,
             concat!(
@@ -1323,8 +1334,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<ComplexMatrixN>())).imag as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrixN>())).imag
+                ) as usize
             },
             16usize,
             concat!(
@@ -1350,7 +1362,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Vector>())).x as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).x) as usize
             },
             0usize,
             concat!(
@@ -1362,7 +1374,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Vector>())).y as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).y) as usize
             },
             8usize,
             concat!(
@@ -1374,7 +1386,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Vector>())).z as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).z) as usize
             },
             16usize,
             concat!(
@@ -1400,8 +1412,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<PauliHamil>())).pauliCodes as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<PauliHamil>())).pauliCodes
+                ) as usize
             },
             0usize,
             concat!(
@@ -1413,8 +1426,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<PauliHamil>())).termCoeffs as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<PauliHamil>())).termCoeffs
+                ) as usize
             },
             8usize,
             concat!(
@@ -1426,8 +1440,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<PauliHamil>())).numSumTerms as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<PauliHamil>())).numSumTerms
+                ) as usize
             },
             16usize,
             concat!(
@@ -1439,8 +1454,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<PauliHamil>())).numQubits as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<PauliHamil>())).numQubits
+                ) as usize
             },
             20usize,
             concat!(
@@ -1465,8 +1481,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).numQubits as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<DiagonalOp>())).numQubits
+                ) as usize
             },
             0usize,
             concat!(
@@ -1478,8 +1495,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).numElemsPerChunk
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<DiagonalOp>())).numElemsPerChunk
+                ) as usize
             },
             8usize,
             concat!(
@@ -1491,8 +1509,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).numChunks as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<DiagonalOp>())).numChunks
+                ) as usize
             },
             16usize,
             concat!(
@@ -1504,8 +1523,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).chunkId as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<DiagonalOp>())).chunkId
+                ) as usize
             },
             20usize,
             concat!(
@@ -1517,7 +1537,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).real as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<DiagonalOp>())).real)
+                    as usize
             },
             24usize,
             concat!(
@@ -1529,7 +1550,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).imag as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<DiagonalOp>())).imag)
+                    as usize
             },
             32usize,
             concat!(
@@ -1541,8 +1563,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<DiagonalOp>())).deviceOperator
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<DiagonalOp>())).deviceOperator
+                ) as usize
             },
             40usize,
             concat!(
@@ -1568,8 +1591,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).isDensityMatrix as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).isDensityMatrix
+                ) as usize
             },
             0usize,
             concat!(
@@ -1581,8 +1605,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).numQubitsRepresented
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).numQubitsRepresented
+                ) as usize
             },
             4usize,
             concat!(
@@ -1594,8 +1619,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).numQubitsInStateVec
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).numQubitsInStateVec
+                ) as usize
             },
             8usize,
             concat!(
@@ -1607,8 +1633,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).numAmpsPerChunk as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).numAmpsPerChunk
+                ) as usize
             },
             16usize,
             concat!(
@@ -1620,8 +1647,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).numAmpsTotal as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).numAmpsTotal
+                ) as usize
             },
             24usize,
             concat!(
@@ -1633,7 +1661,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).chunkId as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Qureg>())).chunkId)
+                    as usize
             },
             32usize,
             concat!(
@@ -1645,7 +1674,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).numChunks as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Qureg>())).numChunks)
+                    as usize
             },
             36usize,
             concat!(
@@ -1657,7 +1687,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).stateVec as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Qureg>())).stateVec)
+                    as usize
             },
             40usize,
             concat!(
@@ -1669,8 +1700,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).pairStateVec as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).pairStateVec
+                ) as usize
             },
             56usize,
             concat!(
@@ -1682,8 +1714,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).deviceStateVec as *const _
-                    as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).deviceStateVec
+                ) as usize
             },
             72usize,
             concat!(
@@ -1695,8 +1728,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).firstLevelReduction
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).firstLevelReduction
+                ) as usize
             },
             88usize,
             concat!(
@@ -1708,8 +1742,9 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).secondLevelReduction
-                    as *const _ as usize
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<Qureg>())).secondLevelReduction
+                ) as usize
             },
             96usize,
             concat!(
@@ -1721,7 +1756,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<Qureg>())).qasmLog as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<Qureg>())).qasmLog)
+                    as usize
             },
             104usize,
             concat!(
@@ -1747,7 +1783,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QuESTEnv>())).rank as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<QuESTEnv>())).rank)
+                    as usize
             },
             0usize,
             concat!(
@@ -1759,7 +1796,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QuESTEnv>())).numRanks as *const _
+                std::ptr::addr_of!((*(::std::ptr::null::<QuESTEnv>())).numRanks)
                     as usize
             },
             4usize,
@@ -1772,7 +1809,8 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QuESTEnv>())).seeds as *const _ as usize
+                std::ptr::addr_of!((*(::std::ptr::null::<QuESTEnv>())).seeds)
+                    as usize
             },
             8usize,
             concat!(
@@ -1784,7 +1822,7 @@ mod tests {
         );
         assert_eq!(
             unsafe {
-                &(*(::std::ptr::null::<QuESTEnv>())).numSeeds as *const _
+                std::ptr::addr_of!((*(::std::ptr::null::<QuESTEnv>())).numSeeds)
                     as usize
             },
             16usize,

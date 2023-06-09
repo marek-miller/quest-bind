@@ -44,6 +44,7 @@ pub struct Qureg(ffi::Qureg);
 #[derive(Debug)]
 pub struct QuESTEnv(ffi::QuESTEnv);
 
+#[must_use]
 pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
@@ -51,6 +52,7 @@ pub fn create_qureg(
     Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
 }
 
+#[must_use]
 pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
@@ -58,13 +60,15 @@ pub fn create_density_qureg(
     Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
 }
 
+#[must_use]
 pub fn create_clone_qureg(
-    qureg: Qureg,
+    qureg: &Qureg,
     env: &QuESTEnv,
 ) -> Qureg {
     Qureg(unsafe { ffi::createCloneQureg(qureg.0, env.0) })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn destroy_qureg(
     qureg: Qureg,
     env: &QuESTEnv,
@@ -72,16 +76,17 @@ pub fn destroy_qureg(
     unsafe { ffi::destroyQureg(qureg.0, env.0) }
 }
 
+#[must_use]
 pub fn create_complex_matrix_n(num_qubits: i32) -> ComplexMatrixN {
     ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) {
     unsafe { ffi::destroyComplexMatrixN(matr.0) }
 }
 
-// pub fn init_complex_matrix_2();
-
+#[allow(clippy::cast_sign_loss)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],
@@ -101,10 +106,11 @@ pub fn init_complex_matrix_n(
             imag_ptrs.push(imag[i].as_ptr());
         }
 
-        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr())
+        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr());
     }
 }
 
+#[must_use]
 pub fn create_pauli_hamil(
     num_qubits: i32,
     num_sum_terms: i32,
@@ -112,17 +118,20 @@ pub fn create_pauli_hamil(
     PauliHamil(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn destroy_pauli_hamil(hamil: PauliHamil) {
     unsafe { ffi::destroyPauliHamil(hamil.0) }
 }
 
+#[must_use]
 pub fn create_pauli_hamil_from_file(fn_: &str) -> PauliHamil {
     let filename = CString::new(fn_).unwrap();
     PauliHamil(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
 }
 
+#[allow(clippy::cast_sign_loss)]
 pub fn init_pauli_hamil(
-    hamil: PauliHamil,
+    hamil: &mut PauliHamil,
     coeffs: &[Qreal],
     codes: &[PauliOpType],
 ) {
@@ -137,6 +146,7 @@ pub fn init_pauli_hamil(
     }
 }
 
+#[must_use]
 pub fn create_diagonal_op(
     num_qubits: i32,
     env: &QuESTEnv,
@@ -144,29 +154,36 @@ pub fn create_diagonal_op(
     DiagonalOp(unsafe { ffi::createDiagonalOp(num_qubits, env.0) })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn destroy_diagonal_op(
     op: DiagonalOp,
     env: &QuESTEnv,
 ) {
-    unsafe { ffi::destroyDiagonalOp(op.0, env.0) }
+    unsafe {
+        ffi::destroyDiagonalOp(op.0, env.0);
+    }
 }
 
 pub fn sync_diagonal_op(op: &mut DiagonalOp) {
-    unsafe { ffi::syncDiagonalOp(op.0) }
+    unsafe {
+        ffi::syncDiagonalOp(op.0);
+    }
 }
 
+#[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
     real: &[Qreal],
     imag: &[Qreal],
 ) {
-    assert!(real.len() >= 2usize.pow(op.0.numQubits as u32));
-    assert!(imag.len() >= 2usize.pow(op.0.numQubits as u32));
+    let len_required = 2usize.pow(op.0.numQubits as u32);
+    assert!(real.len() >= len_required);
+    assert!(imag.len() >= len_required);
 
     unsafe {
         let real_ptr = real.as_ptr();
         let imag_ptr = imag.as_ptr();
-        ffi::initDiagonalOp(op.0, real_ptr, imag_ptr)
+        ffi::initDiagonalOp(op.0, real_ptr, imag_ptr);
     }
 }
 
@@ -178,6 +195,7 @@ pub fn init_diagonal_op_from_pauli_hamil(
     unsafe { ffi::initDiagonalOpFromPauliHamil(op.0, hamil.0) }
 }
 
+#[must_use]
 pub fn create_diagonal_op_from_pauli_hamil_file(
     fn_: &str,
     env: &QuESTEnv,
@@ -215,11 +233,11 @@ mod tests {
         );
 
         unsafe {
-            let row: &[&[f64; 2]; 2] = std::mem::transmute(*m.0.real);
+            let row = &*(*m.0.real).cast::<[&[f64; 2]; 2]>();
             assert_eq!(row, &[&[1., 2.,], &[3., 4.]]);
         }
         unsafe {
-            let row: &[&[f64; 2]; 2] = std::mem::transmute(*m.0.imag);
+            let row = &*(*m.0.imag).cast::<[&[f64; 2]; 2]>();
             assert_eq!(row, &[&[11., 12.], &[13., 14.],]);
         }
         destroy_complex_matrix_n(m);
@@ -235,11 +253,11 @@ mod tests {
         );
 
         unsafe {
-            let row: &[&[f64; 3]; 3] = std::mem::transmute(*m.0.real);
+            let row = &*(*m.0.real).cast::<[&[f64; 3]; 3]>();
             assert_eq!(row, &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]]);
         }
         unsafe {
-            let row: &[&[f64; 3]; 3] = std::mem::transmute(*m.0.imag);
+            let row = &*(*m.0.imag).cast::<[&[f64; 3]; 3]>();
             assert_eq!(
                 row,
                 &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]]
