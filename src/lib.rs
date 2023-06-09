@@ -1,4 +1,6 @@
 mod ffi;
+use std::ffi::CString;
+
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -37,10 +39,7 @@ pub struct PauliHamil(ffi::PauliHamil);
 pub struct DiagonalOp(ffi::DiagonalOp);
 
 #[derive(Debug)]
-pub struct Qureg<'a> {
-    env: &'a QuESTEnv,
-    reg: ffi::Qureg,
-}
+pub struct Qureg(ffi::Qureg);
 
 #[derive(Debug)]
 pub struct QuESTEnv(ffi::QuESTEnv);
@@ -48,35 +47,29 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
-) -> Qureg<'_> {
-    let reg = unsafe { ffi::createQureg(num_qubits, env.0) };
-    Qureg {
-        env,
-        reg,
-    }
+) -> Qureg {
+    Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
 }
 
 pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
 ) -> Qureg {
-    let reg = unsafe { ffi::createDensityQureg(num_qubits, env.0) };
-    Qureg {
-        env,
-        reg,
-    }
+    Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
 }
 
-pub fn create_clone_qureg(qureg: Qureg) -> Qureg {
-    let reg = unsafe { ffi::createCloneQureg(qureg.reg, qureg.env.0) };
-    Qureg {
-        env: qureg.env,
-        reg,
-    }
+pub fn create_clone_qureg(
+    qureg: Qureg,
+    env: &QuESTEnv,
+) -> Qureg {
+    Qureg(unsafe { ffi::createCloneQureg(qureg.0, env.0) })
 }
 
-pub fn destroy_qureg(qureg: Qureg) {
-    unsafe { ffi::destroyQureg(qureg.reg, qureg.env.0) }
+pub fn destroy_qureg(
+    qureg: Qureg,
+    env: &QuESTEnv,
+) {
+    unsafe { ffi::destroyQureg(qureg.0, env.0) }
 }
 
 pub fn create_complex_matrix_n(num_qubits: i32) -> ComplexMatrixN {
@@ -119,15 +112,104 @@ pub fn init_complex_matrix_n(
     }
 }
 
+pub fn create_pauli_hamil(
+    num_qubits: i32,
+    num_sum_terms: i32,
+) -> PauliHamil {
+    PauliHamil(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
+}
+
+pub fn destroy_pauli_hamil(hamil: PauliHamil) {
+    unsafe { ffi::destroyPauliHamil(hamil.0) }
+}
+
+pub fn create_pauli_hamil_from_file(fn_: &str) -> PauliHamil {
+    let filename = CString::new(fn_).unwrap();
+    PauliHamil(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
+}
+
+pub fn init_pauli_hamil(
+    hamil: PauliHamil,
+    coeffs: &[Qreal],
+    codes: &[PauliOpType],
+) {
+    let hamil_len = hamil.0.numSumTerms as usize;
+    assert_eq!(coeffs.len(), hamil_len);
+    assert_eq!(codes.len(), hamil_len * hamil.0.numQubits as usize);
+
+    unsafe {
+        // SAFETY:
+        // QuEST copies values of arrays supplied without modyfings them,
+        // so refs. can stay immutable.
+        let coeffs_ptr = coeffs.as_ptr() as *mut _;
+        let codes_ptr = codes.as_ptr() as *mut _;
+        ffi::initPauliHamil(hamil.0, coeffs_ptr, codes_ptr);
+    }
+}
+
+pub fn create_diagonal_op(
+    num_qubits: i32,
+    env: &QuESTEnv,
+) -> DiagonalOp {
+    DiagonalOp(unsafe { ffi::createDiagonalOp(num_qubits, env.0) })
+}
+
+pub fn destroy_diagonal_op(
+    op: DiagonalOp,
+    env: &QuESTEnv,
+) {
+    unsafe { ffi::destroyDiagonalOp(op.0, env.0) }
+}
+
+pub fn sync_diagonal_op(op: &mut DiagonalOp) {
+    unsafe { ffi::syncDiagonalOp(op.0) }
+}
+
+pub fn init_diagonal_op(
+    op: &mut DiagonalOp,
+    real: &[Qreal],
+    imag: &[Qreal],
+) {
+    assert!(real.len() >= 2usize.pow(op.0.numQubits as u32));
+    assert!(imag.len() >= 2usize.pow(op.0.numQubits as u32));
+
+    unsafe {
+        // SAFETY:
+        // QuEST copies values of arrays using memcpy,
+        // so refs. can stay immutable.
+        let real_ptr = real.as_ptr() as *mut _;
+        let imag_ptr = imag.as_ptr() as *mut _;
+        ffi::initDiagonalOp(op.0, real_ptr, imag_ptr)
+    }
+}
+
+pub fn init_diagonal_op_from_pauli_hamil(
+    op: &mut DiagonalOp,
+    hamil: &PauliHamil,
+) {
+    assert_eq!(op.0.numQubits, hamil.0.numQubits);
+    unsafe { ffi::initDiagonalOpFromPauliHamil(op.0, hamil.0) }
+}
+
+pub fn create_diagonal_op_from_pauli_hamil_file(
+    fn_: &str,
+    env: &QuESTEnv,
+) -> DiagonalOp {
+    let filename = CString::new(fn_).unwrap();
+    DiagonalOp(unsafe {
+        ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
+    })
+}
+
 pub fn init_zero_state(qureg: &mut Qureg) {
     unsafe {
-        ffi::initZeroState(qureg.reg);
+        ffi::initZeroState(qureg.0);
     }
 }
 
 pub fn init_plus_state(qureg: &mut Qureg) {
     unsafe {
-        ffi::initPlusState(qureg.reg);
+        ffi::initPlusState(qureg.0);
     }
 }
 
