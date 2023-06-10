@@ -339,7 +339,7 @@ extern "C" {
 
     pub fn multiControlledPhaseShift(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControlQubits: c_int,
         angle: qreal,
     );
@@ -352,7 +352,7 @@ extern "C" {
 
     pub fn multiControlledPhaseFlip(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControlQubits: c_int,
     );
 

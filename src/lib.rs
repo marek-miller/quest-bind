@@ -9,6 +9,8 @@ pub use ffi::{
 
 mod ffi;
 
+// TODO: define number abstractions for numerical types
+// (use num_traits)
 pub type Qreal = f64;
 
 #[derive(Debug, PartialEq)]
@@ -383,6 +385,96 @@ pub fn set_density_amps(
         ffi::setDensityAmps(
             qureg.0, start_row, start_col, reals_ptr, imags_ptr, num_amps,
         );
+    }
+}
+
+pub fn clone_qureg(
+    target_qureg: &mut Qureg,
+    copy_qureg: &Qureg,
+) {
+    unsafe {
+        ffi::cloneQureg(target_qureg.0, copy_qureg.0);
+    }
+}
+
+pub fn phase_shift(
+    qureg: &mut Qureg,
+    target_quibit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::phaseShift(qureg.0, target_quibit, angle);
+    }
+}
+
+pub fn controlled_phase_shift(
+    qureg: &mut Qureg,
+    id_qubit1: i32,
+    id_qubit2: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::controlledPhaseShift(qureg.0, id_qubit1, id_qubit2, angle);
+    }
+}
+
+pub fn multi_controlled_phase_shift(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    num_control_qubits: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        let control_qubits_ptr = control_qubits.as_ptr();
+        ffi::multiControlledPhaseShift(
+            qureg.0,
+            control_qubits_ptr,
+            num_control_qubits,
+            angle,
+        );
+    }
+}
+
+pub fn controlled_phase_flip(
+    qureg: &mut Qureg,
+    id_qubit1: i32,
+    id_qubit2: i32,
+) {
+    unsafe {
+        ffi::controlledPhaseFlip(qureg.0, id_qubit1, id_qubit2);
+    }
+}
+
+pub fn multi_controlled_phase_flip(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    num_control_qubits: i32,
+) {
+    unsafe {
+        let control_qubits_ptr = control_qubits.as_ptr();
+        ffi::multiControlledPhaseFlip(
+            qureg.0,
+            control_qubits_ptr,
+            num_control_qubits,
+        );
+    }
+}
+
+pub fn s_gate(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::sGate(qureg.0, target_qubit);
+    }
+}
+
+pub fn t_gate(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::tGate(qureg.0, target_qubit);
     }
 }
 
