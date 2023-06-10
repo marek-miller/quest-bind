@@ -509,7 +509,7 @@ extern "C" {
 
     pub fn multiControlledUnitary(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControlQubits: c_int,
         targetQubit: c_int,
         u: ComplexMatrix2,
@@ -543,15 +543,15 @@ extern "C" {
 
     pub fn multiControlledMultiQubitNot(
         qureg: Qureg,
-        ctrls: *mut c_int,
+        ctrls: *const c_int,
         numCtrls: c_int,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
     );
 
     pub fn multiQubitNot(
         qureg: Qureg,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
     );
 
@@ -570,7 +570,7 @@ extern "C" {
     pub fn calcProbOfAllOutcomes(
         outcomeProbs: *mut qreal,
         qureg: Qureg,
-        qubits: *mut c_int,
+        qubits: *const c_int,
         numQubits: c_int,
     );
 
@@ -605,7 +605,7 @@ extern "C" {
 
     pub fn seedQuEST(
         env: *mut QuESTEnv,
-        seedArray: *mut c_ulong,
+        seedArray: *const c_ulong,
         numSeeds: c_int,
     );
 
@@ -625,7 +625,7 @@ extern "C" {
 
     pub fn writeRecordedQASMToFile(
         qureg: Qureg,
-        filename: *mut c_char,
+        filename: *const c_char,
     );
 
     pub fn mixDephasing(

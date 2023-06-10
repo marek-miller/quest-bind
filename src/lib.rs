@@ -1,13 +1,13 @@
 use std::ffi::CString;
 
+pub mod ffi;
+
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
     phaseFunc as PhaseFunc,
     phaseGateType as PhaseGateType,
 };
-
-mod ffi;
 
 // TODO: define number abstractions for numerical types
 // (use num_traits)
@@ -684,6 +684,279 @@ pub fn controlled_rotate_z(
 ) {
     unsafe {
         ffi::controlledRotateZ(qureg.0, control_qubit, target_qubit, angle);
+    }
+}
+
+pub fn controlled_rotate_around_axis(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    angle: Qreal,
+    axis: Vector,
+) {
+    unsafe {
+        ffi::controlledRotateAroundAxis(
+            qureg.0,
+            control_qubit,
+            target_qubit,
+            angle,
+            axis.0,
+        );
+    }
+}
+
+pub fn controlled_compact_unitary(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    alpha: Complex,
+    beta: Complex,
+) {
+    unsafe {
+        ffi::controlledCompactUnitary(
+            qureg.0,
+            control_qubit,
+            target_qubit,
+            alpha.0,
+            beta.0,
+        );
+    }
+}
+
+pub fn controlled_unitary(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    u: ComplexMatrix2,
+) {
+    unsafe {
+        ffi::controlledUnitary(qureg.0, control_qubit, target_qubit, u.0);
+    }
+}
+
+pub fn multi_controlled_unitary(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    num_control_qubits: i32,
+    target_qubit: i32,
+    u: ComplexMatrix2,
+) {
+    unsafe {
+        let control_qubits_ptr = control_qubits.as_ptr();
+        ffi::multiControlledUnitary(
+            qureg.0,
+            control_qubits_ptr,
+            num_control_qubits,
+            target_qubit,
+            u.0,
+        );
+    }
+}
+
+pub fn pauli_x(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::pauliX(qureg.0, target_qubit);
+    }
+}
+
+pub fn pauli_y(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::pauliY(qureg.0, target_qubit);
+    }
+}
+
+pub fn pauli_z(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::pauliZ(qureg.0, target_qubit);
+    }
+}
+
+pub fn hadamard(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::hadamard(qureg.0, target_qubit);
+    }
+}
+
+pub fn controlled_not(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::controlledNot(qureg.0, control_qubit, target_qubit);
+    }
+}
+
+pub fn multi_controlled_multi_qubit_not(
+    qureg: &mut Qureg,
+    ctrls: &[i32],
+    num_ctrls: i32,
+    targs: &[i32],
+    num_targs: i32,
+) {
+    unsafe {
+        let ctrls_ptr = ctrls.as_ptr();
+        let targs_ptr = targs.as_ptr();
+        ffi::multiControlledMultiQubitNot(
+            qureg.0, ctrls_ptr, num_ctrls, targs_ptr, num_targs,
+        );
+    }
+}
+
+pub fn multi_qubit_not(
+    qureg: &mut Qureg,
+    targs: &[i32],
+    num_targs: i32,
+) {
+    unsafe {
+        let targs_ptr = targs.as_ptr();
+        ffi::multiQubitNot(qureg.0, targs_ptr, num_targs);
+    }
+}
+
+pub fn controlled_pauli_y(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+) {
+    unsafe {
+        ffi::controlledPauliY(qureg.0, control_qubit, target_qubit);
+    }
+}
+
+pub fn calc_prob_of_outcome(
+    qureg: &Qureg,
+    measure_qubit: i32,
+    outcome: i32,
+) -> Qreal {
+    unsafe { ffi::calcProbOfOutcome(qureg.0, measure_qubit, outcome) }
+}
+
+pub fn calc_prob_of_all_outcomes(
+    outcome_probs: &mut [Qreal],
+    qureg: &Qureg,
+    qubits: &[i32],
+    num_qubits: i32,
+) {
+    assert!(outcome_probs.len() >= num_qubits as usize);
+    unsafe {
+        let outcome_probs_ptr = outcome_probs.as_mut_ptr();
+        let qubits_ptr = qubits.as_ptr();
+        ffi::calcProbOfAllOutcomes(
+            outcome_probs_ptr,
+            qureg.0,
+            qubits_ptr,
+            num_qubits,
+        );
+    }
+}
+
+pub fn collapse_to_outcome(
+    qureg: &mut Qureg,
+    measure_qubit: i32,
+    outcome: i32,
+) -> Qreal {
+    unsafe { ffi::collapseToOutcome(qureg.0, measure_qubit, outcome) }
+}
+
+pub fn measure(
+    qureg: &mut Qureg,
+    measure_qubit: i32,
+) -> i32 {
+    unsafe { ffi::measure(qureg.0, measure_qubit) }
+}
+
+pub fn measure_with_stats(
+    qureg: &mut Qureg,
+    measure_qubit: i32,
+    outcome_prob: &mut Qreal,
+) -> i32 {
+    unsafe {
+        let outcome_prob_ptr = outcome_prob as *mut _;
+        ffi::measureWithStats(qureg.0, measure_qubit, outcome_prob_ptr)
+    }
+}
+
+pub fn calc_inner_product(
+    bra: &Qureg,
+    ket: &Qureg,
+) -> Complex {
+    Complex(unsafe { ffi::calcInnerProduct(bra.0, ket.0) })
+}
+
+pub fn calc_density_inner_product(
+    rho1: &Qureg,
+    rho2: &Qureg,
+) -> Qreal {
+    unsafe { ffi::calcDensityInnerProduct(rho1.0, rho2.0) }
+}
+
+pub fn seed_qu_estdefault(env: &mut QuESTEnv) {
+    unsafe {
+        let env_ptr = &mut env.0 as *mut _;
+        ffi::seedQuESTDefault(env_ptr);
+    }
+}
+
+pub fn seed_qu_est(
+    env: &mut QuESTEnv,
+    seed_array: &[u64],
+    num_seeds: i32,
+) {
+    // QuEST's function signature is `c_ulong`. Let's use u64 for now...
+    unsafe {
+        let env_ptr = &mut env.0 as *mut _;
+        let seed_array_ptr = seed_array.as_ptr();
+        ffi::seedQuEST(env_ptr, seed_array_ptr, num_seeds);
+    }
+}
+
+// TODO
+// pub fn getQuESTSeeds();
+
+pub fn start_recording_qasm(qureg: &mut Qureg) {
+    unsafe {
+        ffi::startRecordingQASM(qureg.0);
+    }
+}
+
+pub fn stop_recording_qasm(qureg: &mut Qureg) {
+    unsafe {
+        ffi::stopRecordingQASM(qureg.0);
+    }
+}
+
+pub fn clear_recorded_qasm(qureg: &mut Qureg) {
+    unsafe {
+        ffi::clearRecordedQASM(qureg.0);
+    }
+}
+
+pub fn print_recorded_qasm(qureg: &mut Qureg) {
+    unsafe {
+        ffi::printRecordedQASM(qureg.0);
+    }
+}
+
+pub fn write_recorded_qasmto_file(
+    qureg: &mut Qureg,
+    filename: &str,
+) {
+    unsafe {
+        let filename_cstr = CString::new(filename).unwrap();
+        ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
     }
 }
 
