@@ -868,8 +868,8 @@ extern "C" {
 
     pub fn applyPauliSum(
         inQureg: Qureg,
-        allPauliCodes: *mut pauliOpType,
-        termCoeffs: *mut qreal,
+        allPauliCodes: *const pauliOpType,
+        termCoeffs: *const qreal,
         numSumTerms: c_int,
         outQureg: Qureg,
     );
@@ -903,21 +903,22 @@ extern "C" {
 
     pub fn applyMatrixN(
         qureg: Qureg,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
         u: ComplexMatrixN,
     );
 
     pub fn applyMultiControlledMatrixN(
         qureg: Qureg,
-        ctrls: *mut c_int,
+        ctrls: *const c_int,
         numCtrls: c_int,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
         u: ComplexMatrixN,
     );
 
-    pub fn bindArraysToStackComplexMatrixN(
+    
+    fn bindArraysToStackComplexMatrixN(
         numQubits: c_int,
         re: *mut *mut qreal,
         im: *mut *mut qreal,
@@ -927,56 +928,56 @@ extern "C" {
 
     pub fn applyPhaseFunc(
         qureg: Qureg,
-        qubits: *mut c_int,
+        qubits: *const c_int,
         numQubits: c_int,
         encoding: bitEncoding,
-        coeffs: *mut qreal,
-        exponents: *mut qreal,
+        coeffs: *const qreal,
+        exponents: *const qreal,
         numTerms: c_int,
     );
 
     pub fn applyPhaseFuncOverrides(
         qureg: Qureg,
-        qubits: *mut c_int,
+        qubits: *const c_int,
         numQubits: c_int,
         encoding: bitEncoding,
-        coeffs: *mut qreal,
-        exponents: *mut qreal,
+        coeffs: *const qreal,
+        exponents: *const qreal,
         numTerms: c_int,
-        overrideInds: *mut c_longlong,
-        overridePhases: *mut qreal,
+        overrideInds: *const c_longlong,
+        overridePhases: *const qreal,
         numOverrides: c_int,
     );
 
     pub fn applyMultiVarPhaseFunc(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
-        coeffs: *mut qreal,
-        exponents: *mut qreal,
-        numTermsPerReg: *mut c_int,
+        coeffs: *const qreal,
+        exponents: *const qreal,
+        numTermsPerReg: *const c_int,
     );
 
     pub fn applyMultiVarPhaseFuncOverrides(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
-        coeffs: *mut qreal,
-        exponents: *mut qreal,
-        numTermsPerReg: *mut c_int,
-        overrideInds: *mut c_longlong,
-        overridePhases: *mut qreal,
+        coeffs: *const qreal,
+        exponents: *const qreal,
+        numTermsPerReg: *const c_int,
+        overrideInds: *const c_longlong,
+        overridePhases: *const qreal,
         numOverrides: c_int,
     );
 
     pub fn applyNamedPhaseFunc(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
@@ -984,38 +985,38 @@ extern "C" {
 
     pub fn applyNamedPhaseFuncOverrides(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
-        overrideInds: *mut c_longlong,
-        overridePhases: *mut qreal,
+        overrideInds: *const c_longlong,
+        overridePhases: *const qreal,
         numOverrides: c_int,
     );
 
     pub fn applyParamNamedPhaseFunc(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
-        params: *mut qreal,
+        params: *const qreal,
         numParams: c_int,
     );
 
     pub fn applyParamNamedPhaseFuncOverrides(
         qureg: Qureg,
-        qubits: *mut c_int,
-        numQubitsPerReg: *mut c_int,
+        qubits: *const c_int,
+        numQubitsPerReg: *const c_int,
         numRegs: c_int,
         encoding: bitEncoding,
         functionNameCode: phaseFunc,
-        params: *mut qreal,
+        params: *const qreal,
         numParams: c_int,
-        overrideInds: *mut c_longlong,
-        overridePhases: *mut qreal,
+        overrideInds: *const c_longlong,
+        overridePhases: *const qreal,
         numOverrides: c_int,
     );
 
@@ -1023,7 +1024,7 @@ extern "C" {
 
     pub fn applyQFT(
         qureg: Qureg,
-        qubits: *mut c_int,
+        qubits: *const c_int,
         numQubits: c_int,
     );
 

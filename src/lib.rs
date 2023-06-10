@@ -18,10 +18,21 @@ pub enum Error {
     InvalidQuESTInput { err_msg: String, err_func: String },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Complex(ffi::Complex);
 
 impl Complex {
+    #[must_use]
+    pub fn new(
+        real: Qreal,
+        imag: Qreal,
+    ) -> Self {
+        Self(ffi::Complex {
+            real,
+            imag,
+        })
+    }
+
     #[must_use]
     pub fn real(&self) -> Qreal {
         self.0.real
@@ -1402,6 +1413,350 @@ pub fn mix_nontp_multi_qubit_kraus_map(
             ops_inner.as_ptr(),
             num_ops,
         );
+    }
+}
+
+pub fn calc_hilbert_schmidt_distance(
+    a: &Qureg,
+    b: &Qureg,
+) -> Qreal {
+    unsafe { ffi::calcHilbertSchmidtDistance(a.0, b.0) }
+}
+
+pub fn set_weighted_qureg(
+    fac1: Complex,
+    qureg1: &Qureg,
+    fac2: Complex,
+    qureg2: &Qureg,
+    fac_out: Complex,
+    out: &mut Qureg,
+) {
+    unsafe {
+        ffi::setWeightedQureg(
+            fac1.0, qureg1.0, fac2.0, qureg2.0, fac_out.0, out.0,
+        )
+    }
+}
+
+pub fn apply_pauli_sum(
+    in_qureg: &Qureg,
+    all_pauli_codes: &[PauliOpType],
+    term_coeffs: &[Qreal],
+    num_sum_terms: i32,
+    out_qureg: &mut Qureg,
+) {
+    unsafe {
+        ffi::applyPauliSum(
+            in_qureg.0,
+            all_pauli_codes.as_ptr(),
+            term_coeffs.as_ptr(),
+            num_sum_terms,
+            out_qureg.0,
+        );
+    }
+}
+
+pub fn apply_pauli_hamil(
+    in_qureg: &Qureg,
+    hamil: &PauliHamil,
+    out_qureg: &mut Qureg,
+) {
+    unsafe {
+        ffi::applyPauliHamil(in_qureg.0, hamil.0, out_qureg.0);
+    }
+}
+
+pub fn apply_trotter_circuitit(
+    qureg: &mut Qureg,
+    hamil: &PauliHamil,
+    time: Qreal,
+    order: i32,
+    reps: i32,
+) {
+    unsafe {
+        ffi::applyTrotterCircuit(qureg.0, hamil.0, time, order, reps);
+    }
+}
+
+pub fn apply_matrix2(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    u: &ComplexMatrix2,
+) {
+    unsafe {
+        ffi::applyMatrix2(qureg.0, target_qubit, u.0);
+    }
+}
+
+pub fn apply_matrix4(
+    qureg: &mut Qureg,
+    target_qubit1: i32,
+    target_qubit2: i32,
+    u: &ComplexMatrix4,
+) {
+    unsafe {
+        ffi::applyMatrix4(qureg.0, target_qubit1, target_qubit2, u.0);
+    }
+}
+
+pub fn apply_matrix_n(
+    qureg: &mut Qureg,
+    targs: &[i32],
+    num_targs: i32,
+    u: &ComplexMatrixN,
+) {
+    unsafe {
+        ffi::applyMatrixN(qureg.0, targs.as_ptr(), num_targs, u.0);
+    }
+}
+
+pub fn apply_multi_controlled_matrix_n(
+    qureg: &mut Qureg,
+    ctrls: &[i32],
+    num_ctrls: i32,
+    targs: &[i32],
+    num_targs: i32,
+    u: &ComplexMatrixN,
+) {
+    unsafe {
+        ffi::applyMultiControlledMatrixN(
+            qureg.0,
+            ctrls.as_ptr(),
+            num_ctrls,
+            targs.as_ptr(),
+            num_targs,
+            u.0,
+        );
+    }
+}
+
+pub fn apply_phase_func(
+    qureg: &mut Qureg,
+    qubits: &[i32],
+    num_qubits: i32,
+    encoding: BitEncoding,
+    coeffs: &[Qreal],
+    exponents: &[Qreal],
+    num_terms: i32,
+) {
+    unsafe {
+        ffi::applyPhaseFunc(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits,
+            encoding,
+            coeffs.as_ptr(),
+            exponents.as_ptr(),
+            num_terms,
+        );
+    }
+}
+
+pub fn apply_phase_func_overrides(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits: i32,
+    encoding: BitEncoding,
+    coeffs: &[Qreal],
+    exponents: &[Qreal],
+    num_terms: i32,
+    override_inds: &[i64],
+    override_phases: &[Qreal],
+    num_overrides: i32,
+) {
+    unsafe {
+        ffi::applyPhaseFuncOverrides(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits,
+            encoding,
+            coeffs.as_ptr(),
+            exponents.as_ptr(),
+            num_terms,
+            override_inds.as_ptr(),
+            override_phases.as_ptr(),
+            num_overrides,
+        );
+    }
+}
+
+pub fn apply_multi_var_phase_func(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    coeffs: &[Qreal],
+    exponents: &[Qreal],
+    num_terms_per_reg: &[i32],
+) {
+    unsafe {
+        ffi::applyMultiVarPhaseFunc(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            coeffs.as_ptr(),
+            exponents.as_ptr(),
+            num_terms_per_reg.as_ptr(),
+        );
+    }
+}
+
+pub fn apply_multi_var_phase_func_overrides(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    coeffs: &[Qreal],
+    exponents: &[Qreal],
+    num_terms_per_reg: &[i32],
+    override_inds: &[i64],
+    override_phases: &[Qreal],
+    num_overrides: i32,
+) {
+    unsafe {
+        ffi::applyMultiVarPhaseFuncOverrides(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            coeffs.as_ptr(),
+            exponents.as_ptr(),
+            num_terms_per_reg.as_ptr(),
+            override_inds.as_ptr(),
+            override_phases.as_ptr(),
+            num_overrides,
+        );
+    }
+}
+
+pub fn apply_named_phase_func(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    function_name_code: PhaseFunc,
+) {
+    unsafe {
+        ffi::applyNamedPhaseFunc(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            function_name_code,
+        );
+    }
+}
+
+pub fn apply_named_phase_func_overrides(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    function_name_code: PhaseFunc,
+    override_inds: &[i64],
+    override_phases: &[Qreal],
+    num_overrides: i32,
+) {
+    unsafe {
+        ffi::applyNamedPhaseFuncOverrides(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            function_name_code,
+            override_inds.as_ptr(),
+            override_phases.as_ptr(),
+            num_overrides,
+        );
+    }
+}
+
+pub fn apply_param_named_phase_func(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    function_name_code: PhaseFunc,
+    params: &[Qreal],
+    num_params: i32,
+) {
+    unsafe {
+        ffi::applyParamNamedPhaseFunc(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            function_name_code,
+            params.as_ptr(),
+            num_params,
+        );
+    }
+}
+
+pub fn apply_param_named_phase_func_overrides(
+    qureg: Qureg,
+    qubits: &[i32],
+    num_qubits_per_reg: &[i32],
+    num_regs: i32,
+    encoding: BitEncoding,
+    function_name_code: PhaseFunc,
+    params: &[Qreal],
+    num_params: i32,
+    override_inds: &[i64],
+    override_phases: &[Qreal],
+    num_overrides: i32,
+) {
+    unsafe {
+        ffi::applyParamNamedPhaseFuncOverrides(
+            qureg.0,
+            qubits.as_ptr(),
+            num_qubits_per_reg.as_ptr(),
+            num_regs,
+            encoding,
+            function_name_code,
+            params.as_ptr(),
+            num_params,
+            override_inds.as_ptr(),
+            override_phases.as_ptr(),
+            num_overrides,
+        );
+    }
+}
+
+pub fn apply_full_qft(qureg: &mut Qureg) {
+    unsafe {
+        ffi::applyFullQFT(qureg.0);
+    }
+}
+
+pub fn apply_qft(
+    qureg: &mut Qureg,
+    qubits: &[i32],
+    num_qubits: i32,
+) {
+    unsafe {
+        ffi::applyQFT(qureg.0, qubits.as_ptr(), num_qubits);
+    }
+}
+
+pub fn apply_projector(
+    qureg: &mut Qureg,
+    qubit: i32,
+    outcome: i32,
+) {
+    unsafe {
+        ffi::applyProjector(qureg.0, qubit, outcome);
     }
 }
 
