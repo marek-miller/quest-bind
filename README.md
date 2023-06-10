@@ -36,7 +36,7 @@ ln -s ../../../QuEST/build/QuEST/libQuEST.so .
 cd ../../../
 ```
 
-Run unit test:
+Now, we can run unit tests:
 
 ```sh
 cargo test
@@ -44,18 +44,17 @@ cargo test
 
 ## How to use it
 
-No packaging for now. Download and compile everything manually. Here's a quick
-tutorial.
+No packaging for now. Here's a brief tutorial how to compile everything
+manually.
 
-Let's initialize a new binary crate:
+Initialize a new binary crate:
 
 ```sh
-cd ~/
 cargo new testme
 cd testme/
 ```
 
-Clone repositories:
+Clone the dependencies:
 
 ```sh
 git clone --recurse-submodules https://github.com/marek-miller/quest.git
@@ -75,7 +74,7 @@ edition = "2021"
 quest = { path = "./quest" }
 ```
 
-Now write some code and put it in `src/main.rs`:
+Now write some code and put it in `./src/main.rs`:
 
 ```rust
 use quest::*;
@@ -93,13 +92,22 @@ fn main() {
 }
 ```
 
-Compile and run:
+You can read the available documentation locally:
+
+```sh
+cargo doc --open
+```
+
+Refer to [`QuEST` headers](./QuEST/QuEST/include/QuEST.h) for the full
+description of the C API.
+
+Lastly, compile the source code and run:
 
 ```sh
 cargo run
 ```
 
-You should be able to see something like:
+You should be able to see something like this:
 
 ```text
 EXECUTION ENVIRONMENT:
