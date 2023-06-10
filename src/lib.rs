@@ -478,6 +478,48 @@ pub fn t_gate(
     }
 }
 
+#[must_use]
+pub fn create_quest_env() -> QuESTEnv {
+    QuESTEnv(unsafe { ffi::createQuESTEnv() })
+}
+
+pub fn destroy_quest_env(env: QuESTEnv) {
+    unsafe {
+        ffi::destroyQuESTEnv(env.0);
+    }
+}
+
+pub fn sync_quest_env(env: &QuESTEnv) {
+    unsafe {
+        ffi::syncQuESTEnv(env.0);
+    }
+}
+
+#[must_use]
+pub fn sync_quuest_success(success_code: i32) -> i32 {
+    unsafe { ffi::syncQuESTSuccess(success_code) }
+}
+
+pub fn report_quest_env(env: &QuESTEnv) {
+    unsafe {
+        ffi::reportQuESTEnv(env.0);
+    }
+}
+
+#[must_use]
+pub fn get_environment_string(env: &QuESTEnv) -> String {
+    let mut cstr =
+        CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
+            .unwrap();
+
+    unsafe {
+        let cstr_ptr = cstr.into_raw();
+        ffi::getEnvironmentString(env.0, cstr_ptr);
+        cstr = CString::from_raw(cstr_ptr);
+    }
+    cstr.into_string().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -524,5 +566,17 @@ mod tests {
             );
         }
         destroy_complex_matrix_n(m);
+    }
+
+    #[test]
+    fn get_environment_string_01() {
+        let env = create_quest_env();
+        let env_str = get_environment_string(&env);
+
+        assert!(env_str.contains("CUDA="));
+        assert!(env_str.contains("OpenMP="));
+        assert!(env_str.contains("MPI="));
+        assert!(env_str.contains("threads="));
+        assert!(env_str.contains("ranks="));
     }
 }
