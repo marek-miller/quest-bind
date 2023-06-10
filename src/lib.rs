@@ -1,4 +1,3 @@
-mod ffi;
 use std::ffi::CString;
 
 pub use ffi::{
@@ -7,6 +6,8 @@ pub use ffi::{
     phaseFunc as PhaseFunc,
     phaseGateType as PhaseGateType,
 };
+
+mod ffi;
 
 pub type Qreal = f64;
 
@@ -17,6 +18,18 @@ pub enum Error {
 
 #[derive(Debug)]
 pub struct Complex(ffi::Complex);
+
+impl Complex {
+    #[must_use]
+    pub fn real(&self) -> Qreal {
+        self.0.real
+    }
+
+    #[must_use]
+    pub fn imag(&self) -> Qreal {
+        self.0.imag
+    }
+}
 
 #[derive(Debug)]
 pub struct ComplexMatrix2(ffi::ComplexMatrix2);
@@ -40,10 +53,12 @@ pub struct DiagonalOp(ffi::DiagonalOp);
 pub struct Qureg(ffi::Qureg);
 
 impl Qureg {
+    #[must_use]
     pub fn is_density_matrix(&self) -> bool {
         self.0.isDensityMatrix != 0
     }
 
+    #[must_use]
     pub fn num_qubits_represented(&self) -> i32 {
         self.0.numQubitsRepresented
     }
@@ -214,6 +229,81 @@ pub fn create_diagonal_op_from_pauli_hamil_file(
     })
 }
 
+pub fn set_diagonal_op_elems(
+    op: &mut DiagonalOp,
+    start_ind: i64,
+    real: &[Qreal],
+    imag: &[Qreal],
+    num_elems: i64,
+) {
+    assert!(real.len() >= num_elems as usize);
+    assert!(imag.len() >= num_elems as usize);
+
+    unsafe {
+        let real_ptr = real.as_ptr();
+        let imag_ptr = imag.as_ptr();
+
+        ffi::setDiagonalOpElems(op.0, start_ind, real_ptr, imag_ptr, num_elems);
+    }
+}
+
+pub fn apply_diagonal_op(
+    qureg: &mut Qureg,
+    op: &DiagonalOp,
+) {
+    unsafe {
+        ffi::applyDiagonalOp(qureg.0, op.0);
+    }
+}
+
+#[must_use]
+pub fn calc_expec_diagonal_op(
+    qureg: &Qureg,
+    op: &DiagonalOp,
+) -> Complex {
+    Complex(unsafe { ffi::calcExpecDiagonalOp(qureg.0, op.0) })
+}
+
+pub fn report_state(qureg: &Qureg) {
+    unsafe { ffi::reportState(qureg.0) }
+}
+
+pub fn report_state_to_screen(
+    qureg: &Qureg,
+    env: &QuESTEnv,
+    report_rank: i32,
+) {
+    unsafe { ffi::reportStateToScreen(qureg.0, env.0, report_rank) }
+}
+
+pub fn report_qureg_params(qureg: &Qureg) {
+    unsafe {
+        ffi::reportQuregParams(qureg.0);
+    }
+}
+
+pub fn report_pauli_hamil(hamil: &PauliHamil) {
+    unsafe {
+        ffi::reportPauliHamil(hamil.0);
+    }
+}
+
+#[must_use]
+pub fn get_num_qubits(qureg: &Qureg) -> i32 {
+    unsafe { ffi::getNumQubits(qureg.0) }
+}
+
+#[must_use]
+pub fn get_num_amps(qureg: &Qureg) -> i64 {
+    unsafe { ffi::getNumAmps(qureg.0) }
+}
+
+pub fn init_blank_state(qureg: &mut Qureg) {
+    unsafe {
+        ffi::initBlankState(qureg.0);
+    }
+}
+
 pub fn init_zero_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initZeroState(qureg.0);
@@ -223,6 +313,76 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 pub fn init_plus_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initPlusState(qureg.0);
+    }
+}
+
+pub fn init_classical_state(
+    qureg: &mut Qureg,
+    state_ind: i64,
+) {
+    unsafe {
+        ffi::initClassicalState(qureg.0, state_ind);
+    }
+}
+
+pub fn init_pure_state(
+    qureg: &mut Qureg,
+    pure_: &Qureg,
+) {
+    unsafe {
+        ffi::initPureState(qureg.0, pure_.0);
+    }
+}
+
+pub fn init_debug_state(qureg: &mut Qureg) {
+    unsafe {
+        ffi::initDebugState(qureg.0);
+    }
+}
+
+pub fn init_state_from_amps(
+    qureg: &mut Qureg,
+    reals: &[Qreal],
+    imags: &[Qreal],
+) {
+    unsafe {
+        let reals_ptr = reals.as_ptr();
+        let imags_ptr = imags.as_ptr();
+
+        ffi::initStateFromAmps(qureg.0, reals_ptr, imags_ptr);
+    }
+}
+
+pub fn set_amps(
+    qureg: &mut Qureg,
+    start_ind: i64,
+    reals: &[Qreal],
+    imags: &[Qreal],
+    num_amps: i64,
+) {
+    unsafe {
+        let reals_ptr = reals.as_ptr();
+        let imags_ptr = imags.as_ptr();
+
+        ffi::setAmps(qureg.0, start_ind, reals_ptr, imags_ptr, num_amps);
+    }
+}
+
+pub fn set_density_amps(
+    qureg: &mut Qureg,
+    start_row: i64,
+    start_col: i64,
+    reals: &[Qreal],
+    imags: &[Qreal],
+    num_amps: i64,
+) {
+    unsafe {
+        let reals_ptr = reals.as_ptr();
+        let imags_ptr = imags.as_ptr();
+
+        ffi::setDensityAmps(
+            qureg.0, start_row, start_col, reals_ptr, imags_ptr, num_amps,
+        );
     }
 }
 

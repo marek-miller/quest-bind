@@ -56,8 +56,8 @@ pub enum pauliOpType {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Complex {
-    real: qreal,
-    imag: qreal,
+    pub real: qreal,
+    pub imag: qreal,
 }
 
 #[repr(C)]
@@ -142,10 +142,10 @@ pub struct DiagonalOp {
 pub struct Qureg {
     pub isDensityMatrix:      c_int,
     pub numQubitsRepresented: c_int,
-    numQubitsInStateVec:  c_int,
-    numAmpsPerChunk:      c_longlong,
-    numAmpsTotal:         c_longlong,
-    chunkId:              c_int,
+    numQubitsInStateVec:      c_int,
+    numAmpsPerChunk:          c_longlong,
+    numAmpsTotal:             c_longlong,
+    chunkId:                  c_int,
 
     numChunks: c_int,
 
@@ -247,8 +247,8 @@ extern "C" {
     pub fn setDiagonalOpElems(
         op: DiagonalOp,
         startInd: c_longlong,
-        real: *mut qreal,
-        imag: *mut qreal,
+        real: *const qreal,
+        imag: *const qreal,
         numElems: c_longlong,
     );
 
@@ -298,15 +298,15 @@ extern "C" {
 
     pub fn initStateFromAmps(
         qureg: Qureg,
-        reals: *mut qreal,
-        imags: *mut qreal,
+        reals: *const qreal,
+        imags: *const qreal,
     );
 
     pub fn setAmps(
         qureg: Qureg,
         startInd: c_longlong,
-        reals: *mut qreal,
-        imags: *mut qreal,
+        reals: *const qreal,
+        imags: *const qreal,
         numAmps: c_longlong,
     );
 
@@ -314,8 +314,8 @@ extern "C" {
         qureg: Qureg,
         startRow: c_longlong,
         startCol: c_longlong,
-        reals: *mut qreal,
-        imags: *mut qreal,
+        reals: *const qreal,
+        imags: *const qreal,
         numAmps: c_longlong,
     );
 
