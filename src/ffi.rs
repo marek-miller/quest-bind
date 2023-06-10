@@ -917,7 +917,6 @@ extern "C" {
         u: ComplexMatrixN,
     );
 
-    
     fn bindArraysToStackComplexMatrixN(
         numQubits: c_int,
         re: *mut *mut qreal,

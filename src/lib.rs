@@ -562,6 +562,7 @@ pub fn copy_substate_from_gpu(
     }
 }
 
+#[must_use]
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
@@ -569,6 +570,7 @@ pub fn get_amp(
     Complex(unsafe { ffi::getAmp(qureg.0, index) })
 }
 
+#[must_use]
 pub fn get_real_amp(
     qureg: &Qureg,
     index: i64,
@@ -576,6 +578,7 @@ pub fn get_real_amp(
     unsafe { ffi::getRealAmp(qureg.0, index) }
 }
 
+#[must_use]
 pub fn get_imag_amp(
     qureg: &Qureg,
     index: i64,
@@ -583,6 +586,7 @@ pub fn get_imag_amp(
     unsafe { ffi::getImagAmp(qureg.0, index) }
 }
 
+#[must_use]
 pub fn get_prob_amp(
     qureg: &Qureg,
     index: i64,
@@ -590,6 +594,7 @@ pub fn get_prob_amp(
     unsafe { ffi::getProbAmp(qureg.0, index) }
 }
 
+#[must_use]
 pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
@@ -598,6 +603,7 @@ pub fn get_density_amp(
     Complex(unsafe { ffi::getDensityAmp(qureg.0, row, col) })
 }
 
+#[must_use]
 pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
     unsafe { ffi::calcTotalProb(qureg.0) }
 }
@@ -616,7 +622,7 @@ pub fn compact_unitary(
 pub fn unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
-    u: ComplexMatrix2,
+    u: &ComplexMatrix2,
 ) {
     unsafe {
         ffi::unitary(qureg.0, target_qubit, u.0);
@@ -657,7 +663,7 @@ pub fn rotate_around_axis(
     qureg: &mut Qureg,
     rot_qubit: i32,
     angle: Qreal,
-    axis: Vector,
+    axis: &Vector,
 ) {
     unsafe {
         ffi::rotateAroundAxis(qureg.0, rot_qubit, angle, axis.0);
@@ -702,7 +708,7 @@ pub fn controlled_rotate_around_axis(
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
-    axis: Vector,
+    axis: &Vector,
 ) {
     unsafe {
         ffi::controlledRotateAroundAxis(
@@ -737,7 +743,7 @@ pub fn controlled_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
     target_qubit: i32,
-    u: ComplexMatrix2,
+    u: &ComplexMatrix2,
 ) {
     unsafe {
         ffi::controlledUnitary(qureg.0, control_qubit, target_qubit, u.0);
@@ -749,7 +755,7 @@ pub fn multi_controlled_unitary(
     control_qubits: &[i32],
     num_control_qubits: i32,
     target_qubit: i32,
-    u: ComplexMatrix2,
+    u: &ComplexMatrix2,
 ) {
     unsafe {
         ffi::multiControlledUnitary(
@@ -847,6 +853,7 @@ pub fn controlled_pauli_y(
     }
 }
 
+#[must_use]
 pub fn calc_prob_of_outcome(
     qureg: &Qureg,
     measure_qubit: i32,
@@ -898,6 +905,7 @@ pub fn measure_with_stats(
     }
 }
 
+#[must_use]
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
@@ -905,6 +913,7 @@ pub fn calc_inner_product(
     Complex(unsafe { ffi::calcInnerProduct(bra.0, ket.0) })
 }
 
+#[must_use]
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
@@ -914,7 +923,7 @@ pub fn calc_density_inner_product(
 
 pub fn seed_quest_default(env: &mut QuESTEnv) {
     unsafe {
-        let env_ptr = &mut env.0 as *mut _;
+        let env_ptr = std::ptr::addr_of_mut!(env.0);
         ffi::seedQuESTDefault(env_ptr);
     }
 }
@@ -926,12 +935,13 @@ pub fn seed_quest(
 ) {
     // QuEST's function signature is `c_ulong`. Let's use u64 for now...
     unsafe {
-        let env_ptr = &mut env.0 as *mut _;
+        let env_ptr = std::ptr::addr_of_mut!(env.0);
         let seed_array_ptr = seed_array.as_ptr();
         ffi::seedQuEST(env_ptr, seed_array_ptr, num_seeds);
     }
 }
 
+#[must_use]
 pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuESTEnv) -> (&'b mut [u64], i32) {
     unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
@@ -1045,17 +1055,19 @@ pub fn mix_pauli(
 pub fn mix_density_matrix(
     combine_qureg: &mut Qureg,
     prob: Qreal,
-    other_qureg: Qureg,
+    other_qureg: &Qureg,
 ) {
     unsafe {
         ffi::mixDensityMatrix(combine_qureg.0, prob, other_qureg.0);
     }
 }
 
+#[must_use]
 pub fn calc_purity(qureg: &Qureg) -> Qreal {
     unsafe { ffi::calcPurity(qureg.0) }
 }
 
+#[must_use]
 pub fn calc_fidelity(
     qureg: &Qureg,
     pure_state: &Qureg,
@@ -1089,7 +1101,7 @@ pub fn multi_state_controlled_unitary(
     control_state: &[i32],
     num_control_qubits: i32,
     target_qubit: i32,
-    u: ComplexMatrix2,
+    u: &ComplexMatrix2,
 ) {
     unsafe {
         ffi::multiStateControlledUnitary(
@@ -1099,7 +1111,7 @@ pub fn multi_state_controlled_unitary(
             num_control_qubits,
             target_qubit,
             u.0,
-        )
+        );
     }
 }
 
@@ -1248,12 +1260,12 @@ pub fn controlled_two_qubit_unitary(
 }
 
 pub fn multi_controlled_two_qubit_unitary(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     control_qubits: &[i32],
     num_control_qubits: i32,
     target_qubit1: i32,
     target_qubit2: i32,
-    u: ComplexMatrix4,
+    u: &ComplexMatrix4,
 ) {
     unsafe {
         ffi::multiControlledTwoQubitUnitary(
@@ -1263,7 +1275,7 @@ pub fn multi_controlled_two_qubit_unitary(
             target_qubit1,
             target_qubit2,
             u.0,
-        )
+        );
     }
 }
 
@@ -1416,6 +1428,7 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     }
 }
 
+#[must_use]
 pub fn calc_hilbert_schmidt_distance(
     a: &Qureg,
     b: &Qureg,
@@ -1434,7 +1447,7 @@ pub fn set_weighted_qureg(
     unsafe {
         ffi::setWeightedQureg(
             fac1.0, qureg1.0, fac2.0, qureg2.0, fac_out.0, out.0,
-        )
+        );
     }
 }
 
@@ -1552,8 +1565,9 @@ pub fn apply_phase_func(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits: i32,
     encoding: BitEncoding,
@@ -1580,8 +1594,9 @@ pub fn apply_phase_func_overrides(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
@@ -1604,8 +1619,9 @@ pub fn apply_multi_var_phase_func(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func_overrides(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
@@ -1635,7 +1651,7 @@ pub fn apply_multi_var_phase_func_overrides(
 }
 
 pub fn apply_named_phase_func(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
@@ -1654,8 +1670,9 @@ pub fn apply_named_phase_func(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_named_phase_func_overrides(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
@@ -1680,8 +1697,9 @@ pub fn apply_named_phase_func_overrides(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
@@ -1704,8 +1722,9 @@ pub fn apply_param_named_phase_func(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func_overrides(
-    qureg: Qureg,
+    qureg: &mut Qureg,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     num_regs: i32,
