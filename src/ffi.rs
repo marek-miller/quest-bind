@@ -1,4 +1,4 @@
-//! FFI bindings to `libQuEST` v3.5.0
+//! Raw FFI bindings to `libQuEST` v3.5.0
 
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
@@ -1039,7 +1039,7 @@ extern "C" {
 // For now, it is just a direct translation from
 // QuEST's default callback.
 #[no_mangle]
-pub extern "C" fn invalidQuESTInputError(
+unsafe extern "C" fn invalidQuESTInputError(
     errMsg: *const c_char,
     errFunc: *const c_char,
 ) {

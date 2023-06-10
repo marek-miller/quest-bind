@@ -950,13 +950,87 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
     }
 }
 
-pub fn write_recorded_qasmto_file(
+pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg,
     filename: &str,
 ) {
     unsafe {
         let filename_cstr = CString::new(filename).unwrap();
         ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
+    }
+}
+
+pub fn mix_dephasing(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    prob: Qreal,
+) {
+    unsafe {
+        ffi::mixDephasing(qureg.0, target_qubit, prob);
+    }
+}
+
+pub fn mix_two_qubit_dephasing(
+    qureg: &mut Qureg,
+    qubit1: i32,
+    qubit2: i32,
+    prob: Qreal,
+) {
+    unsafe {
+        ffi::mixTwoQubitDephasing(qureg.0, qubit1, qubit2, prob);
+    }
+}
+
+pub fn mix_depolarising(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    prob: Qreal,
+) {
+    unsafe {
+        ffi::mixDepolarising(qureg.0, target_qubit, prob);
+    }
+}
+
+pub fn mix_damping(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    prob: Qreal,
+) {
+    unsafe {
+        ffi::mixDamping(qureg.0, target_qubit, prob);
+    }
+}
+
+pub fn mix_two_qubit_depolarising(
+    qureg: &mut Qureg,
+    qubit1: i32,
+    qubit2: i32,
+    prob: Qreal,
+) {
+    unsafe {
+        ffi::mixTwoQubitDepolarising(qureg.0, qubit1, qubit2, prob);
+    }
+}
+
+pub fn mix_pauli(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    prob_x: Qreal,
+    prob_y: Qreal,
+    prob_z: Qreal,
+) {
+    unsafe {
+        ffi::mixPauli(qureg.0, target_qubit, prob_x, prob_y, prob_z);
+    }
+}
+
+pub fn mix_density_matrix(
+    combine_qureg: &mut Qureg,
+    prob: Qreal,
+    other_qureg: Qureg,
+) {
+    unsafe {
+        ffi::mixDensityMatrix(combine_qureg.0, prob, other_qureg.0);
     }
 }
 
