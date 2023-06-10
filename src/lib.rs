@@ -520,6 +520,173 @@ pub fn get_environment_string(env: &QuESTEnv) -> String {
     cstr.into_string().unwrap()
 }
 
+pub fn copy_state_to_gpu(qureg: &mut Qureg) {
+    unsafe {
+        ffi::copyStateToGPU(qureg.0);
+    }
+}
+
+pub fn copy_state_from_gpu(qureg: &mut Qureg) {
+    unsafe {
+        ffi::copyStateFromGPU(qureg.0);
+    }
+}
+
+pub fn copy_substate_to_gpu(
+    qureg: &mut Qureg,
+    start_ind: i64,
+    num_amps: i64,
+) {
+    unsafe {
+        ffi::copySubstateToGPU(qureg.0, start_ind, num_amps);
+    }
+}
+
+pub fn copy_substate_from_gpu(
+    qureg: &mut Qureg,
+    start_ind: i64,
+    num_amps: i64,
+) {
+    unsafe {
+        ffi::copySubstateToGPU(qureg.0, start_ind, num_amps);
+    }
+}
+
+pub fn get_amp(
+    qureg: &Qureg,
+    index: i64,
+) -> Complex {
+    Complex(unsafe { ffi::getAmp(qureg.0, index) })
+}
+
+pub fn get_real_amp(
+    qureg: &Qureg,
+    index: i64,
+) -> Qreal {
+    unsafe { ffi::getRealAmp(qureg.0, index) }
+}
+
+pub fn get_imag_amp(
+    qureg: &Qureg,
+    index: i64,
+) -> Qreal {
+    unsafe { ffi::getImagAmp(qureg.0, index) }
+}
+
+pub fn get_prob_amp(
+    qureg: &Qureg,
+    index: i64,
+) -> Qreal {
+    unsafe { ffi::getProbAmp(qureg.0, index) }
+}
+
+pub fn get_density_amp(
+    qureg: &Qureg,
+    row: i64,
+    col: i64,
+) -> Complex {
+    Complex(unsafe { ffi::getDensityAmp(qureg.0, row, col) })
+}
+
+pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
+    unsafe { ffi::calcTotalProb(qureg.0) }
+}
+
+pub fn compact_unitary(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    alpha: Complex,
+    beta: Complex,
+) {
+    unsafe {
+        ffi::compactUnitary(qureg.0, target_qubit, alpha.0, beta.0);
+    }
+}
+
+pub fn unitary(
+    qureg: &mut Qureg,
+    target_qubit: i32,
+    u: ComplexMatrix2,
+) {
+    unsafe {
+        ffi::unitary(qureg.0, target_qubit, u.0);
+    }
+}
+
+pub fn rotate_x(
+    qureg: &mut Qureg,
+    rot_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::rotateX(qureg.0, rot_qubit, angle);
+    }
+}
+
+pub fn rotate_y(
+    qureg: &mut Qureg,
+    rot_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::rotateY(qureg.0, rot_qubit, angle);
+    }
+}
+
+pub fn rotate_z(
+    qureg: &mut Qureg,
+    rot_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::rotateZ(qureg.0, rot_qubit, angle);
+    }
+}
+
+pub fn rotate_around_axis(
+    qureg: &mut Qureg,
+    rot_qubit: i32,
+    angle: Qreal,
+    axis: Vector,
+) {
+    unsafe {
+        ffi::rotateAroundAxis(qureg.0, rot_qubit, angle, axis.0);
+    }
+}
+
+pub fn controlled_rotate_x(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::controlledRotateX(qureg.0, control_qubit, target_qubit, angle);
+    }
+}
+
+pub fn controlled_rotate_y(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::controlledRotateY(qureg.0, control_qubit, target_qubit, angle);
+    }
+}
+
+pub fn controlled_rotate_z(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::controlledRotateZ(qureg.0, control_qubit, target_qubit, angle);
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
