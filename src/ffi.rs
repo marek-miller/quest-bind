@@ -695,8 +695,8 @@ extern "C" {
 
     pub fn multiStateControlledUnitary(
         qureg: Qureg,
-        controlQubits: *mut c_int,
-        controlState: *mut c_int,
+        controlQubits: *const c_int,
+        controlState: *const c_int,
         numControlQubits: c_int,
         targetQubit: c_int,
         u: ComplexMatrix2,
@@ -704,50 +704,50 @@ extern "C" {
 
     pub fn multiRotateZ(
         qureg: Qureg,
-        qubits: *mut c_int,
+        qubits: *const c_int,
         numQubits: c_int,
         angle: qreal,
     );
 
     pub fn multiRotatePauli(
         qureg: Qureg,
-        targetQubits: *mut c_int,
-        targetPaulis: *mut pauliOpType,
+        targetQubits: *const c_int,
+        targetPaulis: *const pauliOpType,
         numTargets: c_int,
         angle: qreal,
     );
 
     pub fn multiControlledMultiRotateZ(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControls: c_int,
-        targetQubits: *mut c_int,
+        targetQubits: *const c_int,
         numTargets: c_int,
         angle: qreal,
     );
 
     pub fn multiControlledMultiRotatePauli(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControls: c_int,
-        targetQubits: *mut c_int,
-        targetPaulis: *mut pauliOpType,
+        targetQubits: *const c_int,
+        targetPaulis: *const pauliOpType,
         numTargets: c_int,
         angle: qreal,
     );
 
     pub fn calcExpecPauliProd(
         qureg: Qureg,
-        targetQubits: *mut c_int,
-        pauliCodes: *mut pauliOpType,
+        targetQubits: *const c_int,
+        pauliCodes: *const pauliOpType,
         numTargets: c_int,
         workspace: Qureg,
     ) -> qreal;
 
     pub fn calcExpecPauliSum(
         qureg: Qureg,
-        allPauliCodes: *mut pauliOpType,
-        termCoeffs: *mut qreal,
+        allPauliCodes: *const pauliOpType,
+        termCoeffs: *const qreal,
         numSumTerms: c_int,
         workspace: Qureg,
     ) -> qreal;
@@ -775,7 +775,7 @@ extern "C" {
 
     pub fn multiControlledTwoQubitUnitary(
         qureg: Qureg,
-        controlQubits: *mut c_int,
+        controlQubits: *const c_int,
         numControlQubits: c_int,
         targetQubit1: c_int,
         targetQubit2: c_int,
@@ -784,7 +784,7 @@ extern "C" {
 
     pub fn multiQubitUnitary(
         qureg: Qureg,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
         u: ComplexMatrixN,
     );
@@ -792,16 +792,16 @@ extern "C" {
     pub fn controlledMultiQubitUnitary(
         qureg: Qureg,
         ctrl: c_int,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
         u: ComplexMatrixN,
     );
 
     pub fn multiControlledMultiQubitUnitary(
         qureg: Qureg,
-        ctrls: *mut c_int,
+        ctrls: *const c_int,
         numCtrls: c_int,
-        targs: *mut c_int,
+        targs: *const c_int,
         numTargs: c_int,
         u: ComplexMatrixN,
     );
@@ -809,7 +809,7 @@ extern "C" {
     pub fn mixKrausMap(
         qureg: Qureg,
         target: c_int,
-        ops: *mut ComplexMatrix2,
+        ops: *const ComplexMatrix2,
         numOps: c_int,
     );
 
@@ -817,22 +817,22 @@ extern "C" {
         qureg: Qureg,
         target1: c_int,
         target2: c_int,
-        ops: *mut ComplexMatrix4,
+        ops: *const ComplexMatrix4,
         numOps: c_int,
     );
 
     pub fn mixMultiQubitKrausMap(
         qureg: Qureg,
-        targets: *mut c_int,
+        targets: *const c_int,
         numTargets: c_int,
-        ops: *mut ComplexMatrixN,
+        ops: *const ComplexMatrixN,
         numOps: c_int,
     );
 
     pub fn mixNonTPKrausMap(
         qureg: Qureg,
         target: c_int,
-        ops: *mut ComplexMatrix2,
+        ops: *const ComplexMatrix2,
         numOps: c_int,
     );
 
@@ -840,15 +840,15 @@ extern "C" {
         qureg: Qureg,
         target1: c_int,
         target2: c_int,
-        ops: *mut ComplexMatrix4,
+        ops: *const ComplexMatrix4,
         numOps: c_int,
     );
 
     pub fn mixNonTPMultiQubitKrausMap(
         qureg: Qureg,
-        targets: *mut c_int,
+        targets: *const c_int,
         numTargets: c_int,
-        ops: *mut ComplexMatrixN,
+        ops: *const ComplexMatrixN,
         numOps: c_int,
     );
 

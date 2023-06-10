@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-pub mod ffi;
+mod ffi;
 
 pub use ffi::{
     bitEncoding as BitEncoding,
@@ -165,9 +165,7 @@ pub fn init_pauli_hamil(
     assert_eq!(codes.len(), hamil_len * hamil.0.numQubits as usize);
 
     unsafe {
-        let coeffs_ptr = coeffs.as_ptr();
-        let codes_ptr = codes.as_ptr();
-        ffi::initPauliHamil(hamil.0, coeffs_ptr, codes_ptr);
+        ffi::initPauliHamil(hamil.0, coeffs.as_ptr(), codes.as_ptr());
     }
 }
 
@@ -206,9 +204,7 @@ pub fn init_diagonal_op(
     assert!(imag.len() >= len_required);
 
     unsafe {
-        let real_ptr = real.as_ptr();
-        let imag_ptr = imag.as_ptr();
-        ffi::initDiagonalOp(op.0, real_ptr, imag_ptr);
+        ffi::initDiagonalOp(op.0, real.as_ptr(), imag.as_ptr());
     }
 }
 
@@ -242,10 +238,13 @@ pub fn set_diagonal_op_elems(
     assert!(imag.len() >= num_elems as usize);
 
     unsafe {
-        let real_ptr = real.as_ptr();
-        let imag_ptr = imag.as_ptr();
-
-        ffi::setDiagonalOpElems(op.0, start_ind, real_ptr, imag_ptr, num_elems);
+        ffi::setDiagonalOpElems(
+            op.0,
+            start_ind,
+            real.as_ptr(),
+            imag.as_ptr(),
+            num_elems,
+        );
     }
 }
 
@@ -348,10 +347,7 @@ pub fn init_state_from_amps(
     imags: &[Qreal],
 ) {
     unsafe {
-        let reals_ptr = reals.as_ptr();
-        let imags_ptr = imags.as_ptr();
-
-        ffi::initStateFromAmps(qureg.0, reals_ptr, imags_ptr);
+        ffi::initStateFromAmps(qureg.0, reals.as_ptr(), imags.as_ptr());
     }
 }
 
@@ -363,10 +359,13 @@ pub fn set_amps(
     num_amps: i64,
 ) {
     unsafe {
-        let reals_ptr = reals.as_ptr();
-        let imags_ptr = imags.as_ptr();
-
-        ffi::setAmps(qureg.0, start_ind, reals_ptr, imags_ptr, num_amps);
+        ffi::setAmps(
+            qureg.0,
+            start_ind,
+            reals.as_ptr(),
+            imags.as_ptr(),
+            num_amps,
+        );
     }
 }
 
@@ -379,11 +378,13 @@ pub fn set_density_amps(
     num_amps: i64,
 ) {
     unsafe {
-        let reals_ptr = reals.as_ptr();
-        let imags_ptr = imags.as_ptr();
-
         ffi::setDensityAmps(
-            qureg.0, start_row, start_col, reals_ptr, imags_ptr, num_amps,
+            qureg.0,
+            start_row,
+            start_col,
+            reals.as_ptr(),
+            imags.as_ptr(),
+            num_amps,
         );
     }
 }
@@ -425,10 +426,9 @@ pub fn multi_controlled_phase_shift(
     angle: Qreal,
 ) {
     unsafe {
-        let control_qubits_ptr = control_qubits.as_ptr();
         ffi::multiControlledPhaseShift(
             qureg.0,
-            control_qubits_ptr,
+            control_qubits.as_ptr(),
             num_control_qubits,
             angle,
         );
@@ -451,10 +451,9 @@ pub fn multi_controlled_phase_flip(
     num_control_qubits: i32,
 ) {
     unsafe {
-        let control_qubits_ptr = control_qubits.as_ptr();
         ffi::multiControlledPhaseFlip(
             qureg.0,
-            control_qubits_ptr,
+            control_qubits.as_ptr(),
             num_control_qubits,
         );
     }
@@ -742,10 +741,9 @@ pub fn multi_controlled_unitary(
     u: ComplexMatrix2,
 ) {
     unsafe {
-        let control_qubits_ptr = control_qubits.as_ptr();
         ffi::multiControlledUnitary(
             qureg.0,
-            control_qubits_ptr,
+            control_qubits.as_ptr(),
             num_control_qubits,
             target_qubit,
             u.0,
@@ -807,10 +805,12 @@ pub fn multi_controlled_multi_qubit_not(
     num_targs: i32,
 ) {
     unsafe {
-        let ctrls_ptr = ctrls.as_ptr();
-        let targs_ptr = targs.as_ptr();
         ffi::multiControlledMultiQubitNot(
-            qureg.0, ctrls_ptr, num_ctrls, targs_ptr, num_targs,
+            qureg.0,
+            ctrls.as_ptr(),
+            num_ctrls,
+            targs.as_ptr(),
+            num_targs,
         );
     }
 }
@@ -852,12 +852,10 @@ pub fn calc_prob_of_all_outcomes(
 ) {
     assert!(outcome_probs.len() >= num_qubits as usize);
     unsafe {
-        let outcome_probs_ptr = outcome_probs.as_mut_ptr();
-        let qubits_ptr = qubits.as_ptr();
         ffi::calcProbOfAllOutcomes(
-            outcome_probs_ptr,
+            outcome_probs.as_mut_ptr(),
             qureg.0,
-            qubits_ptr,
+            qubits.as_ptr(),
             num_qubits,
         );
     }
@@ -903,14 +901,14 @@ pub fn calc_density_inner_product(
     unsafe { ffi::calcDensityInnerProduct(rho1.0, rho2.0) }
 }
 
-pub fn seed_qu_estdefault(env: &mut QuESTEnv) {
+pub fn seed_quest_default(env: &mut QuESTEnv) {
     unsafe {
         let env_ptr = &mut env.0 as *mut _;
         ffi::seedQuESTDefault(env_ptr);
     }
 }
 
-pub fn seed_qu_est(
+pub fn seed_quest(
     env: &mut QuESTEnv,
     seed_array: &[u64],
     num_seeds: i32,
@@ -923,8 +921,17 @@ pub fn seed_qu_est(
     }
 }
 
-// TODO
-// pub fn getQuESTSeeds();
+pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuESTEnv) -> (&'b mut [u64], i32) {
+    unsafe {
+        let seeds_ptr = &mut std::ptr::null_mut();
+        let mut num_seeds = 0;
+        ffi::getQuESTSeeds(env.0, seeds_ptr, &mut num_seeds);
+
+        let seeds =
+            std::slice::from_raw_parts_mut(*seeds_ptr, num_seeds as usize);
+        (seeds, num_seeds)
+    }
+}
 
 pub fn start_recording_qasm(qureg: &mut Qureg) {
     unsafe {
@@ -1034,6 +1041,370 @@ pub fn mix_density_matrix(
     }
 }
 
+pub fn calc_purity(qureg: &Qureg) -> Qreal {
+    unsafe { ffi::calcPurity(qureg.0) }
+}
+
+pub fn calc_fidelity(
+    qureg: &Qureg,
+    pure_state: &Qureg,
+) -> Qreal {
+    unsafe { ffi::calcFidelity(qureg.0, pure_state.0) }
+}
+
+pub fn swap_gate(
+    qureg: &mut Qureg,
+    qubit1: i32,
+    qubit2: i32,
+) {
+    unsafe {
+        ffi::swapGate(qureg.0, qubit1, qubit2);
+    }
+}
+
+pub fn sqrt_swap_gate(
+    qureg: &mut Qureg,
+    qb1: i32,
+    qb2: i32,
+) {
+    unsafe {
+        ffi::swapGate(qureg.0, qb1, qb2);
+    }
+}
+
+pub fn multi_state_controlled_unitary(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    control_state: &[i32],
+    num_control_qubits: i32,
+    target_qubit: i32,
+    u: ComplexMatrix2,
+) {
+    unsafe {
+        ffi::multiStateControlledUnitary(
+            qureg.0,
+            control_qubits.as_ptr(),
+            control_state.as_ptr(),
+            num_control_qubits,
+            target_qubit,
+            u.0,
+        )
+    }
+}
+
+pub fn multi_rotate_z(
+    qureg: &mut Qureg,
+    qubits: &[i32],
+    num_qubits: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::multiRotateZ(qureg.0, qubits.as_ptr(), num_qubits, angle);
+    }
+}
+
+pub fn multi_rotate_pauli(
+    qureg: &mut Qureg,
+    target_qubits: &[i32],
+    target_paulis: &[PauliOpType],
+    num_targets: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::multiRotatePauli(
+            qureg.0,
+            target_qubits.as_ptr(),
+            target_paulis.as_ptr(),
+            num_targets,
+            angle,
+        );
+    }
+}
+
+pub fn multi_controlled_multi_rotate_z(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    num_controls: i32,
+    target_qubits: &[i32],
+    num_targets: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::multiControlledMultiRotateZ(
+            qureg.0,
+            control_qubits.as_ptr(),
+            num_controls,
+            target_qubits.as_ptr(),
+            num_targets,
+            angle,
+        );
+    }
+}
+
+pub fn multi_controlled_multi_rotate_pauli(
+    qureg: &mut Qureg,
+    control_qubits: &[i32],
+    num_controls: i32,
+    target_qubits: &[i32],
+    target_paulis: &[PauliOpType],
+    num_targets: i32,
+    angle: Qreal,
+) {
+    unsafe {
+        ffi::multiControlledMultiRotatePauli(
+            qureg.0,
+            control_qubits.as_ptr(),
+            num_controls,
+            target_qubits.as_ptr(),
+            target_paulis.as_ptr(),
+            num_targets,
+            angle,
+        );
+    }
+}
+
+pub fn calc_expec_pauli_prod(
+    qureg: &Qureg,
+    target_qubits: &[i32],
+    pauli_codes: &[PauliOpType],
+    num_targets: i32,
+    workspace: &mut Qureg,
+) -> Qreal {
+    unsafe {
+        ffi::calcExpecPauliProd(
+            qureg.0,
+            target_qubits.as_ptr(),
+            pauli_codes.as_ptr(),
+            num_targets,
+            workspace.0,
+        )
+    }
+}
+
+pub fn calc_expec_pauli_sum(
+    qureg: &Qureg,
+    all_pauli_codes: &[PauliOpType],
+    term_coeffs: &[Qreal],
+    num_sum_terms: i32,
+    workspace: &mut Qureg,
+) -> Qreal {
+    unsafe {
+        ffi::calcExpecPauliSum(
+            qureg.0,
+            all_pauli_codes.as_ptr(),
+            term_coeffs.as_ptr(),
+            num_sum_terms,
+            workspace.0,
+        )
+    }
+}
+
+pub fn calc_expec_pauli_hamil(
+    qureg: &Qureg,
+    hamil: &PauliHamil,
+    workspace: &mut Qureg,
+) -> Qreal {
+    unsafe { ffi::calcExpecPauliHamil(qureg.0, hamil.0, workspace.0) }
+}
+
+pub fn two_qubit_unitary(
+    qureg: &mut Qureg,
+    target_qubit1: i32,
+    target_qubit2: i32,
+    u: &ComplexMatrix4,
+) {
+    unsafe {
+        ffi::twoQubitUnitary(qureg.0, target_qubit1, target_qubit2, u.0);
+    }
+}
+
+pub fn controlled_two_qubit_unitary(
+    qureg: &mut Qureg,
+    control_qubit: i32,
+    target_qubit1: i32,
+    target_qubit2: i32,
+    u: &ComplexMatrix4,
+) {
+    unsafe {
+        ffi::controlledTwoQubitUnitary(
+            qureg.0,
+            control_qubit,
+            target_qubit1,
+            target_qubit2,
+            u.0,
+        );
+    }
+}
+
+pub fn multi_controlled_two_qubit_unitary(
+    qureg: Qureg,
+    control_qubits: &[i32],
+    num_control_qubits: i32,
+    target_qubit1: i32,
+    target_qubit2: i32,
+    u: ComplexMatrix4,
+) {
+    unsafe {
+        ffi::multiControlledTwoQubitUnitary(
+            qureg.0,
+            control_qubits.as_ptr(),
+            num_control_qubits,
+            target_qubit1,
+            target_qubit2,
+            u.0,
+        )
+    }
+}
+
+pub fn multi_qubit_unitary(
+    qureg: &mut Qureg,
+    targs: &[i32],
+    num_targs: i32,
+    u: &ComplexMatrixN,
+) {
+    unsafe {
+        ffi::multiQubitUnitary(qureg.0, targs.as_ptr(), num_targs, u.0);
+    }
+}
+
+pub fn controlled_multi_qubit_unitary(
+    qureg: &mut Qureg,
+    ctrl: i32,
+    targs: &[i32],
+    num_targs: i32,
+    u: &ComplexMatrixN,
+) {
+    unsafe {
+        ffi::controlledMultiQubitUnitary(
+            qureg.0,
+            ctrl,
+            targs.as_ptr(),
+            num_targs,
+            u.0,
+        );
+    }
+}
+
+pub fn multi_controlled_multi_qubit_unitary(
+    qureg: &mut Qureg,
+    ctrls: &[i32],
+    num_ctrls: i32,
+    targs: &[i32],
+    num_targs: i32,
+    u: &ComplexMatrixN,
+) {
+    unsafe {
+        ffi::multiControlledMultiQubitUnitary(
+            qureg.0,
+            ctrls.as_ptr(),
+            num_ctrls,
+            targs.as_ptr(),
+            num_targs,
+            u.0,
+        );
+    }
+}
+
+pub fn mix_kraus_map(
+    qureg: &mut Qureg,
+    target: i32,
+    ops: &[ComplexMatrix2],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixKrausMap(qureg.0, target, ops_inner.as_ptr(), num_ops);
+    }
+}
+
+pub fn mix_two_qubit_kraus_map(
+    qureg: &mut Qureg,
+    target1: i32,
+    target2: i32,
+    ops: &[ComplexMatrix4],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixTwoQubitKrausMap(
+            qureg.0,
+            target1,
+            target2,
+            ops_inner.as_ptr(),
+            num_ops,
+        );
+    }
+}
+
+pub fn mix_multi_qubit_kraus_map(
+    qureg: &mut Qureg,
+    targets: &[i32],
+    num_targets: i32,
+    ops: &[ComplexMatrixN],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixMultiQubitKrausMap(
+            qureg.0,
+            targets.as_ptr(),
+            num_targets,
+            ops_inner.as_ptr(),
+            num_ops,
+        );
+    }
+}
+
+pub fn mix_nontp_kraus_map(
+    qureg: &mut Qureg,
+    target: i32,
+    ops: &[ComplexMatrix2],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixNonTPKrausMap(qureg.0, target, ops_inner.as_ptr(), num_ops);
+    }
+}
+
+pub fn mix_nontp_two_qubit_kraus_map(
+    qureg: &mut Qureg,
+    target1: i32,
+    target2: i32,
+    ops: &[ComplexMatrix4],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixNonTPTwoQubitKrausMap(
+            qureg.0,
+            target1,
+            target2,
+            ops_inner.as_ptr(),
+            num_ops,
+        );
+    }
+}
+
+pub fn mix_nontp_multi_qubit_kraus_map(
+    qureg: &mut Qureg,
+    targets: &[i32],
+    num_targets: i32,
+    ops: &[ComplexMatrixN],
+    num_ops: i32,
+) {
+    let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
+    unsafe {
+        ffi::mixNonTPMultiQubitKrausMap(
+            qureg.0,
+            targets.as_ptr(),
+            num_targets,
+            ops_inner.as_ptr(),
+            num_ops,
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -1092,5 +1463,18 @@ mod tests {
         assert!(env_str.contains("MPI="));
         assert!(env_str.contains("threads="));
         assert!(env_str.contains("ranks="));
+
+        destroy_quest_env(env);
+    }
+
+    #[test]
+    fn get_quest_seeds_01() {
+        let env = create_quest_env();
+        let (seeds, num_seeds) = get_quest_seeds(&env);
+
+        assert!(num_seeds > 0);
+        assert_eq!(seeds.len(), num_seeds as usize);
+
+        destroy_quest_env(env);
     }
 }
