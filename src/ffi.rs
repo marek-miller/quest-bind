@@ -1467,6 +1467,8 @@ mod tests {
             )
         );
     }
+
+    #[allow(clippy::too_many_lines)]
     #[test]
     fn bindgen_test_layout_DiagonalOp() {
         assert_eq!(
@@ -1577,6 +1579,7 @@ mod tests {
         );
     }
 
+    #[allow(clippy::too_many_lines)]
     #[test]
     fn bindgen_test_layout_Qureg() {
         assert_eq!(

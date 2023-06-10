@@ -1,3 +1,5 @@
+#![allow(clippy::missing_errors_doc)]
+
 use std::ffi::CString;
 
 mod ffi;
@@ -16,6 +18,8 @@ pub type Qreal = f64;
 #[derive(Debug, PartialEq)]
 pub enum Error {
     InvalidQuESTInput { err_msg: String, err_func: String },
+    NulError(std::ffi::NulError),
+    IntoStringError(std::ffi::IntoStringError),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -129,16 +133,12 @@ pub fn init_complex_matrix_n(
     imag: &[&[Qreal]],
 ) {
     let n = m.0.numQubits as usize;
-    assert!(real.len() >= n);
-    assert!(imag.len() >= n);
 
     let mut real_ptrs = Vec::with_capacity(n);
     let mut imag_ptrs = Vec::with_capacity(n);
     unsafe {
         for i in 0..n {
-            assert!(real[i].len() >= n);
             real_ptrs.push(real[i].as_ptr());
-            assert!(imag[i].len() >= n);
             imag_ptrs.push(imag[i].as_ptr());
         }
 
@@ -159,22 +159,18 @@ pub fn destroy_pauli_hamil(hamil: PauliHamil) {
     unsafe { ffi::destroyPauliHamil(hamil.0) }
 }
 
-#[must_use]
-pub fn create_pauli_hamil_from_file(fn_: &str) -> PauliHamil {
-    let filename = CString::new(fn_).unwrap();
-    PauliHamil(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
+pub fn create_pauli_hamil_from_file(fn_: &str) -> Result<PauliHamil, Error> {
+    let filename = CString::new(fn_).map_err(Error::NulError)?;
+    Ok(PauliHamil(unsafe {
+        ffi::createPauliHamilFromFile((*filename).as_ptr())
+    }))
 }
 
-#[allow(clippy::cast_sign_loss)]
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
     codes: &[PauliOpType],
 ) {
-    let hamil_len = hamil.0.numSumTerms as usize;
-    assert_eq!(coeffs.len(), hamil_len);
-    assert_eq!(codes.len(), hamil_len * hamil.0.numQubits as usize);
-
     unsafe {
         ffi::initPauliHamil(hamil.0, coeffs.as_ptr(), codes.as_ptr());
     }
@@ -204,6 +200,11 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) {
     }
 }
 
+/// # Panics
+///
+/// This function will panic,
+/// if either `real` or `imag` have length smaller than
+/// `2.pow(num_qubits)`.
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
@@ -223,21 +224,26 @@ pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp,
     hamil: &PauliHamil,
 ) {
-    assert_eq!(op.0.numQubits, hamil.0.numQubits);
     unsafe { ffi::initDiagonalOpFromPauliHamil(op.0, hamil.0) }
 }
 
-#[must_use]
 pub fn create_diagonal_op_from_pauli_hamil_file(
     fn_: &str,
     env: &QuESTEnv,
-) -> DiagonalOp {
-    let filename = CString::new(fn_).unwrap();
-    DiagonalOp(unsafe {
+) -> Result<DiagonalOp, Error> {
+    let filename = CString::new(fn_).map_err(Error::NulError)?;
+    Ok(DiagonalOp(unsafe {
         ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
-    })
+    }))
 }
 
+/// # Panics
+///
+/// This function will panic if either
+/// `real.len() >= num_elems as usize`, or
+/// `imag.len() >= num_elems as usize`.
+#[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_possible_truncation)]
 pub fn set_diagonal_op_elems(
     op: &mut DiagonalOp,
     start_ind: i64,
@@ -493,6 +499,7 @@ pub fn create_quest_env() -> QuESTEnv {
     QuESTEnv(unsafe { ffi::createQuESTEnv() })
 }
 
+#[allow(clippy::needless_pass_by_value)]
 pub fn destroy_quest_env(env: QuESTEnv) {
     unsafe {
         ffi::destroyQuESTEnv(env.0);
@@ -516,18 +523,16 @@ pub fn report_quest_env(env: &QuESTEnv) {
     }
 }
 
-#[must_use]
-pub fn get_environment_string(env: &QuESTEnv) -> String {
+pub fn get_environment_string(env: &QuESTEnv) -> Result<String, Error> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
-            .unwrap();
-
+            .map_err(Error::NulError)?;
     unsafe {
         let cstr_ptr = cstr.into_raw();
         ffi::getEnvironmentString(env.0, cstr_ptr);
         cstr = CString::from_raw(cstr_ptr);
     }
-    cstr.into_string().unwrap()
+    cstr.into_string().map_err(Error::IntoStringError)
 }
 
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
@@ -862,6 +867,11 @@ pub fn calc_prob_of_outcome(
     unsafe { ffi::calcProbOfOutcome(qureg.0, measure_qubit, outcome) }
 }
 
+/// # Panics
+///
+/// This function will panic if
+/// `outcome_probs.len() < num_qubits as usize`
+#[allow(clippy::cast_sign_loss)]
 pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
     qureg: &Qureg,
@@ -941,11 +951,12 @@ pub fn seed_quest(
     }
 }
 
+#[allow(clippy::cast_sign_loss)]
 #[must_use]
 pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuESTEnv) -> (&'b mut [u64], i32) {
     unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
-        let mut num_seeds = 0;
+        let mut num_seeds = 0_i32;
         ffi::getQuESTSeeds(env.0, seeds_ptr, &mut num_seeds);
 
         let seeds =
@@ -981,11 +992,12 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg,
     filename: &str,
-) {
+) -> Result<(), Error> {
     unsafe {
-        let filename_cstr = CString::new(filename).unwrap();
+        let filename_cstr = CString::new(filename).map_err(Error::NulError)?;
         ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
     }
+    Ok(())
 }
 
 pub fn mix_dephasing(
@@ -1781,6 +1793,7 @@ pub fn apply_projector(
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::cast_sign_loss)]
 
     use super::*;
 
@@ -1830,7 +1843,7 @@ mod tests {
     #[test]
     fn get_environment_string_01() {
         let env = create_quest_env();
-        let env_str = get_environment_string(&env);
+        let env_str = get_environment_string(&env).unwrap();
 
         assert!(env_str.contains("CUDA="));
         assert!(env_str.contains("OpenMP="));
