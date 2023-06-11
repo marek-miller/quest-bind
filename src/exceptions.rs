@@ -44,9 +44,9 @@ where
     let _guard = QUEST_EXCEPTION_GUARD.lock().unwrap();
     let res = f();
     let err = {
-        let mut err_guard = QUEST_EXCEPTION_ERROR.lock().unwrap();
-        let err = err_guard.clone();
-        *err_guard = None;
+        let mut err_lock = QUEST_EXCEPTION_ERROR.lock().unwrap();
+        let err = err_lock.clone();
+        *err_lock = None;
         err
     };
 

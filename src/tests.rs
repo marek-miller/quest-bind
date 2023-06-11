@@ -91,6 +91,24 @@ fn init_complex_matrix_n_03() -> Result<(), Error> {
 }
 
 #[test]
+fn create_pauli_hamil_01() -> Result<(), Error> {
+    let hamil = create_pauli_hamil(1, 1)?;
+    destroy_pauli_hamil(hamil);
+    let hamil = create_pauli_hamil(2, 3)?;
+    destroy_pauli_hamil(hamil);
+    let hamil = create_pauli_hamil(3, 2)?;
+    destroy_pauli_hamil(hamil);
+
+    let _ = create_pauli_hamil(0, 1).unwrap_err();
+    let _ = create_pauli_hamil(-1, 1).unwrap_err();
+    let _ = create_pauli_hamil(1, 0).unwrap_err();
+    let _ = create_pauli_hamil(1, -1).unwrap_err();
+    let _ = create_pauli_hamil(0, 0).unwrap_err();
+
+    Ok(())
+}
+
+#[test]
 fn get_environment_string_01() {
     let env = create_quest_env();
     let env_str = get_environment_string(&env).unwrap();
