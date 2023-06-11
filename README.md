@@ -1,7 +1,7 @@
 # quest-bind
 
 A safe wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0. As
-thin as possible: the API stays almost identical to the original.
+thin as possible: the API stays nearly identical to the original.
 
 QuEST (Quantum Exact Simulation Toolkit) is a no-fluff, bent-on-speed quantum
 circuit simulator. It is distributed under MIT License.

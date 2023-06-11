@@ -18,7 +18,7 @@ mod ffi;
 pub type Qreal = f64;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Error {
+pub enum QuestError {
     /// An exception thrown by the C library.  From QuEST documentation:
     ///
     /// > An internal function is called when invalid arguments are passed to a
@@ -40,6 +40,7 @@ pub enum Error {
     },
     NulError(std::ffi::NulError),
     IntoStringError(std::ffi::IntoStringError),
+    ArrayLengthError,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -110,7 +111,7 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), Error> {
+/// # fn main() -> Result<(), QuestError> {
 /// let env = create_quest_env();
 ///
 /// let qureg = create_qureg(2, &env)?;
@@ -125,26 +126,26 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 ///
 /// # Errors
 ///
-/// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
+/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
 /// on failure.  This is an exception thrown by `QuEST`.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
 pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
-) -> Result<Qureg, Error> {
+) -> Result<Qureg, QuestError> {
     catch_quest_exception(|| {
         Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
     })
 }
 
-///  Creates a density matrix Qureg object
+///  Creates a density matrix Qureg object.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), Error> {
+/// # fn main() -> Result<(), QuestError> {
 /// let env = create_quest_env();
 ///
 /// let qureg = create_density_qureg(2, &env)?;
@@ -159,27 +160,29 @@ pub fn create_qureg(
 ///
 /// # Errors
 ///
-/// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
+/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
 /// on failure.  This is an exception thrown by `QuEST`.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
 pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
-) -> Result<Qureg, Error> {
+) -> Result<Qureg, QuestError> {
     catch_quest_exception(|| {
         Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
     })
 }
 
 /// Create a new [`Qureg`](crate::Qureg) which is an exact clone of the passed
-/// `qureg`, which can be either a state-vector or a density matrix.
+/// `qureg`.
+///
+/// It can be either a state-vector or a density matrix.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), Error> {
+/// # fn main() -> Result<(), QuestError> {
 /// let env = create_quest_env();
 /// let qureg = create_qureg(2, &env)?;
 ///
@@ -209,7 +212,7 @@ pub fn create_clone_qureg(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), Error> {
+/// # fn main() -> Result<(), QuestError> {
 /// let env = create_quest_env();
 /// let qureg = create_qureg(2, &env)?;
 ///
@@ -231,26 +234,110 @@ pub fn destroy_qureg(
     unsafe { ffi::destroyQureg(qureg.0, env.0) }
 }
 
+/// Allocate dynamic memory for a square complex matrix of any size.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// let mtr = create_complex_matrix_n(3)?;
+/// destroy_complex_matrix_n(mtr);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+/// on failure.  This is an exception thrown by `QuEST`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga815103261fb22ea9690e1427571df00e
 pub fn create_complex_matrix_n(
     num_qubits: i32
-) -> Result<ComplexMatrixN, Error> {
+) -> Result<ComplexMatrixN, QuestError> {
     catch_quest_exception(|| {
         ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
     })
 }
 
+/// Destroy a `ComplexMatrixN` instance created with
+/// [`create_complex_matrix_n()`](crate::create_complex_matrix_n()).
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// let mtr = create_complex_matrix_n(3)?;
+/// destroy_complex_matrix_n(mtr);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+/// on failure.  This is an exception thrown by `QuEST`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga9df2f3d86be4a6e9aad481665e5e6753
 #[allow(clippy::needless_pass_by_value)]
-pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) -> Result<(), Error> {
+pub fn destroy_complex_matrix_n(
+    matr: ComplexMatrixN
+) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe { ffi::destroyComplexMatrixN(matr.0) })
 }
 
+/// Initialises a `ComplexMatrixN` instance to have the passed
+/// `real` and `imag` values.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// let mut mtr = create_complex_matrix_n(2)?;
+/// init_complex_matrix_n(
+///     &mut mtr,
+///     &[&[1., 2.], &[3., 4.]],
+///     &[&[5., 6.], &[7., 8.]],
+/// )?;
+/// destroy_complex_matrix_n(mtr);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
+/// either `real` or `imag` is not a square array of dimension equal to the
+/// number of qubits in `m`.  Otherwise, returns
+/// [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+/// failure. This is an exception thrown by `QuEST`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga429f1b90b3ef06c786dec8c7f0eda4ce
 #[allow(clippy::cast_sign_loss)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
-) -> Result<(), Error> {
+) -> Result<(), QuestError> {
     let n = m.0.numQubits as usize;
+
+    if real.len() < n || imag.len() < n {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for i in 0..n {
+        if real[i].len() < n || imag[i].len() < n {
+            return Err(QuestError::ArrayLengthError);
+        }
+    }
 
     let mut real_ptrs = Vec::with_capacity(n);
     let mut imag_ptrs = Vec::with_capacity(n);
@@ -264,21 +351,64 @@ pub fn init_complex_matrix_n(
     })
 }
 
-#[must_use]
+/// Dynamically allocates a Hamiltonian
+///
+/// The Hamiltonian is expressed as a real-weighted sum of products of Pauli
+/// operators.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// let hamil = create_pauli_hamil(2, 3)?;
+/// destroy_pauli_hamil(hamil);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+/// failure. This is an exception thrown by `QuEST`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga35b28710877c462927366fa602e591cb
 pub fn create_pauli_hamil(
     num_qubits: i32,
     num_sum_terms: i32,
-) -> PauliHamil {
-    PauliHamil(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
+) -> Result<PauliHamil, QuestError> {
+    catch_quest_exception(|| {
+        PauliHamil(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
+    })
 }
 
+/// Destroy a [`PauliHamil`](crate::PauliHamil) instance.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// let hamil = create_pauli_hamil(2, 3)?;
+/// destroy_pauli_hamil(hamil);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gac1c8ed909b33bd55ae680901006051b6
 #[allow(clippy::needless_pass_by_value)]
 pub fn destroy_pauli_hamil(hamil: PauliHamil) {
     unsafe { ffi::destroyPauliHamil(hamil.0) }
 }
 
-pub fn create_pauli_hamil_from_file(fn_: &str) -> Result<PauliHamil, Error> {
-    let filename = CString::new(fn_).map_err(Error::NulError)?;
+pub fn create_pauli_hamil_from_file(
+    fn_: &str
+) -> Result<PauliHamil, QuestError> {
+    let filename = CString::new(fn_).map_err(QuestError::NulError)?;
     Ok(PauliHamil(unsafe {
         ffi::createPauliHamilFromFile((*filename).as_ptr())
     }))
@@ -348,8 +478,8 @@ pub fn init_diagonal_op_from_pauli_hamil(
 pub fn create_diagonal_op_from_pauli_hamil_file(
     fn_: &str,
     env: &QuESTEnv,
-) -> Result<DiagonalOp, Error> {
-    let filename = CString::new(fn_).map_err(Error::NulError)?;
+) -> Result<DiagonalOp, QuestError> {
+    let filename = CString::new(fn_).map_err(QuestError::NulError)?;
     Ok(DiagonalOp(unsafe {
         ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
     }))
@@ -641,16 +771,16 @@ pub fn report_quest_env(env: &QuESTEnv) {
     }
 }
 
-pub fn get_environment_string(env: &QuESTEnv) -> Result<String, Error> {
+pub fn get_environment_string(env: &QuESTEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
-            .map_err(Error::NulError)?;
+            .map_err(QuestError::NulError)?;
     unsafe {
         let cstr_ptr = cstr.into_raw();
         ffi::getEnvironmentString(env.0, cstr_ptr);
         cstr = CString::from_raw(cstr_ptr);
     }
-    cstr.into_string().map_err(Error::IntoStringError)
+    cstr.into_string().map_err(QuestError::IntoStringError)
 }
 
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
@@ -1110,9 +1240,10 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg,
     filename: &str,
-) -> Result<(), Error> {
+) -> Result<(), QuestError> {
     unsafe {
-        let filename_cstr = CString::new(filename).map_err(Error::NulError)?;
+        let filename_cstr =
+            CString::new(filename).map_err(QuestError::NulError)?;
         ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
     }
     Ok(())
