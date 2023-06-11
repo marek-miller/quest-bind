@@ -405,6 +405,14 @@ pub fn destroy_pauli_hamil(hamil: PauliHamil) {
     unsafe { ffi::destroyPauliHamil(hamil.0) }
 }
 
+/// Creates a [`PauliHamil`] instance
+/// populated with the data in filename `fn_`.
+///
+/// # Bugs
+///
+/// This function calls its C equivalent which unfortunately behaves erratically
+/// when the file specified is incorrectly formatted or inaccessible, often
+/// leading to seg-faults.  Use at your own risk.
 pub fn create_pauli_hamil_from_file(
     fn_: &str
 ) -> Result<PauliHamil, QuestError> {
@@ -416,14 +424,6 @@ pub fn create_pauli_hamil_from_file(
     })
 }
 
-/// Creates a [`PauliHamil`] instance
-/// populated with the data in filename `fn_`.
-///
-/// # Bugs
-///
-/// This function calls its C equivalent which unfortunately behaves erratically
-/// when the file specified is incorrectly formatted or inaccessible, often
-/// leading to seg-faults.  Use at your own risk.
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
