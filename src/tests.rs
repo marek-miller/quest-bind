@@ -6,7 +6,7 @@ use super::*;
 fn create_qureg_01() -> Result<(), Error> {
     let env = create_quest_env();
 
-    let qureg = create_qureg(1, &env)?;
+    let qureg = create_qureg(10, &env)?;
     destroy_qureg(qureg, &env);
     let qureg = create_qureg(5, &env)?;
     destroy_qureg(qureg, &env);

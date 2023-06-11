@@ -119,7 +119,9 @@ pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
 ) -> Result<Qureg, Error> {
-    catch_quest_exception(Qureg(unsafe { ffi::createQureg(num_qubits, env.0) }))
+    catch_quest_exception(|| {
+        Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
+    })
 }
 
 ///  Creates a density matrix Qureg object
@@ -137,9 +139,9 @@ pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
 ) -> Result<Qureg, Error> {
-    catch_quest_exception(Qureg(unsafe {
-        ffi::createDensityQureg(num_qubits, env.0)
-    }))
+    catch_quest_exception(|| {
+        Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
+    })
 }
 
 /// Create a new [`Qureg`](crate::Qureg) which is an exact clone of the passed
@@ -168,14 +170,14 @@ pub fn destroy_qureg(
 pub fn create_complex_matrix_n(
     num_qubits: i32
 ) -> Result<ComplexMatrixN, Error> {
-    catch_quest_exception(ComplexMatrixN(unsafe {
-        ffi::createComplexMatrixN(num_qubits)
-    }))
+    catch_quest_exception(|| {
+        ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
+    })
 }
 
 #[allow(clippy::needless_pass_by_value)]
 pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) -> Result<(), Error> {
-    catch_quest_exception(unsafe { ffi::destroyComplexMatrixN(matr.0) })
+    catch_quest_exception(|| unsafe { ffi::destroyComplexMatrixN(matr.0) })
 }
 
 #[allow(clippy::cast_sign_loss)]
@@ -188,7 +190,7 @@ pub fn init_complex_matrix_n(
 
     let mut real_ptrs = Vec::with_capacity(n);
     let mut imag_ptrs = Vec::with_capacity(n);
-    catch_quest_exception(unsafe {
+    catch_quest_exception(|| unsafe {
         for i in 0..n {
             real_ptrs.push(real[i].as_ptr());
             imag_ptrs.push(imag[i].as_ptr());
