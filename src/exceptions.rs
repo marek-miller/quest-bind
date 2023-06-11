@@ -14,7 +14,7 @@ use lazy_static::lazy_static;
 use super::Error;
 
 lazy_static! {
-    static ref QUEST_EXCEPTION: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
+    static ref QUEST_EXCEPTION_GUARD: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
     static ref QUEST_EXCEPTION_ERROR: Arc<Mutex<Option<Error>>> =
         Arc::new(Mutex::new(None));
 }
@@ -41,7 +41,7 @@ pub fn catch_quest_exception<T, F>(f: F) -> Result<T, Error>
 where
     F: FnOnce() -> T,
 {
-    let _guard = QUEST_EXCEPTION.lock().unwrap();
+    let _guard = QUEST_EXCEPTION_GUARD.lock().unwrap();
     let res = f();
     let err = {
         let mut err_guard = QUEST_EXCEPTION_ERROR.lock().unwrap();
@@ -59,6 +59,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::thread;
+
     use super::*;
     use crate::create_complex_matrix_n;
 
@@ -75,12 +77,29 @@ mod tests {
 
     #[test]
     fn catch_exception_02() -> Result<(), Error> {
-        let err = create_complex_matrix_n(-1).unwrap_err();
-        match err {
-            Error::InvalidQuESTInput {
-                ..
-            } => Ok(()),
-            _ => panic!(),
-        }
+        let _ = create_complex_matrix_n(1).unwrap();
+        Ok(())
+    }
+
+    #[test]
+    fn catch_exception_parallel_01() {
+        thread::scope(|s| {
+            s.spawn(|| {
+                catch_exception_01().unwrap();
+                catch_exception_02().unwrap();
+            });
+            s.spawn(|| {
+                catch_exception_02().unwrap();
+                catch_exception_01().unwrap();
+            });
+            s.spawn(|| {
+                catch_exception_01().unwrap();
+                catch_exception_01().unwrap();
+            });
+            s.spawn(|| {
+                catch_exception_02().unwrap();
+                catch_exception_02().unwrap();
+            });
+        });
     }
 }

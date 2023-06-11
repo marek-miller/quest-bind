@@ -106,6 +106,21 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 
 /// Creates a state-vector Qureg object.
 ///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), Error> {
+/// let env = create_quest_env();
+///
+/// let qureg = create_qureg(2, &env)?;
+///
+/// destroy_qureg(qureg, &env);
+/// destroy_quest_env(env);
+/// # Ok(())
+/// # }
+/// ```
+///
 /// See [QuEST API][1] for more information.
 ///
 /// # Errors
@@ -126,6 +141,21 @@ pub fn create_qureg(
 
 ///  Creates a density matrix Qureg object
 ///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), Error> {
+/// let env = create_quest_env();
+///
+/// let qureg = create_density_qureg(2, &env)?;
+///
+/// destroy_qureg(qureg, &env);
+/// destroy_quest_env(env);
+/// # Ok(())
+/// # }
+/// ```
+///
 /// See [QuEST API][1] for more information.
 ///
 /// # Errors
@@ -145,7 +175,24 @@ pub fn create_density_qureg(
 }
 
 /// Create a new [`Qureg`](crate::Qureg) which is an exact clone of the passed
-/// qureg, which can be either a state-vector or a density matrix.
+/// `qureg`, which can be either a state-vector or a density matrix.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), Error> {
+/// let env = create_quest_env();
+/// let qureg = create_qureg(2, &env)?;
+///
+/// let qureg_clone = create_clone_qureg(&qureg, &env);
+///
+/// destroy_qureg(qureg_clone, &env);
+/// destroy_qureg(qureg, &env);
+/// destroy_quest_env(env);
+/// # Ok(())
+/// # }
+/// ```
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -158,6 +205,26 @@ pub fn create_clone_qureg(
     Qureg(unsafe { ffi::createCloneQureg(qureg.0, env.0) })
 }
 
+/// Deallocate a [`Qureg`](crate::Qureg), freeing its memory.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), Error> {
+/// let env = create_quest_env();
+/// let qureg = create_qureg(2, &env)?;
+///
+/// destroy_qureg(qureg, &env);
+///
+/// destroy_quest_env(env);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga8e1e6ad3254892edc2ee08712ea9d692
 #[allow(clippy::needless_pass_by_value)]
 pub fn destroy_qureg(
     qureg: Qureg,
