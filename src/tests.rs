@@ -3,7 +3,7 @@
 use super::*;
 
 #[test]
-fn create_qureg_01() -> Result<(), Error> {
+fn create_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
 
     let qureg = create_qureg(1, &env)?;
@@ -18,7 +18,7 @@ fn create_qureg_01() -> Result<(), Error> {
 }
 
 #[test]
-fn create_density_qureg_01() -> Result<(), Error> {
+fn create_density_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
 
     let qureg = create_density_qureg(1, &env)?;
@@ -33,7 +33,7 @@ fn create_density_qureg_01() -> Result<(), Error> {
 }
 
 #[test]
-fn create_clone_qureg_01() -> Result<(), Error> {
+fn create_clone_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
 
     let qureg1 = create_density_qureg(2, &env)?;
@@ -46,7 +46,7 @@ fn create_clone_qureg_01() -> Result<(), Error> {
 }
 
 #[test]
-fn init_complex_matrix_n_02() -> Result<(), Error> {
+fn init_complex_matrix_n_02() -> Result<(), QuestError> {
     let mut m = create_complex_matrix_n(2)?;
     init_complex_matrix_n(
         &mut m,
@@ -67,7 +67,7 @@ fn init_complex_matrix_n_02() -> Result<(), Error> {
 }
 
 #[test]
-fn init_complex_matrix_n_03() -> Result<(), Error> {
+fn init_complex_matrix_n_03() -> Result<(), QuestError> {
     let mut m = create_complex_matrix_n(3)?;
     init_complex_matrix_n(
         &mut m,
@@ -91,7 +91,7 @@ fn init_complex_matrix_n_03() -> Result<(), Error> {
 }
 
 #[test]
-fn create_pauli_hamil_01() -> Result<(), Error> {
+fn create_pauli_hamil_01() -> Result<(), QuestError> {
     let hamil = create_pauli_hamil(1, 1)?;
     destroy_pauli_hamil(hamil);
     let hamil = create_pauli_hamil(2, 3)?;

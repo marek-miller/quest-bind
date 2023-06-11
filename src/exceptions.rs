@@ -11,11 +11,11 @@ use std::{
 
 use lazy_static::lazy_static;
 
-use super::Error;
+use super::QuestError;
 
 lazy_static! {
     static ref QUEST_EXCEPTION_GUARD: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
-    static ref QUEST_EXCEPTION_ERROR: Arc<Mutex<Option<Error>>> =
+    static ref QUEST_EXCEPTION_ERROR: Arc<Mutex<Option<QuestError>>> =
         Arc::new(Mutex::new(None));
 }
 
@@ -29,7 +29,7 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
     let mut err = QUEST_EXCEPTION_ERROR.lock().unwrap();
-    *err = Some(Error::InvalidQuESTInput {
+    *err = Some(QuestError::InvalidQuESTInput {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
     });
@@ -37,7 +37,7 @@ unsafe extern "C" fn invalidQuESTInputError(
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
 
-pub fn catch_quest_exception<T, F>(f: F) -> Result<T, Error>
+pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
     F: FnOnce() -> T,
 {
@@ -65,10 +65,10 @@ mod tests {
     use crate::create_complex_matrix_n;
 
     #[test]
-    fn catch_exception_01() -> Result<(), Error> {
+    fn catch_exception_01() -> Result<(), QuestError> {
         let err = create_complex_matrix_n(0).unwrap_err();
         match err {
-            Error::InvalidQuESTInput {
+            QuestError::InvalidQuESTInput {
                 ..
             } => Ok(()),
             _ => panic!(),
