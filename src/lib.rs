@@ -409,11 +409,21 @@ pub fn create_pauli_hamil_from_file(
     fn_: &str
 ) -> Result<PauliHamil, QuestError> {
     let filename = CString::new(fn_).map_err(QuestError::NulError)?;
-    Ok(PauliHamil(unsafe {
-        ffi::createPauliHamilFromFile((*filename).as_ptr())
-    }))
+    catch_quest_exception(|| {
+        PauliHamil(unsafe {
+            ffi::createPauliHamilFromFile((*filename).as_ptr())
+        })
+    })
 }
 
+/// Creates a [`PauliHamil`] instance
+/// populated with the data in filename `fn_`.
+///
+/// # Bugs
+///
+/// This function calls its C equivalent which unfortunately behaves erratically
+/// when the file specified is incorrectly formatted or inaccessible, often
+/// leading to seg-faults.  Use at your own risk.
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
