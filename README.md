@@ -79,11 +79,11 @@ Now write some code and put it in `./src/main.rs`:
 ```rust
 use quest_bind::*;
 
-fn main() {
+fn main() -> Result<(), QuestError> {
     let env = create_quest_env();
     report_quest_env(&env);
 
-    let mut qureg = create_qureg(0x10, &env);
+    let mut qureg = create_qureg(0x10, &env)?;
     {
         let qureg = &mut qureg;
         init_plus_state(qureg);
@@ -98,6 +98,7 @@ fn main() {
 
     destroy_qureg(qureg, &env);
     destroy_quest_env(env);
+    Ok(())
 }
 ```
 

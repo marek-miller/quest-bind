@@ -76,9 +76,8 @@ mod tests {
     }
 
     #[test]
-    fn catch_exception_02() -> Result<(), Error> {
+    fn catch_exception_02() {
         let _ = create_complex_matrix_n(1).unwrap();
-        Ok(())
     }
 
     #[test]
@@ -86,10 +85,10 @@ mod tests {
         thread::scope(|s| {
             s.spawn(|| {
                 catch_exception_01().unwrap();
-                catch_exception_02().unwrap();
+                catch_exception_02();
             });
             s.spawn(|| {
-                catch_exception_02().unwrap();
+                catch_exception_02();
                 catch_exception_01().unwrap();
             });
             s.spawn(|| {
@@ -97,8 +96,8 @@ mod tests {
                 catch_exception_01().unwrap();
             });
             s.spawn(|| {
-                catch_exception_02().unwrap();
-                catch_exception_02().unwrap();
+                catch_exception_02();
+                catch_exception_02();
             });
         });
     }

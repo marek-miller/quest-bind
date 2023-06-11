@@ -126,10 +126,9 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 /// # Errors
 ///
 /// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by QuEST.
+/// on failure.  This is an exception thrown by `QuEST`.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
-#[must_use]
 pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
@@ -161,10 +160,9 @@ pub fn create_qureg(
 /// # Errors
 ///
 /// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by QuEST.
+/// on failure.  This is an exception thrown by `QuEST`.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
-#[must_use]
 pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
@@ -233,7 +231,6 @@ pub fn destroy_qureg(
     unsafe { ffi::destroyQureg(qureg.0, env.0) }
 }
 
-#[must_use]
 pub fn create_complex_matrix_n(
     num_qubits: i32
 ) -> Result<ComplexMatrixN, Error> {
@@ -263,7 +260,7 @@ pub fn init_complex_matrix_n(
             imag_ptrs.push(imag[i].as_ptr());
         }
 
-        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr())
+        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr());
     })
 }
 
