@@ -135,6 +135,13 @@ Outcome: 0 with prob: 0.50
 
 ## Releases
 
+### v0.2.0 (??/07/2023)
+
+New features/improvements:
+
+- Catch exceptions thrown by QuEST
+- Improve documentation
+
 ### v0.1.0 (11/06/2023)
 
 Initial release.
