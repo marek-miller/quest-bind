@@ -1,4 +1,4 @@
-# quest
+# quest-bind
 
 A safe wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0. As
 thin as possible: the API stays almost identical to the original.
@@ -12,13 +12,13 @@ In order to test this library, first clone the repository together with `QuEST`
 source code as submodule:
 
 ```sh
-git clone --recurse-submodules https://github.com/marek-miller/quest.git
+git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
 ```
 
 Then compile `QuEST` _without_ MPI support:
 
 ```sh
-cd quest
+cd quest-bind
 cd QuEST
 mkdir build
 cd build
@@ -44,7 +44,7 @@ cargo test
 
 ## How to use it
 
-No packaging for now. Here's a brief tutorial how to compile everything
+No package management for now. Here's a brief tutorial how to compile everything
 manually.
 
 Initialize a new binary crate:
@@ -54,15 +54,15 @@ cargo new testme
 cd testme/
 ```
 
-Clone the dependencies:
+Clone the dependencies as before:
 
 ```sh
-git clone --recurse-submodules https://github.com/marek-miller/quest.git
+git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
 ```
 
-Compile `QuEST` as above (you can enable MPI this time) and put a link to the
-shared library in your crate's `./target/debug/deps`. Then add dependencies to
-your project's `Cargo.toml`:
+Compile `QuEST` (you can enable MPI this time) and put a link to the shared
+library in your crate's `./target/debug/deps`. Then add dependencies to your
+project's `Cargo.toml`:
 
 ```toml
 [package]
@@ -71,35 +71,44 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-quest = { path = "./quest" }
+quest_bind = { path = "./quest-bind" }
 ```
 
 Now write some code and put it in `./src/main.rs`:
 
 ```rust
-use quest::*;
+use quest_bind::*;
 
 fn main() {
     let env = create_quest_env();
     report_quest_env(&env);
 
-    let mut qureg = create_qureg(3, &env);
-    init_plus_state(&mut qureg);
-    report_qureg_params(&qureg);
-    destroy_qureg(qureg, &env);
+    let mut qureg = create_qureg(0x10, &env);
+    {
+        let qureg = &mut qureg;
+        init_plus_state(qureg);
+        report_qureg_params(qureg);
 
+        let mut outcome_prob = 0.;
+        let outcome = measure_with_stats(qureg, 1, &mut outcome_prob);
+
+        println!("Measure first qubit.");
+        println!("Outcome: {} with prob: {:.2}", outcome, outcome_prob);
+    }
+    
+    destroy_qureg(qureg, &env);
     destroy_quest_env(env);
 }
+
 ```
 
-You can read the available documentation locally:
+You can read the available documentation locally (refer to
+[`QuEST` headers](https://github.com/QuEST-Kit/QuEST/blob/v3.5.0/QuEST/include/QuEST.h)
+for the full description of the C API):
 
 ```sh
 cargo doc --open
 ```
-
-Refer to [`QuEST` headers](./QuEST/QuEST/include/QuEST.h) for the full
-description of the C API.
 
 Lastly, compile the source code and run:
 
@@ -117,7 +126,15 @@ OpenMP enabled
 Number of threads available is 8
 Precision: size of qreal is 8 bytes
 QUBITS:
-Number of qubits is 3.
-Number of amps is 8.
-Number of amps per rank is 8.
+Number of qubits is 16.
+Number of amps is 65536.
+Number of amps per rank is 65536.
+Measure first qubit.
+Outcome: 0 with prob: 0.50
 ```
+
+## Releases
+
+### v0.1 (11/07/2023)
+
+Initial release.
