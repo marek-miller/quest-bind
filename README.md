@@ -95,7 +95,7 @@ fn main() {
         println!("Measure first qubit.");
         println!("Outcome: {} with prob: {:.2}", outcome, outcome_prob);
     }
-    
+
     destroy_qureg(qureg, &env);
     destroy_quest_env(env);
 }
@@ -135,6 +135,6 @@ Outcome: 0 with prob: 0.50
 
 ## Releases
 
-### v0.1 (11/07/2023)
+### v0.1.0 (11/07/2023)
 
 Initial release.
