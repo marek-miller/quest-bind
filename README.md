@@ -3,19 +3,19 @@
 A safe wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0. As
 thin as possible: the API stays almost identical to the original.
 
-`QuEST` (Quantum Exact Simulation Toolkit) is a no-fluff, bent-on-speed quantum
+QuEST (Quantum Exact Simulation Toolkit) is a no-fluff, bent-on-speed quantum
 circuit simulator. It is distributed under MIT License.
 
 ## Testing
 
-In order to test this library, first clone the repository together with `QuEST`
+In order to test this library, first clone the repository together with QuEST
 source code as submodule:
 
 ```sh
 git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
 ```
 
-Then compile `QuEST` _without_ MPI support:
+Then compile QuEST _without_ MPI support:
 
 ```sh
 cd quest-bind
@@ -60,7 +60,7 @@ Clone the dependencies as before:
 git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
 ```
 
-Compile `QuEST` (you can enable MPI this time) and put a link to the shared
+Compile QuEST (you can enable MPI this time) and put a link to the shared
 library in your crate's `./target/debug/deps`. Then add dependencies to your
 project's `Cargo.toml`:
 
@@ -99,11 +99,10 @@ fn main() {
     destroy_qureg(qureg, &env);
     destroy_quest_env(env);
 }
-
 ```
 
 You can read the available documentation locally (refer to
-[`QuEST` headers](https://github.com/QuEST-Kit/QuEST/blob/v3.5.0/QuEST/include/QuEST.h)
+[QuEST headers](https://github.com/QuEST-Kit/QuEST/blob/v3.5.0/QuEST/include/QuEST.h)
 for the full description of the C API):
 
 ```sh
@@ -135,6 +134,6 @@ Outcome: 0 with prob: 0.50
 
 ## Releases
 
-### v0.1.0 (11/07/2023)
+### v0.1.0 (11/06/2023)
 
 Initial release.
