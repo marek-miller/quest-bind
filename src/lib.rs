@@ -2,8 +2,7 @@
 
 use std::ffi::CString;
 
-mod ffi;
-
+use exceptions::catch_quest_exception;
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -11,11 +10,14 @@ pub use ffi::{
     phaseGateType as PhaseGateType,
 };
 
+mod exceptions;
+mod ffi;
+
 // TODO: define number abstractions for numerical types
 // (use num_traits)
 pub type Qreal = f64;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Error {
     InvalidQuESTInput { err_msg: String, err_func: String },
     NulError(std::ffi::NulError),
@@ -88,24 +90,28 @@ pub struct QuESTEnv(ffi::QuESTEnv);
 pub fn create_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
-) -> Qureg {
-    Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
+) -> Result<Qureg, Error> {
+    catch_quest_exception(Qureg(unsafe { ffi::createQureg(num_qubits, env.0) }))
 }
 
 #[must_use]
 pub fn create_density_qureg(
     num_qubits: i32,
     env: &QuESTEnv,
-) -> Qureg {
-    Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
+) -> Result<Qureg, Error> {
+    catch_quest_exception(Qureg(unsafe {
+        ffi::createDensityQureg(num_qubits, env.0)
+    }))
 }
 
 #[must_use]
 pub fn create_clone_qureg(
     qureg: &Qureg,
     env: &QuESTEnv,
-) -> Qureg {
-    Qureg(unsafe { ffi::createCloneQureg(qureg.0, env.0) })
+) -> Result<Qureg, Error> {
+    catch_quest_exception(Qureg(unsafe {
+        ffi::createCloneQureg(qureg.0, env.0)
+    }))
 }
 
 #[allow(clippy::needless_pass_by_value)]
@@ -117,13 +123,17 @@ pub fn destroy_qureg(
 }
 
 #[must_use]
-pub fn create_complex_matrix_n(num_qubits: i32) -> ComplexMatrixN {
-    ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
+pub fn create_complex_matrix_n(
+    num_qubits: i32
+) -> Result<ComplexMatrixN, Error> {
+    catch_quest_exception(ComplexMatrixN(unsafe {
+        ffi::createComplexMatrixN(num_qubits)
+    }))
 }
 
 #[allow(clippy::needless_pass_by_value)]
-pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) {
-    unsafe { ffi::destroyComplexMatrixN(matr.0) }
+pub fn destroy_complex_matrix_n(matr: ComplexMatrixN) -> Result<(), Error> {
+    catch_quest_exception(unsafe { ffi::destroyComplexMatrixN(matr.0) })
 }
 
 #[allow(clippy::cast_sign_loss)]
@@ -131,19 +141,19 @@ pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
-) {
+) -> Result<(), Error> {
     let n = m.0.numQubits as usize;
 
     let mut real_ptrs = Vec::with_capacity(n);
     let mut imag_ptrs = Vec::with_capacity(n);
-    unsafe {
+    catch_quest_exception(unsafe {
         for i in 0..n {
             real_ptrs.push(real[i].as_ptr());
             imag_ptrs.push(imag[i].as_ptr());
         }
 
-        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr());
-    }
+        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr())
+    })
 }
 
 #[must_use]

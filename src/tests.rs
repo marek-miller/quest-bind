@@ -3,8 +3,8 @@
 use super::*;
 
 #[test]
-fn init_complex_matrix_n_02() {
-    let mut m = create_complex_matrix_n(2);
+fn init_complex_matrix_n_02() -> Result<(), Error> {
+    let mut m = create_complex_matrix_n(2)?;
     init_complex_matrix_n(
         &mut m,
         &[&[1., 2.], &[3., 4.]],
@@ -20,11 +20,12 @@ fn init_complex_matrix_n_02() {
         assert_eq!(row, &[&[11., 12.], &[13., 14.],]);
     }
     destroy_complex_matrix_n(m);
+    Ok(())
 }
 
 #[test]
-fn init_complex_matrix_n_03() {
-    let mut m = create_complex_matrix_n(3);
+fn init_complex_matrix_n_03() -> Result<(), Error> {
+    let mut m = create_complex_matrix_n(3)?;
     init_complex_matrix_n(
         &mut m,
         &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]],
@@ -43,6 +44,7 @@ fn init_complex_matrix_n_03() {
         );
     }
     destroy_complex_matrix_n(m);
+    Ok(())
 }
 
 #[test]

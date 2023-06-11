@@ -11,7 +11,6 @@ use std::ffi::{
     c_int,
     c_longlong,
     c_ulong,
-    CStr,
 };
 
 pub type qreal = c_double;
@@ -1035,24 +1034,6 @@ extern "C" {
 
 }
 
-// TODO: Allow user to override this.
-// For now, it is just a direct translation from
-// QuEST's default callback.
-#[no_mangle]
-unsafe extern "C" fn invalidQuESTInputError(
-    errMsg: *const c_char,
-    errFunc: *const c_char,
-) {
-    let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
-    let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
-
-    println!("!!!");
-    println!("QueST Error in function {err_func}: {err_msg}");
-    println!("!!!");
-    println!("exiting..");
-    panic!();
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(deref_nullptr)]
@@ -1836,13 +1817,5 @@ mod tests {
                 stringify!(numSeeds)
             )
         );
-    }
-
-    #[test]
-    #[should_panic]
-    fn invalid_quest_input_error_throw_01() {
-        unsafe {
-            createComplexMatrixN(0);
-        };
     }
 }
