@@ -19,7 +19,25 @@ pub type Qreal = f64;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Error {
-    InvalidQuESTInput { err_msg: String, err_func: String },
+    /// An exception thrown by the C library.  From QuEST documentation:
+    ///
+    /// > An internal function is called when invalid arguments are passed to a
+    /// > QuEST API call, which the user can optionally override by
+    /// > redefining. This function is a weak symbol, so that users can
+    /// > choose how input errors are handled, by redefining it in their own
+    /// > code. Users must ensure that the triggered API call
+    /// > does not continue (e.g. the user exits or throws an exception), else
+    /// > QuEST will continue with the valid input and likely trigger a
+    /// > seg-fault. This function is triggered before any internal
+    /// > state-change, hence it is safe to interrupt with exceptions.
+    ///
+    /// See also [`invalidQuESTInputError()`][1].
+    ///
+    /// [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
+    InvalidQuESTInput {
+        err_msg:  String,
+        err_func: String,
+    },
     NulError(std::ffi::NulError),
     IntoStringError(std::ffi::IntoStringError),
 }
@@ -86,6 +104,16 @@ impl Qureg {
 #[derive(Debug)]
 pub struct QuESTEnv(ffi::QuESTEnv);
 
+/// Creates a state-vector Qureg object.
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
+/// on failure.  This is an exception thrown by QuEST.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
 #[must_use]
 pub fn create_qureg(
     num_qubits: i32,
@@ -94,6 +122,16 @@ pub fn create_qureg(
     catch_quest_exception(Qureg(unsafe { ffi::createQureg(num_qubits, env.0) }))
 }
 
+///  Creates a density matrix Qureg object
+///
+/// See [QuEST API][1] for more information.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidQuESTInput`](crate::Error::InvalidQuESTInput)
+/// on failure.  This is an exception thrown by QuEST.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
 #[must_use]
 pub fn create_density_qureg(
     num_qubits: i32,
@@ -104,14 +142,18 @@ pub fn create_density_qureg(
     }))
 }
 
+/// Create a new [`Qureg`](crate::Qureg) which is an exact clone of the passed
+/// qureg, which can be either a state-vector or a density matrix.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gabd07eee133dcd4e6ae7c2d2ce4c42978
 #[must_use]
 pub fn create_clone_qureg(
     qureg: &Qureg,
     env: &QuESTEnv,
-) -> Result<Qureg, Error> {
-    catch_quest_exception(Qureg(unsafe {
-        ffi::createCloneQureg(qureg.0, env.0)
-    }))
+) -> Qureg {
+    Qureg(unsafe { ffi::createCloneQureg(qureg.0, env.0) })
 }
 
 #[allow(clippy::needless_pass_by_value)]
