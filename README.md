@@ -80,6 +80,32 @@ Measure first qubit.
 Outcome: 0 with prob: 0.50
 ```
 
+## Distributed and GPU accelerated mode
+
+QuEST support for MPI and GPU accelerated computation is enabled by setting appropriate feature flags. To use QuEST's MPI mode, enable `mpi` feature for
+`quest_bind`.  Simply edit `Cargo.toml` of your binary crate:
+
+```toml
+[package]
+name = "testme"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+quest_bind = { git = "https://github.com/marek-miller/quest-bind.git", features = ["mpi",] }
+```
+
+Now if we compile and run the above programme again, the output should be:
+
+```text
+EXECUTION ENVIRONMENT:
+Running distributed (MPI) version
+Number of ranks is 1
+...
+```
+
+The feature "`gpu`" enables the GPU accelerated mode. These features are mutually exclusive, so if you set both flags, the feature `"mpi"` takes precedence.
+
 ## Testing
 
 To run unit tests for this library, first clone the repository together with QuEST
