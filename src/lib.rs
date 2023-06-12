@@ -94,6 +94,24 @@ pub struct Qureg<'a> {
 }
 
 impl<'a> Qureg<'a> {
+    /// Creates a state-vector Qureg object.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = QuESTEnv::new();
+    /// let qureg = Qureg::try_new(2, &env).unwrap();
+    /// ```
+    ///
+    /// See [QuEST API][1] for more information.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// on failure.  This is an exception thrown by `QuEST`.
+    ///
+    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
     pub fn try_new(
         num_qubits: i32,
         env: &'a QuESTEnv,
@@ -103,11 +121,29 @@ impl<'a> Qureg<'a> {
         })?;
 
         Ok(Self {
-            reg,
             env,
+            reg,
         })
     }
 
+    ///  Creates a density matrix Qureg object.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = QuESTEnv::new();
+    /// let qureg = Qureg::try_new_density(2, &env).unwrap();
+    /// ```
+    ///
+    /// See [QuEST API][1] for more information.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// on failure.  This is an exception thrown by `QuEST`.
+    ///
+    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
     pub fn try_new_density(
         num_qubits: i32,
         env: &'a QuESTEnv,
@@ -117,8 +153,8 @@ impl<'a> Qureg<'a> {
         })?;
 
         Ok(Self {
-            reg,
             env,
+            reg,
         })
     }
 
@@ -152,134 +188,30 @@ impl<'a> Clone for Qureg<'a> {
 #[derive(Debug)]
 pub struct QuESTEnv(ffi::QuESTEnv);
 
-/// Creates a state-vector Qureg object.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let env = create_quest_env();
-///
-/// let qureg = create_qureg(2, &env)?;
-///
-/// destroy_qureg(qureg, &env);
-/// destroy_quest_env(env);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// # Errors
-///
-/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by `QuEST`.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
-// pub fn create_qureg(
-//     num_qubits: i32,
-//     env: &QuESTEnv,
-// ) -> Result<Qureg, QuestError> {
-//     catch_quest_exception(|| {
-//         Qureg(unsafe { ffi::createQureg(num_qubits, env.0) })
-//     })
-// }
+impl QuESTEnv {
+    #[must_use]
+    pub fn new() -> Self {
+        Self(unsafe { ffi::createQuESTEnv() })
+    }
 
-///  Creates a density matrix Qureg object.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let env = create_quest_env();
-///
-/// let qureg = create_density_qureg(2, &env)?;
-///
-/// destroy_qureg(qureg, &env);
-/// destroy_quest_env(env);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// # Errors
-///
-/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by `QuEST`.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
-// pub fn create_density_qureg(
-//     num_qubits: i32,
-//     env: &QuESTEnv,
-// ) -> Result<Qureg, QuestError> {
-//     catch_quest_exception(|| {
-//         Qureg(unsafe { ffi::createDensityQureg(num_qubits, env.0) })
-//     })
-// }
+    pub fn sync(&self) {
+        unsafe {
+            ffi::syncQuESTEnv(self.0);
+        }
+    }
+}
 
-/// Create a new [`Qureg`](crate::Qureg) which is an exact clone of the passed
-/// `qureg`.
-///
-/// It can be either a state-vector or a density matrix.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let env = create_quest_env();
-/// let qureg = create_qureg(2, &env)?;
-///
-/// let qureg_clone = create_clone_qureg(&qureg, &env);
-///
-/// destroy_qureg(qureg_clone, &env);
-/// destroy_qureg(qureg, &env);
-/// destroy_quest_env(env);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gabd07eee133dcd4e6ae7c2d2ce4c42978
-// #[must_use]
-// pub fn create_clone_qureg(
-//     qureg: &Qureg,
-//     env: &QuESTEnv,
-// ) -> Qureg {
-//     Qureg(unsafe { ffi::createCloneQureg(qureg.reg, env.0) })
-// }
+impl Default for QuESTEnv {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
-/// Deallocate a [`Qureg`](crate::Qureg), freeing its memory.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let env = create_quest_env();
-/// let qureg = create_qureg(2, &env)?;
-///
-/// destroy_qureg(qureg, &env);
-///
-/// destroy_quest_env(env);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga8e1e6ad3254892edc2ee08712ea9d692
-// #[allow(clippy::needless_pass_by_value)]
-// pub fn destroy_qureg(
-//     qureg: Qureg,
-//     env: &QuESTEnv,
-// ) {
-//     unsafe { ffi::destroyQureg(qureg.reg, env.0) }
-// }
+impl Drop for QuESTEnv {
+    fn drop(&mut self) {
+        unsafe { ffi::destroyQuESTEnv(self.0) }
+    }
+}
 
 /// Allocate dynamic memory for a square complex matrix of any size.
 ///
@@ -827,26 +759,26 @@ pub fn t_gate(
     })
 }
 
+// #[must_use]
+// pub fn create_quest_env() -> QuESTEnv {
+//     QuESTEnv(unsafe { ffi::createQuESTEnv() })
+// }
+
+// #[allow(clippy::needless_pass_by_value)]
+// pub fn destroy_quest_env(env: QuESTEnv) {
+//     unsafe {
+//         ffi::destroyQuESTEnv(env.0);
+//     }
+// }
+
+// pub fn sync_quest_env(env: &QuESTEnv) {
+//     unsafe {
+//         ffi::syncQuESTEnv(env.0);
+//     }
+// }
+
 #[must_use]
-pub fn create_quest_env() -> QuESTEnv {
-    QuESTEnv(unsafe { ffi::createQuESTEnv() })
-}
-
-#[allow(clippy::needless_pass_by_value)]
-pub fn destroy_quest_env(env: QuESTEnv) {
-    unsafe {
-        ffi::destroyQuESTEnv(env.0);
-    }
-}
-
-pub fn sync_quest_env(env: &QuESTEnv) {
-    unsafe {
-        ffi::syncQuESTEnv(env.0);
-    }
-}
-
-#[must_use]
-pub fn sync_quuest_success(success_code: i32) -> i32 {
+pub fn sync_quest_success(success_code: i32) -> i32 {
     unsafe { ffi::syncQuESTSuccess(success_code) }
 }
 

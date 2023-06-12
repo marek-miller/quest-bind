@@ -4,38 +4,33 @@ use super::*;
 
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
-    let env = create_quest_env();
-    {
-        let _ = Qureg::try_new(1, &env)?;
-        let _ = Qureg::try_new(5, &env)?;
+    let env = QuESTEnv::new();
+    let _ = Qureg::try_new(1, &env)?;
+    let _ = Qureg::try_new(5, &env)?;
 
-        let _ = Qureg::try_new(0, &env).unwrap_err();
-    }
-    destroy_quest_env(env);
+    let _ = Qureg::try_new(0, &env).unwrap_err();
     Ok(())
 }
 
 #[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
-    let env = create_quest_env();
+    let env = QuESTEnv::new();
     {
         let _ = Qureg::try_new_density(1, &env)?;
         let _ = Qureg::try_new_density(5, &env)?;
 
         let _ = Qureg::try_new_density(0, &env).unwrap_err();
     }
-    destroy_quest_env(env);
     Ok(())
 }
 
 #[test]
 fn create_clone_qureg_01() -> Result<(), QuestError> {
-    let env = create_quest_env();
+    let env = QuESTEnv::new();
     {
         let qureg = Qureg::try_new_density(2, &env)?;
         let _ = qureg.clone();
     }
-    destroy_quest_env(env);
     Ok(())
 }
 
@@ -119,7 +114,7 @@ fn initialize_pauli_hamil_01() {
 
 #[test]
 fn get_environment_string_01() {
-    let env = create_quest_env();
+    let env = QuESTEnv::new();
     let env_str = get_environment_string(&env).unwrap();
 
     assert!(env_str.contains("CUDA="));
@@ -127,17 +122,13 @@ fn get_environment_string_01() {
     assert!(env_str.contains("MPI="));
     assert!(env_str.contains("threads="));
     assert!(env_str.contains("ranks="));
-
-    destroy_quest_env(env);
 }
 
 #[test]
 fn get_quest_seeds_01() {
-    let env = create_quest_env();
+    let env = QuESTEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(&env);
 
     assert!(num_seeds > 0);
     assert_eq!(seeds.len(), num_seeds as usize);
-
-    destroy_quest_env(env);
 }
