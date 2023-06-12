@@ -1,12 +1,4 @@
-use quest_bind::{
-    init_plus_state,
-    measure_with_stats,
-    report_quest_env,
-    report_qureg_params,
-    QuESTEnv,
-    QuestError,
-    Qureg,
-};
+use quest_bind::*;
 
 fn main() -> Result<(), QuestError> {
     let env = QuESTEnv::new();
@@ -24,5 +16,6 @@ fn main() -> Result<(), QuestError> {
         println!("Measure first qubit.");
         println!("Outcome: {outcome} with prob: {outcome_prob:.2}");
     }
+
     Ok(())
 }

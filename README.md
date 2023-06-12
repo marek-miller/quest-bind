@@ -27,10 +27,10 @@ Now write some code and put it in `./src/main.rs`:
 use quest_bind::*;
 
 fn main() -> Result<(), QuestError> {
-    let env = create_quest_env();
+    let env = QuESTEnv::new();
     report_quest_env(&env);
 
-    let mut qureg = create_qureg(0x10, &env)?;
+    let mut qureg = Qureg::try_new(0x10, &env)?;
     {
         let qureg = &mut qureg;
         init_plus_state(qureg);
@@ -43,8 +43,6 @@ fn main() -> Result<(), QuestError> {
         println!("Outcome: {outcome} with prob: {outcome_prob:.2}");
     }
 
-    destroy_qureg(qureg, &env);
-    destroy_quest_env(env);
     Ok(())
 }
 ```
