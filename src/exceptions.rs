@@ -1,12 +1,12 @@
-//! Catch exceptions thrown by QuEST.
+//! Catch exceptions thrown by `QuEST`.
 //!
-//! On failure, QuEST throws exceptions via user-configurable global
+//! On failure, `QuEST` throws exceptions via user-configurable global
 //! [`invalidQuESTInputError()`][1]. By default, this function prints an error
 //! message and aborts, which is problematic in a large distributed setup. We
 //! opt for catching all exceptions and putting them in `Result<_. QuestError>`.
 //! The exception handler is locked during an API call. This means that calling
-//! QuEST functions is synchronous and should be thread-safe, but comes at the
-//! expense of being able to run only one QuEST API call at the time.
+//! `QuEST` functions is synchronous and should be thread-safe, but comes at the
+//! expense of being able to run only one `QuEST` API call at the time.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
@@ -27,6 +27,10 @@ use std::{
 use super::QuestError;
 
 struct ExceptGuard(Arc<Mutex<u8>>);
+struct ExceptError(Arc<Mutex<Option<QuestError>>>);
+
+static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
+static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
 
 impl Default for ExceptGuard {
     fn default() -> Self {
@@ -34,26 +38,21 @@ impl Default for ExceptGuard {
     }
 }
 
-struct ExceptError(Arc<Mutex<Option<QuestError>>>);
-
 impl Default for ExceptError {
     fn default() -> Self {
         Self(Arc::new(Mutex::new(None)))
     }
 }
 
-static QUEST_EXCEPTION_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
-static QUEST_EXCEPTION_ERROR: OnceLock<ExceptError> = OnceLock::new();
-
-/// Report error in a QuEST API call.
+/// Report error in a `QuEST` API call.
 ///
-/// This function is called by QuEST whenever an error occurs.  We redefine it
+/// This function is called by `QuEST` whenever an error occurs.  We redefine it
 /// to put the error message and site reported into a thread-safe global
 /// storage, instead of just aborting.
 ///
 /// # Panics
 ///
-/// This function will panic if strings returned by QuEST are not properly
+/// This function will panic if strings returned by `QuEST` are not properly
 /// formatted (null terminated) C strings, or if our mutex is poisoned.
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -64,7 +63,7 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    let mut err = QUEST_EXCEPTION_ERROR
+    let mut err = QUEST_EXCEPT_ERROR
         .get_or_init(Default::default)
         .0
         .lock()
@@ -77,38 +76,49 @@ unsafe extern "C" fn invalidQuESTInputError(
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
 
-/// Execute a call to QuEST API and catch exceptions.
+/// Execute a call to `QuEST` API and catch exceptions.
 ///
 /// This function achieves synchronous execution between threads
 /// by locking the global `QUEST_EXCEPTION_GUARD` each time,
 /// then executing the closure supplied, and finally checking the global
 /// storage `QUEST_EXCEPTION_ERROR` for any error messages reported downstream.
 ///
-/// This way, interacting with QuEST API should stay thread-safe at all times,
+/// This way, interacting with `QuEST` API should stay thread-safe at all times,
 /// at the expense of being able to call only one function at the time.
-/// That shouldn't matter much for the overall performance of the simulation,
-/// since each functions retains access to all parallelism available in the
-/// system.
+/// This is not an undesired property and shouldn't matter much for the overall
+/// performance of the simulation, since each functions retains access to all
+/// parallelism available in the system.
 pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
     F: FnOnce() -> T,
 {
-    let _guard = QUEST_EXCEPTION_GUARD
+    // Lock QuEST to our call
+    let guard = QUEST_EXCEPT_GUARD
         .get_or_init(Default::default)
         .0
         .lock()
         .unwrap();
+
+    // Call QuEST API
     let res = f();
+
+    // Catch exception
     let err = {
-        let mut err = QUEST_EXCEPTION_ERROR
+        // Wait for QueEST to finish reporting
+        let mut err = QUEST_EXCEPT_ERROR
             .get_or_init(Default::default)
             .0
             .lock()
             .unwrap();
-        let err_clone = err.clone();
-        *err = None;
-        err_clone
+
+        // This is important! Wipe out error message before the next API call
+        (*err).take()
+
+        // the lock to `err` is dropped here
     };
+
+    // Drop the lock as soon as we don't need it anymore:
+    drop(guard);
 
     // This might be a little confusing:
     // If there is Some error, report it;
