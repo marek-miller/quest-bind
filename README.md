@@ -105,7 +105,7 @@ Number of ranks is 1
 ...
 ```
 
-The feature "`gpu`" enables the GPU accelerated mode. These features are
+The feature `"gpu"` enables the GPU accelerated mode. These features are
 mutually exclusive, so if you set both flags, the feature `"mpi"` takes
 precedence.
 
@@ -116,6 +116,7 @@ QuEST source code as submodule:
 
 ```sh
 git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
+cd quest-bind
 ```
 
 Then run:
@@ -125,12 +126,11 @@ cargo test --tests
 ```
 
 To be able to run documentation tests, we need to work around a known issue
-with `rustdoc`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
+with `cargo`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
 
 Make sure you compile QuEST _without_ MPI support:
 
 ```sh
-cd quest-bind
 cd QuEST
 mkdir build
 cd build
