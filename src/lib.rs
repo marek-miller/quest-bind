@@ -85,7 +85,50 @@ pub struct Vector(ffi::Vector);
 pub struct PauliHamil(ffi::PauliHamil);
 
 #[derive(Debug)]
-pub struct DiagonalOp(ffi::DiagonalOp);
+pub struct DiagonalOp<'a> {
+    env: &'a QuESTEnv,
+    op:  ffi::DiagonalOp,
+}
+
+impl<'a> DiagonalOp<'a> {
+    pub fn try_new(
+        num_qubits: i32,
+        env: &'a QuESTEnv,
+    ) -> Result<Self, QuestError> {
+        let op = catch_quest_exception(|| unsafe {
+            ffi::createDiagonalOp(num_qubits, env.0)
+        })?;
+
+        Ok(Self {
+            env,
+            op,
+        })
+    }
+
+    pub fn try_new_from_file(
+        fn_: &str,
+        env: &'a QuESTEnv,
+    ) -> Result<Self, QuestError> {
+        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
+
+        let op = catch_quest_exception(|| unsafe {
+            ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
+        })?;
+
+        Ok(Self {
+            env,
+            op,
+        })
+    }
+}
+
+impl<'a> Drop for DiagonalOp<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::destroyDiagonalOp(self.op, self.env.0);
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Qureg<'a> {
@@ -439,28 +482,9 @@ pub fn init_pauli_hamil(
     })
 }
 
-pub fn create_diagonal_op(
-    num_qubits: i32,
-    env: &QuESTEnv,
-) -> Result<DiagonalOp, QuestError> {
-    catch_quest_exception(|| {
-        DiagonalOp(unsafe { ffi::createDiagonalOp(num_qubits, env.0) })
-    })
-}
-
-#[allow(clippy::needless_pass_by_value)]
-pub fn destroy_diagonal_op(
-    op: DiagonalOp,
-    env: &QuESTEnv,
-) {
-    unsafe {
-        ffi::destroyDiagonalOp(op.0, env.0);
-    }
-}
-
 pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
-        ffi::syncDiagonalOp(op.0);
+        ffi::syncDiagonalOp(op.op);
     })
 }
 
@@ -475,11 +499,11 @@ pub fn init_diagonal_op(
     real: &[Qreal],
     imag: &[Qreal],
 ) -> Result<(), QuestError> {
-    let len_required = 2usize.pow(op.0.numQubits as u32);
+    let len_required = 2usize.pow(op.op.numQubits as u32);
     assert!(real.len() >= len_required);
     assert!(imag.len() >= len_required);
     catch_quest_exception(|| unsafe {
-        ffi::initDiagonalOp(op.0, real.as_ptr(), imag.as_ptr());
+        ffi::initDiagonalOp(op.op, real.as_ptr(), imag.as_ptr());
     })
 }
 
@@ -488,18 +512,8 @@ pub fn init_diagonal_op_from_pauli_hamil(
     hamil: &PauliHamil,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
-        ffi::initDiagonalOpFromPauliHamil(op.0, hamil.0);
+        ffi::initDiagonalOpFromPauliHamil(op.op, hamil.0);
     })
-}
-
-pub fn create_diagonal_op_from_pauli_hamil_file(
-    fn_: &str,
-    env: &QuESTEnv,
-) -> Result<DiagonalOp, QuestError> {
-    let filename = CString::new(fn_).map_err(QuestError::NulError)?;
-    Ok(DiagonalOp(unsafe {
-        ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
-    }))
 }
 
 /// # Panics
@@ -521,7 +535,7 @@ pub fn set_diagonal_op_elems(
 
     catch_quest_exception(|| unsafe {
         ffi::setDiagonalOpElems(
-            op.0,
+            op.op,
             start_ind,
             real.as_ptr(),
             imag.as_ptr(),
@@ -535,7 +549,7 @@ pub fn apply_diagonal_op(
     op: &DiagonalOp,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
-        ffi::applyDiagonalOp(qureg.reg, op.0);
+        ffi::applyDiagonalOp(qureg.reg, op.op);
     })
 }
 
@@ -544,7 +558,7 @@ pub fn calc_expec_diagonal_op(
     op: &DiagonalOp,
 ) -> Result<Complex, QuestError> {
     catch_quest_exception(|| {
-        Complex(unsafe { ffi::calcExpecDiagonalOp(qureg.reg, op.0) })
+        Complex(unsafe { ffi::calcExpecDiagonalOp(qureg.reg, op.op) })
     })
 }
 
