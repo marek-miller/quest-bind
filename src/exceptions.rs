@@ -26,7 +26,7 @@ use std::{
 
 use super::QuestError;
 
-struct ExceptGuard(Arc<Mutex<u8>>);
+struct ExceptGuard(Arc<Mutex<[u8; 0]>>);
 struct ExceptError(Arc<Mutex<Option<QuestError>>>);
 
 static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
@@ -34,7 +34,7 @@ static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
 
 impl Default for ExceptGuard {
     fn default() -> Self {
-        Self(Arc::new(Mutex::new(0)))
+        Self(Arc::new(Mutex::new([])))
     }
 }
 
