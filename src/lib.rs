@@ -116,6 +116,58 @@ pub struct Vector(ffi::Vector);
 #[derive(Debug)]
 pub struct PauliHamil(ffi::PauliHamil);
 
+impl PauliHamil {
+    /// Dynamically allocates a Hamiltonian
+    ///
+    /// The Hamiltonian is expressed as a real-weighted sum of products of
+    /// Pauli operators.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let hamil = PauliHamil::try_new(2, 3).unwrap();
+    /// ```
+    ///
+    /// See [QuEST API][1] for more information.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+    /// failure. This is an exception thrown by `QuEST`.
+    ///
+    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga35b28710877c462927366fa602e591cb
+    pub fn try_new(
+        num_qubits: i32,
+        num_sum_terms: i32,
+    ) -> Result<Self, QuestError> {
+        catch_quest_exception(|| {
+            Self(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
+        })
+    }
+
+    /// Creates a [`PauliHamil`] instance
+    /// populated with the data in filename `fn_`.
+    ///
+    /// # Bugs
+    ///
+    /// This function calls its C equivalent which unfortunately behaves
+    /// erratically when the file specified is incorrectly formatted or
+    /// inaccessible, often leading to seg-faults.  Use at your own risk.
+    pub fn try_new_from_file(fn_: &str) -> Result<Self, QuestError> {
+        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
+        catch_quest_exception(|| {
+            Self(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
+        })
+    }
+}
+
+impl Drop for PauliHamil {
+    fn drop(&mut self) {
+        unsafe { ffi::destroyPauliHamil(self.0) }
+    }
+}
+
 #[derive(Debug)]
 pub struct DiagonalOp<'a> {
     env: &'a QuESTEnv,
@@ -344,79 +396,6 @@ pub fn init_complex_matrix_n(
     })
 }
 
-/// Dynamically allocates a Hamiltonian
-///
-/// The Hamiltonian is expressed as a real-weighted sum of products of Pauli
-/// operators.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let hamil = create_pauli_hamil(2, 3)?;
-/// destroy_pauli_hamil(hamil);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// # Errors
-///
-/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
-/// failure. This is an exception thrown by `QuEST`.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga35b28710877c462927366fa602e591cb
-pub fn create_pauli_hamil(
-    num_qubits: i32,
-    num_sum_terms: i32,
-) -> Result<PauliHamil, QuestError> {
-    catch_quest_exception(|| {
-        PauliHamil(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
-    })
-}
-
-/// Destroy a [`PauliHamil`](crate::PauliHamil) instance.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let hamil = create_pauli_hamil(2, 3)?;
-/// destroy_pauli_hamil(hamil);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gac1c8ed909b33bd55ae680901006051b6
-#[allow(clippy::needless_pass_by_value)]
-pub fn destroy_pauli_hamil(hamil: PauliHamil) {
-    unsafe { ffi::destroyPauliHamil(hamil.0) }
-}
-
-/// Creates a [`PauliHamil`] instance
-/// populated with the data in filename `fn_`.
-///
-/// # Bugs
-///
-/// This function calls its C equivalent which unfortunately behaves erratically
-/// when the file specified is incorrectly formatted or inaccessible, often
-/// leading to seg-faults.  Use at your own risk.
-pub fn create_pauli_hamil_from_file(
-    fn_: &str
-) -> Result<PauliHamil, QuestError> {
-    let filename = CString::new(fn_).map_err(QuestError::NulError)?;
-    catch_quest_exception(|| {
-        PauliHamil(unsafe {
-            ffi::createPauliHamilFromFile((*filename).as_ptr())
-        })
-    })
-}
-
 /// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
 /// coefficients
 ///
@@ -424,20 +403,16 @@ pub fn create_pauli_hamil_from_file(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
 /// use quest_bind::PauliOpType::*;
 ///
-/// let mut hamil = create_pauli_hamil(2, 2)?;
+/// let mut hamil = PauliHamil::try_new(2, 2).unwrap();
 ///
 /// init_pauli_hamil(
 ///     &mut hamil,
 ///     &[0.5, -0.5],
 ///     &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
-/// )?;
-///
-/// destroy_pauli_hamil(hamil);
-/// # Ok(())
-/// # }
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

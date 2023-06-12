@@ -130,8 +130,8 @@ mod tests {
     use std::thread;
 
     use crate::{
-        create_pauli_hamil,
         ComplexMatrixN,
+        PauliHamil,
     };
 
     #[test]
@@ -144,8 +144,8 @@ mod tests {
 
     #[test]
     fn catch_exception_02() {
-        let _ = create_pauli_hamil(2, 2).unwrap();
-        let _ = create_pauli_hamil(-11, -3).unwrap_err();
+        let _ = PauliHamil::try_new(2, 2).unwrap();
+        let _ = PauliHamil::try_new(-11, -3).unwrap_err();
     }
 
     #[test]

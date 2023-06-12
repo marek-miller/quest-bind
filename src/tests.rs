@@ -78,27 +78,22 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 }
 
 #[test]
-fn create_pauli_hamil_01() -> Result<(), QuestError> {
-    let hamil = create_pauli_hamil(1, 1)?;
-    destroy_pauli_hamil(hamil);
-    let hamil = create_pauli_hamil(2, 3)?;
-    destroy_pauli_hamil(hamil);
-    let hamil = create_pauli_hamil(3, 2)?;
-    destroy_pauli_hamil(hamil);
+fn create_pauli_hamil_01() {
+    let _ = PauliHamil::try_new(1, 1).unwrap();
+    let _ = PauliHamil::try_new(2, 3).unwrap();
+    let _ = PauliHamil::try_new(3, 2).unwrap();
 
-    let _ = create_pauli_hamil(0, 1).unwrap_err();
-    let _ = create_pauli_hamil(-1, 1).unwrap_err();
-    let _ = create_pauli_hamil(1, 0).unwrap_err();
-    let _ = create_pauli_hamil(1, -1).unwrap_err();
-    let _ = create_pauli_hamil(0, 0).unwrap_err();
-
-    Ok(())
+    let _ = PauliHamil::try_new(0, 1).unwrap_err();
+    let _ = PauliHamil::try_new(-1, 1).unwrap_err();
+    let _ = PauliHamil::try_new(1, 0).unwrap_err();
+    let _ = PauliHamil::try_new(1, -1).unwrap_err();
+    let _ = PauliHamil::try_new(0, 0).unwrap_err();
 }
 
 #[test]
 fn initialize_pauli_hamil_01() {
     use PauliOpType::*;
-    let mut hamil = create_pauli_hamil(2, 2).unwrap();
+    let mut hamil = PauliHamil::try_new(2, 2).unwrap();
 
     init_pauli_hamil(
         &mut hamil,
@@ -106,8 +101,6 @@ fn initialize_pauli_hamil_01() {
         &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
     )
     .unwrap();
-
-    destroy_pauli_hamil(hamil);
 }
 
 #[test]
