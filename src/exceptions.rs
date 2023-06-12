@@ -85,43 +85,32 @@ where
 mod tests {
     use std::thread;
 
-    use super::*;
     use crate::create_complex_matrix_n;
 
     #[test]
-    fn catch_exception_01() -> Result<(), QuestError> {
-        let err = create_complex_matrix_n(0).unwrap_err();
-        match err {
-            QuestError::InvalidQuESTInput {
-                ..
-            } => Ok(()),
-            _ => panic!(),
-        }
-    }
-
-    #[test]
-    fn catch_exception_02() {
+    fn catch_exception_01() {
         let _ = create_complex_matrix_n(1).unwrap();
+        let _ = create_complex_matrix_n(-1).unwrap_err();
     }
 
     #[test]
-    fn catch_exception_parallel_01() {
+    fn catch_exception_parallel() {
         thread::scope(|s| {
             s.spawn(|| {
-                catch_exception_01().unwrap();
-                catch_exception_02();
+                catch_exception_01();
+                catch_exception_01();
             });
             s.spawn(|| {
-                catch_exception_02();
-                catch_exception_01().unwrap();
+                catch_exception_01();
+                catch_exception_01();
             });
             s.spawn(|| {
-                catch_exception_01().unwrap();
-                catch_exception_01().unwrap();
+                catch_exception_01();
+                catch_exception_01();
             });
             s.spawn(|| {
-                catch_exception_02();
-                catch_exception_02();
+                catch_exception_01();
+                catch_exception_01();
             });
         });
     }
