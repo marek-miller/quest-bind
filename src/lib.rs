@@ -1186,8 +1186,8 @@ pub fn collapse_to_outcome(
 pub fn measure(
     qureg: &mut Qureg,
     measure_qubit: i32,
-) -> i32 {
-    unsafe { ffi::measure(qureg.0, measure_qubit) }
+) -> Result<i32, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::measure(qureg.0, measure_qubit) })
 }
 
 pub fn measure_with_stats(
@@ -1201,20 +1201,22 @@ pub fn measure_with_stats(
     })
 }
 
-#[must_use]
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
-) -> Complex {
-    Complex(unsafe { ffi::calcInnerProduct(bra.0, ket.0) })
+) -> Result<Complex, QuestError> {
+    catch_quest_exception(|| {
+        Complex(unsafe { ffi::calcInnerProduct(bra.0, ket.0) })
+    })
 }
 
-#[must_use]
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
-) -> Qreal {
-    unsafe { ffi::calcDensityInnerProduct(rho1.0, rho2.0) }
+) -> Result<f64, QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::calcDensityInnerProduct(rho1.0, rho2.0)
+    })
 }
 
 pub fn seed_quest_default(env: &mut QuESTEnv) {
@@ -1282,19 +1284,20 @@ pub fn write_recorded_qasm_to_file(
     unsafe {
         let filename_cstr =
             CString::new(filename).map_err(QuestError::NulError)?;
-        ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
+        catch_quest_exception(|| {
+            ffi::writeRecordedQASMToFile(qureg.0, (*filename_cstr).as_ptr());
+        })
     }
-    Ok(())
 }
 
 pub fn mix_dephasing(
     qureg: &mut Qureg,
     target_qubit: i32,
     prob: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixDephasing(qureg.0, target_qubit, prob);
-    }
+    })
 }
 
 pub fn mix_two_qubit_dephasing(
@@ -1302,30 +1305,30 @@ pub fn mix_two_qubit_dephasing(
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDephasing(qureg.0, qubit1, qubit2, prob);
-    }
+    })
 }
 
 pub fn mix_depolarising(
     qureg: &mut Qureg,
     target_qubit: i32,
     prob: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixDepolarising(qureg.0, target_qubit, prob);
-    }
+    })
 }
 
 pub fn mix_damping(
     qureg: &mut Qureg,
     target_qubit: i32,
     prob: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixDamping(qureg.0, target_qubit, prob);
-    }
+    })
 }
 
 pub fn mix_two_qubit_depolarising(
@@ -1333,10 +1336,10 @@ pub fn mix_two_qubit_depolarising(
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDepolarising(qureg.0, qubit1, qubit2, prob);
-    }
+    })
 }
 
 pub fn mix_pauli(
@@ -1345,53 +1348,53 @@ pub fn mix_pauli(
     prob_x: Qreal,
     prob_y: Qreal,
     prob_z: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.0, target_qubit, prob_x, prob_y, prob_z);
-    }
+    })
 }
 
 pub fn mix_density_matrix(
     combine_qureg: &mut Qureg,
     prob: Qreal,
     other_qureg: &Qureg,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::mixDensityMatrix(combine_qureg.0, prob, other_qureg.0);
-    }
+    })
 }
 
-#[must_use]
-pub fn calc_purity(qureg: &Qureg) -> Qreal {
-    unsafe { ffi::calcPurity(qureg.0) }
+pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.0) })
 }
 
-#[must_use]
 pub fn calc_fidelity(
     qureg: &Qureg,
     pure_state: &Qureg,
-) -> Qreal {
-    unsafe { ffi::calcFidelity(qureg.0, pure_state.0) }
+) -> Result<Qreal, QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::calcFidelity(qureg.0, pure_state.0)
+    })
 }
 
 pub fn swap_gate(
     qureg: &mut Qureg,
     qubit1: i32,
     qubit2: i32,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.0, qubit1, qubit2);
-    }
+    })
 }
 
 pub fn sqrt_swap_gate(
     qureg: &mut Qureg,
     qb1: i32,
     qb2: i32,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.0, qb1, qb2);
-    }
+    })
 }
 
 pub fn multi_state_controlled_unitary(
@@ -1401,8 +1404,8 @@ pub fn multi_state_controlled_unitary(
     num_control_qubits: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.0,
             control_qubits.as_ptr(),
@@ -1411,7 +1414,7 @@ pub fn multi_state_controlled_unitary(
             target_qubit,
             u.0,
         );
-    }
+    })
 }
 
 pub fn multi_rotate_z(
@@ -1419,10 +1422,10 @@ pub fn multi_rotate_z(
     qubits: &[i32],
     num_qubits: i32,
     angle: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.0, qubits.as_ptr(), num_qubits, angle);
-    }
+    })
 }
 
 pub fn multi_rotate_pauli(
@@ -1431,8 +1434,8 @@ pub fn multi_rotate_pauli(
     target_paulis: &[PauliOpType],
     num_targets: i32,
     angle: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::multiRotatePauli(
             qureg.0,
             target_qubits.as_ptr(),
@@ -1440,7 +1443,7 @@ pub fn multi_rotate_pauli(
             num_targets,
             angle,
         );
-    }
+    })
 }
 
 pub fn multi_controlled_multi_rotate_z(
@@ -1450,8 +1453,8 @@ pub fn multi_controlled_multi_rotate_z(
     target_qubits: &[i32],
     num_targets: i32,
     angle: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiRotateZ(
             qureg.0,
             control_qubits.as_ptr(),
@@ -1460,7 +1463,7 @@ pub fn multi_controlled_multi_rotate_z(
             num_targets,
             angle,
         );
-    }
+    })
 }
 
 pub fn multi_controlled_multi_rotate_pauli(
@@ -1471,8 +1474,8 @@ pub fn multi_controlled_multi_rotate_pauli(
     target_paulis: &[PauliOpType],
     num_targets: i32,
     angle: Qreal,
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiRotatePauli(
             qureg.0,
             control_qubits.as_ptr(),
@@ -1482,7 +1485,7 @@ pub fn multi_controlled_multi_rotate_pauli(
             num_targets,
             angle,
         );
-    }
+    })
 }
 
 pub fn calc_expec_pauli_prod(
