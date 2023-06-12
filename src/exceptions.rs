@@ -3,11 +3,10 @@
 //! On failure, `QuEST` throws exceptions via user-configurable global
 //! [`invalidQuESTInputError()`][1]. By default, this function prints an error
 //! message and aborts, which is problematic in a large distributed setup. We
-//! opt for catching all exceptions early and putting them in `Result<_.
-//! QuestError>`. The exception handler is locked during an API call. This means
-//! that calling `QuEST` functions is synchronous and should be thread-safe, but
-//! comes at the expense of being able to run only one `QuEST` API call at the
-//! time.
+//! opt for catching all exceptions early. The exception handler is locked
+//! during an API call. This means that calling `QuEST` functions is synchronous
+//! and should be thread-safe, but comes at the expense of being able to run
+//! only one `QuEST` API call at the time.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
@@ -60,14 +59,11 @@ unsafe extern "C" fn invalidQuESTInputError(
         .0
         .lock()
         .unwrap();
-
-    // Check if the last exception has been scooped properly
     assert!(
         err.is_none(),
-        "All exception must be dealt with. This is a bug in quest_bind.  \
+        "All exceptions must be dealt with. This is a bug in quest_bind.  \
          Please report it."
     );
-
     *err = Some(QuestError::InvalidQuESTInput {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
@@ -117,7 +113,7 @@ where
         // the lock to `err` is dropped here
     };
 
-    // Drop the lock as soon as we don't need it anymore:
+    // Drop the guard as soon as we don't need it anymore:
     drop(guard);
 
     // This might be a little confusing:
@@ -142,7 +138,7 @@ mod tests {
     fn catch_exception_01() {
         let _ = create_complex_matrix_n(1).unwrap();
         // Seems like supplying other invalid params here, like e.g. -3,
-        // causes QuEST to hang.  Is this a bug on our side?
+        // causes QuEST to hang.  Or is this a bug on our side?
         let _ = create_complex_matrix_n(0).unwrap_err();
     }
 
