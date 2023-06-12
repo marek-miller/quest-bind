@@ -6,46 +6,7 @@ thin as possible: the API stays nearly identical to the original.
 QuEST (Quantum Exact Simulation Toolkit) is a no-fluff, bent-on-speed quantum
 circuit simulator. It is distributed under MIT License.
 
-## Testing
-
-In order to test this library, first clone the repository together with QuEST
-source code as submodule:
-
-```sh
-git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
-```
-
-Then compile QuEST _without_ MPI support:
-
-```sh
-cd quest-bind
-cd QuEST
-mkdir build
-cd build
-cmake -DDISTRIBUTED=OFF ..
-make
-```
-
-Put a symlink to `libQuEST.so` where cargo can find it:
-
-```sh
-cd ../../
-mkdir -p target/debug/deps
-cd target/debug/deps/
-ln -s ../../../QuEST/build/QuEST/libQuEST.so .
-cd ../../../
-```
-
-Now, we can run unit tests:
-
-```sh
-cargo test
-```
-
 ## How to use it
-
-No package management for now. Here's a brief tutorial how to compile everything
-manually.
 
 Initialize a new binary crate:
 
@@ -54,24 +15,10 @@ cargo new testme
 cd testme/
 ```
 
-Clone the dependencies as before:
+Add `quest-bind` to your project's dependencies
 
 ```sh
-git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
-```
-
-Compile QuEST (you can enable MPI this time) and put a link to the shared
-library in your crate's `./target/debug/deps`. Then add dependencies to your
-project's `Cargo.toml`:
-
-```toml
-[package]
-name = "testme"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-quest_bind = { path = "./quest-bind" }
+cargo add quest_bind --git https://github.com/marek-miller/quest-bind.git 
 ```
 
 Now write some code and put it in `./src/main.rs`:
@@ -93,7 +40,7 @@ fn main() -> Result<(), QuestError> {
         let outcome = measure_with_stats(qureg, 1, &mut outcome_prob);
 
         println!("Measure first qubit.");
-        println!("Outcome: {} with prob: {:.2}", outcome, outcome_prob);
+        println!("Outcome: {outcome} with prob: {outcome_prob:.2}");
     }
 
     destroy_qureg(qureg, &env);
@@ -133,6 +80,50 @@ Measure first qubit.
 Outcome: 0 with prob: 0.50
 ```
 
+## Testing
+
+To run unit tests for this library, first clone the repository together with QuEST
+source code as submodule:
+
+```sh
+git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
+```
+
+Then run:
+
+```sh
+cargo test --tests
+```
+
+To be able to run documentation tests, we need to work around a known issue with `rustdoc`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
+
+Make sure you compile QuEST _without_ MPI support:
+
+```sh
+cd quest-bind
+cd QuEST
+mkdir build
+cd build
+cmake -DDISTRIBUTED=OFF ..
+make
+```
+
+Put a symlink to `libQuEST.so` where cargo can find it:
+
+```sh
+cd ../../
+mkdir -p target/debug/deps
+cd target/debug/deps/
+ln -s ../../../QuEST/build/QuEST/libQuEST.so .
+cd ../../../
+```
+
+Now, we can run all unit tests:
+
+```sh
+cargo test
+```
+
 ## Releases
 
 ### v0.2.0 (??/07/2023)
@@ -141,6 +132,7 @@ New features/improvements:
 
 - Catch exceptions thrown by QuEST
 - Improve documentation
+- Add build script
 
 ### v0.1.0 (11/06/2023)
 
