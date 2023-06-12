@@ -158,7 +158,7 @@ cargo test
 
 On failure, QuEST throws exceptions via user-configurable global
 [`invalidQuESTInputError()`](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db).
-By default, this function prints en error message and aborts, which is
+By default, this function prints an error message and aborts, which is
 problematic in a large distributed setup. We opt for catching all exceptions
 and putting them in `Result<_. QuestError>`. The exception handler is locked
 during an API call. This means that calling QuEST functions is synchronous and
