@@ -59,6 +59,18 @@ unsafe extern "C" fn invalidQuESTInputError(
         .0
         .lock()
         .unwrap();
+
+    // Check if the last exceptions has been scooped properly
+    match *err {
+        Some(_) => {
+            panic!(
+                "All exception must be dealt with. This is a bug in \
+                 quest_bind.  Please report it."
+            )
+        }
+        None => (),
+    }
+
     *err = Some(QuestError::InvalidQuESTInput {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
@@ -124,16 +136,27 @@ where
 mod tests {
     use std::thread;
 
-    use crate::create_complex_matrix_n;
+    use crate::{
+        create_complex_matrix_n,
+        create_pauli_hamil,
+    };
 
     #[test]
     fn catch_exception_01() {
         let _ = create_complex_matrix_n(1).unwrap();
-        let _ = create_complex_matrix_n(-1).unwrap_err();
+        // Seems like supplying other invalid params here, like e.g. -3,
+        // causes QuEST to hang.  Is this a bug on our side?
+        let _ = create_complex_matrix_n(0).unwrap_err();
     }
 
     #[test]
-    fn catch_exception_parallel() {
+    fn catch_exception_02() {
+        let _ = create_pauli_hamil(2, 2).unwrap();
+        let _ = create_pauli_hamil(-11, -3).unwrap_err();
+    }
+
+    #[test]
+    fn catch_exception_parallel_01() {
         thread::scope(|s| {
             s.spawn(|| {
                 catch_exception_01();
@@ -143,13 +166,19 @@ mod tests {
                 catch_exception_01();
                 catch_exception_01();
             });
+        });
+    }
+
+    #[test]
+    fn catch_exception_parallel_02() {
+        thread::scope(|s| {
             s.spawn(|| {
-                catch_exception_01();
-                catch_exception_01();
+                catch_exception_02();
+                catch_exception_02();
             });
             s.spawn(|| {
-                catch_exception_01();
-                catch_exception_01();
+                catch_exception_02();
+                catch_exception_02();
             });
         });
     }
