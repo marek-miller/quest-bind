@@ -6,18 +6,15 @@ use std::{
     sync::{
         Arc,
         Mutex,
+        OnceLock,
     },
 };
 
-use lazy_static::lazy_static;
-
 use super::QuestError;
 
-lazy_static! {
-    static ref QUEST_EXCEPTION_GUARD: Arc<Mutex<u8>> = Arc::new(Mutex::new(0));
-    static ref QUEST_EXCEPTION_ERROR: Arc<Mutex<Option<QuestError>>> =
-        Arc::new(Mutex::new(None));
-}
+static QUEST_EXCEPTION_GUARD: OnceLock<Arc<Mutex<u8>>> = OnceLock::new();
+static QUEST_EXCEPTION_ERROR: OnceLock<Arc<Mutex<Option<QuestError>>>> =
+    OnceLock::new();
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -28,7 +25,10 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    let mut err = QUEST_EXCEPTION_ERROR.lock().unwrap();
+    let mut err = QUEST_EXCEPTION_ERROR
+        .get_or_init(|| Arc::new(Mutex::new(None)))
+        .lock()
+        .unwrap();
     *err = Some(QuestError::InvalidQuESTInput {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
@@ -41,10 +41,16 @@ pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
     F: FnOnce() -> T,
 {
-    let _guard = QUEST_EXCEPTION_GUARD.lock().unwrap();
+    let _guard = QUEST_EXCEPTION_GUARD
+        .get_or_init(|| Arc::new(Mutex::new(0)))
+        .lock()
+        .unwrap();
     let res = f();
     let err = {
-        let mut err_lock = QUEST_EXCEPTION_ERROR.lock().unwrap();
+        let mut err_lock = QUEST_EXCEPTION_ERROR
+            .get_or_init(|| Arc::new(Mutex::new(None)))
+            .lock()
+            .unwrap();
         let err = err_lock.clone();
         *err_lock = None;
         err
