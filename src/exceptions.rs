@@ -130,16 +130,16 @@ mod tests {
     use std::thread;
 
     use crate::{
-        create_complex_matrix_n,
         create_pauli_hamil,
+        ComplexMatrixN,
     };
 
     #[test]
     fn catch_exception_01() {
-        let _ = create_complex_matrix_n(1).unwrap();
+        let _ = ComplexMatrixN::try_new(1).unwrap();
         // Seems like supplying other invalid params here, like e.g. -3,
         // causes QuEST to hang.  Or is this a bug on our side?
-        let _ = create_complex_matrix_n(0).unwrap_err();
+        let _ = ComplexMatrixN::try_new(0).unwrap_err();
     }
 
     #[test]

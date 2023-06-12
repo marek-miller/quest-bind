@@ -78,6 +78,38 @@ pub struct ComplexMatrix4(ffi::ComplexMatrix4);
 #[derive(Debug)]
 pub struct ComplexMatrixN(ffi::ComplexMatrixN);
 
+impl ComplexMatrixN {
+    /// Allocate dynamic memory for a square complex matrix of any size.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let mtr = ComplexMatrixN::try_new(3).unwrap();
+    /// ```
+    ///
+    /// See [QuEST API][1] for more information.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// on failure.  This is an exception thrown by `QuEST`.
+    ///
+    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga815103261fb22ea9690e1427571df00e
+    pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
+        catch_quest_exception(|| {
+            Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
+        })
+    }
+}
+
+impl Drop for ComplexMatrixN {
+    fn drop(&mut self) {
+        catch_quest_exception(|| unsafe { ffi::destroyComplexMatrixN(self.0) })
+            .unwrap();
+    }
+}
+
 #[derive(Debug)]
 pub struct Vector(ffi::Vector);
 
@@ -256,64 +288,6 @@ impl Drop for QuESTEnv {
     }
 }
 
-/// Allocate dynamic memory for a square complex matrix of any size.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let mtr = create_complex_matrix_n(3)?;
-/// destroy_complex_matrix_n(mtr);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// # Errors
-///
-/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by `QuEST`.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga815103261fb22ea9690e1427571df00e
-pub fn create_complex_matrix_n(
-    num_qubits: i32
-) -> Result<ComplexMatrixN, QuestError> {
-    catch_quest_exception(|| {
-        ComplexMatrixN(unsafe { ffi::createComplexMatrixN(num_qubits) })
-    })
-}
-
-/// Destroy a `ComplexMatrixN` instance created with
-/// [`create_complex_matrix_n()`](crate::create_complex_matrix_n()).
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let mtr = create_complex_matrix_n(3)?;
-/// destroy_complex_matrix_n(mtr);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// # Errors
-///
-/// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
-/// on failure.  This is an exception thrown by `QuEST`.
-///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga9df2f3d86be4a6e9aad481665e5e6753
-#[allow(clippy::needless_pass_by_value)]
-pub fn destroy_complex_matrix_n(
-    matr: ComplexMatrixN
-) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe { ffi::destroyComplexMatrixN(matr.0) })
-}
-
 /// Initialises a `ComplexMatrixN` instance to have the passed
 /// `real` and `imag` values.
 ///
@@ -321,16 +295,13 @@ pub fn destroy_complex_matrix_n(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// # fn main() -> Result<(), QuestError> {
-/// let mut mtr = create_complex_matrix_n(2)?;
+/// let mut mtr = ComplexMatrixN::try_new(2).unwrap();
 /// init_complex_matrix_n(
 ///     &mut mtr,
 ///     &[&[1., 2.], &[3., 4.]],
 ///     &[&[5., 6.], &[7., 8.]],
-/// )?;
-/// destroy_complex_matrix_n(mtr);
-/// # Ok(())
-/// # }
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

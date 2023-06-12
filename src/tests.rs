@@ -36,7 +36,7 @@ fn create_clone_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn init_complex_matrix_n_02() -> Result<(), QuestError> {
-    let mut m = create_complex_matrix_n(2)?;
+    let mut m = ComplexMatrixN::try_new(2)?;
     init_complex_matrix_n(
         &mut m,
         &[&[1., 2.], &[3., 4.]],
@@ -51,13 +51,12 @@ fn init_complex_matrix_n_02() -> Result<(), QuestError> {
         let row = &*(*m.0.imag).cast::<[&[f64; 2]; 2]>();
         assert_eq!(row, &[&[11., 12.], &[13., 14.],]);
     }
-    destroy_complex_matrix_n(m)?;
     Ok(())
 }
 
 #[test]
 fn init_complex_matrix_n_03() -> Result<(), QuestError> {
-    let mut m = create_complex_matrix_n(3)?;
+    let mut m = ComplexMatrixN::try_new(3)?;
     init_complex_matrix_n(
         &mut m,
         &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]],
@@ -75,7 +74,6 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
             &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]]
         );
     }
-    destroy_complex_matrix_n(m)?;
     Ok(())
 }
 
