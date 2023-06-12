@@ -5,14 +5,12 @@ use super::*;
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
+    {
+        let _ = Qureg::try_new(1, &env)?;
+        let _ = Qureg::try_new(5, &env)?;
 
-    let qureg = create_qureg(1, &env)?;
-    destroy_qureg(qureg, &env);
-    let qureg = create_qureg(5, &env)?;
-    destroy_qureg(qureg, &env);
-
-    let _ = create_qureg(0, &env).unwrap_err();
-
+        let _ = Qureg::try_new(0, &env).unwrap_err();
+    }
     destroy_quest_env(env);
     Ok(())
 }
@@ -20,14 +18,12 @@ fn create_qureg_01() -> Result<(), QuestError> {
 #[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
+    {
+        let _ = Qureg::try_new_density(1, &env)?;
+        let _ = Qureg::try_new_density(5, &env)?;
 
-    let qureg = create_density_qureg(1, &env)?;
-    destroy_qureg(qureg, &env);
-    let qureg = create_density_qureg(5, &env)?;
-    destroy_qureg(qureg, &env);
-
-    let _ = create_density_qureg(0, &env).unwrap_err();
-
+        let _ = Qureg::try_new_density(0, &env).unwrap_err();
+    }
     destroy_quest_env(env);
     Ok(())
 }
@@ -35,12 +31,10 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 #[test]
 fn create_clone_qureg_01() -> Result<(), QuestError> {
     let env = create_quest_env();
-
-    let qureg1 = create_density_qureg(2, &env)?;
-    let qureg2 = create_clone_qureg(&qureg1, &env);
-    destroy_qureg(qureg1, &env);
-    destroy_qureg(qureg2, &env);
-
+    {
+        let qureg = Qureg::try_new_density(2, &env)?;
+        let _ = qureg.clone();
+    }
     destroy_quest_env(env);
     Ok(())
 }
