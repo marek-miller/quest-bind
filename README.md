@@ -18,7 +18,7 @@ cd testme/
 Add `quest-bind` to your project's dependencies
 
 ```sh
-cargo add quest_bind --git https://github.com/marek-miller/quest-bind.git 
+cargo add quest_bind --git https://github.com/marek-miller/quest-bind.git
 ```
 
 Now write some code and put it in `./src/main.rs`:
@@ -82,8 +82,9 @@ Outcome: 0 with prob: 0.50
 
 ## Distributed and GPU accelerated mode
 
-QuEST support for MPI and GPU accelerated computation is enabled by setting appropriate feature flags. To use QuEST's MPI mode, enable `mpi` feature for
-`quest_bind`.  Simply edit `Cargo.toml` of your binary crate:
+QuEST support for MPI and GPU accelerated computation is enabled by setting
+appropriate feature flags. To use QuEST's MPI mode, enable `mpi` feature for
+`quest_bind`. Simply edit `Cargo.toml` of your binary crate:
 
 ```toml
 [package]
@@ -104,12 +105,14 @@ Number of ranks is 1
 ...
 ```
 
-The feature "`gpu`" enables the GPU accelerated mode. These features are mutually exclusive, so if you set both flags, the feature `"mpi"` takes precedence.
+The feature "`gpu`" enables the GPU accelerated mode. These features are
+mutually exclusive, so if you set both flags, the feature `"mpi"` takes
+precedence.
 
 ## Testing
 
-To run unit tests for this library, first clone the repository together with QuEST
-source code as submodule:
+To run unit tests for this library, first clone the repository together with
+QuEST source code as submodule:
 
 ```sh
 git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
@@ -121,7 +124,8 @@ Then run:
 cargo test --tests
 ```
 
-To be able to run documentation tests, we need to work around a known issue with `rustdoc`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
+To be able to run documentation tests, we need to work around a known issue
+with `rustdoc`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
 
 Make sure you compile QuEST _without_ MPI support:
 
@@ -149,6 +153,18 @@ Now, we can run all unit tests:
 ```sh
 cargo test
 ```
+
+## Handling exceptions
+
+On failure, QuEST throws exceptions via user-configurable global
+[`invalidQuESTInputError()`](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db).
+By default, this function prints en error message and aborts, which is
+problematic in a large distributed setup. We opt for catching all exceptions
+and putting them in `Result<_. QuestError>`. The exception handler is locked
+during an API call. This means that calling QuEST functions is synchronous and
+should be thread-safe, but comes at the expense of being able to run only one
+QuEST API call at the time. Bear in mind, though, that each QuEST function
+still executes with maximal available parallelism enabled by default.
 
 ## Releases
 
