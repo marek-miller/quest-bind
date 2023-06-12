@@ -12,9 +12,24 @@ use std::{
 
 use super::QuestError;
 
-static QUEST_EXCEPTION_GUARD: OnceLock<Arc<Mutex<u8>>> = OnceLock::new();
-static QUEST_EXCEPTION_ERROR: OnceLock<Arc<Mutex<Option<QuestError>>>> =
-    OnceLock::new();
+struct ExceptGuard(Arc<Mutex<u8>>);
+
+impl Default for ExceptGuard {
+    fn default() -> Self {
+        Self(Arc::new(Mutex::new(0)))
+    }
+}
+
+struct ExceptError(Arc<Mutex<Option<QuestError>>>);
+
+impl Default for ExceptError {
+    fn default() -> Self {
+        Self(Arc::new(Mutex::new(None)))
+    }
+}
+
+static QUEST_EXCEPTION_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
+static QUEST_EXCEPTION_ERROR: OnceLock<ExceptError> = OnceLock::new();
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -26,7 +41,8 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
     let mut err = QUEST_EXCEPTION_ERROR
-        .get_or_init(|| Arc::new(Mutex::new(None)))
+        .get_or_init(|| Default::default())
+        .0
         .lock()
         .unwrap();
     *err = Some(QuestError::InvalidQuESTInput {
@@ -42,13 +58,15 @@ where
     F: FnOnce() -> T,
 {
     let _guard = QUEST_EXCEPTION_GUARD
-        .get_or_init(|| Arc::new(Mutex::new(0)))
+        .get_or_init(|| Default::default())
+        .0
         .lock()
         .unwrap();
     let res = f();
     let err = {
         let mut err_lock = QUEST_EXCEPTION_ERROR
-            .get_or_init(|| Arc::new(Mutex::new(None)))
+            .get_or_init(|| Default::default())
+            .0
             .lock()
             .unwrap();
         let err = err_lock.clone();
