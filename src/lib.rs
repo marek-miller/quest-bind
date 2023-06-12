@@ -424,14 +424,40 @@ pub fn create_pauli_hamil_from_file(
     })
 }
 
+/// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
+/// coefficients
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # fn main() -> Result<(), QuestError> {
+/// use quest_bind::PauliOpType::*;
+///
+/// let mut hamil = create_pauli_hamil(2, 2)?;
+///
+/// init_pauli_hamil(
+///     &mut hamil,
+///     &[0.5, -0.5],
+///     &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
+/// )?;
+///
+/// destroy_pauli_hamil(hamil);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gadbe6701dda1d49168f2f23253e370a7a
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
     codes: &[PauliOpType],
-) {
-    unsafe {
+) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
         ffi::initPauliHamil(hamil.0, coeffs.as_ptr(), codes.as_ptr());
-    }
+    })
 }
 
 #[must_use]

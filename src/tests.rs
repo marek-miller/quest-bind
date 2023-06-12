@@ -109,6 +109,21 @@ fn create_pauli_hamil_01() -> Result<(), QuestError> {
 }
 
 #[test]
+fn initialize_pauli_hamil_01() {
+    use PauliOpType::*;
+    let mut hamil = create_pauli_hamil(2, 2).unwrap();
+
+    init_pauli_hamil(
+        &mut hamil,
+        &[0.5, -0.5],
+        &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
+    )
+    .unwrap();
+
+    destroy_pauli_hamil(hamil);
+}
+
+#[test]
 fn get_environment_string_01() {
     let env = create_quest_env();
     let env_str = get_environment_string(&env).unwrap();
