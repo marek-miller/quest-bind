@@ -174,6 +174,7 @@ New features/improvements:
 - Catch exceptions thrown by QuEST
 - Improve documentation
 - Add build script
+- Constructors/destructors for QuEST structs
 
 ### v0.1.0 (11/06/2023)
 
