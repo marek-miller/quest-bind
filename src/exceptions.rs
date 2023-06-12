@@ -26,23 +26,14 @@ use std::{
 
 use super::QuestError;
 
+#[derive(Default)]
 struct ExceptGuard(Arc<Mutex<[u8; 0]>>);
+
+#[derive(Default)]
 struct ExceptError(Arc<Mutex<Option<QuestError>>>);
 
 static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
 static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
-
-impl Default for ExceptGuard {
-    fn default() -> Self {
-        Self(Arc::new(Mutex::new([])))
-    }
-}
-
-impl Default for ExceptError {
-    fn default() -> Self {
-        Self(Arc::new(Mutex::new(None)))
-    }
-}
 
 /// Report error in a `QuEST` API call.
 ///
