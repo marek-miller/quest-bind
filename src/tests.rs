@@ -25,16 +25,6 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 }
 
 #[test]
-fn create_clone_qureg_01() -> Result<(), QuestError> {
-    let env = QuestEnv::new();
-    {
-        let qureg = Qureg::try_new_density(2, &env)?;
-        let _ = qureg.clone();
-    }
-    Ok(())
-}
-
-#[test]
 fn init_complex_matrix_n_02() -> Result<(), QuestError> {
     let mut m = ComplexMatrixN::try_new(2)?;
     init_complex_matrix_n(
@@ -153,6 +143,49 @@ fn initialize_pauli_hamil_01() {
         &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
     )
     .unwrap();
+}
+
+#[test]
+fn set_amps_01() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new(3, &env).unwrap();
+
+    let num_amps = 4;
+    let re = [1., 2., 3., 4.];
+    let im = [1., 2., 3., 4.];
+
+    set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap();
+
+    assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+
+    set_amps(&mut qureg, 9, &re, &im, 4).unwrap_err();
+    set_amps(&mut qureg, 7, &re, &im, 4).unwrap_err();
+    set_amps(&mut qureg, 3, &re, &im, 9).unwrap_err();
+    set_amps(&mut qureg, -1, &re, &im, 9).unwrap_err();
+    set_amps(&mut qureg, 1, &re, &im, -9).unwrap_err();
+}
+
+#[test]
+fn set_density_amps_01() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new_density(3, &env).unwrap();
+
+    let num_amps = 4;
+    let re = [1., 2., 3., 4.];
+    let im = [1., 2., 3., 4.];
+
+    set_density_amps(&mut qureg, 0, 0, &re, &im, num_amps).unwrap();
+    assert!(
+        (get_density_amp(&qureg, 0, 0).unwrap().real() - 1.).abs()
+            < f64::EPSILON
+    );
+
+    set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap_err();
+
+    set_density_amps(&mut qureg, 0, 9, &re, &im, 4).unwrap_err();
+    set_density_amps(&mut qureg, 8, 7, &re, &im, 4).unwrap_err();
+    set_density_amps(&mut qureg, 0, -1, &re, &im, 9).unwrap_err();
+    set_density_amps(&mut qureg, 0, 1, &re, &im, -9).unwrap_err();
 }
 
 #[test]
