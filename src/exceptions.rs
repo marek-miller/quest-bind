@@ -12,6 +12,20 @@
 //!
 //! [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
 
+// TODO:
+// =====
+//
+// There still might be a problem with this approach to catch QuEST exceptions.
+// What if there's some lingering call to `invalidQuESTInputError()` and will
+// overlap with the next API call that should clear just fine?
+// We will catch an exception from the wrong call.  So far, this problem doesn't
+// manifest itself in unit tests, but it is a possibility.
+//
+// A solution will be to mark somehow `invalidQuESTInputError()` to know which 
+// function we're calling from.
+//
+// Non-local exceptions suck! 🤦
+
 use std::{
     ffi::{
         c_char,
