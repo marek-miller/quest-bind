@@ -8,6 +8,12 @@
 //! and should be thread-safe, but comes at the expense of being able to run
 //! only one `QuEST` API call at the time.
 //!
+//! The present implementation works because QuEST's `invalidQuESTInputError()`
+//! is synchronous and *all* QuEST API calls from us that can
+//! potentially throw an exception are wrapped with `catch_quest_exception()`.
+//! This way we ensure the calls are atomic and all exceptions have been thrown
+//! already when it's time for us to scoop them.
+//!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
 //! [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
@@ -54,16 +60,18 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    let mut err_buf = QUEST_EXCEPT_ERROR
+    QUEST_EXCEPT_ERROR
         .get_or_init(Default::default)
         .0
         .lock()
-        .unwrap();
-
-    err_buf.push(QuestError::InvalidQuESTInputError {
-        err_msg:  err_msg.to_owned(),
-        err_func: err_func.to_owned(),
-    });
+        .unwrap()
+        .insert(
+            0,
+            QuestError::InvalidQuESTInputError {
+                err_msg:  err_msg.to_owned(),
+                err_func: err_func.to_owned(),
+            },
+        );
 
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
@@ -79,7 +87,7 @@ unsafe extern "C" fn invalidQuESTInputError(
 /// at the expense of being able to call only one function at the time.
 /// This is not an undesired property and shouldn't matter much for the overall
 /// performance of the simulation, since each functions retains access to all
-/// parallelism available in the system.
+/// the parallelism available in the system.
 pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
     F: FnOnce() -> T,
@@ -91,38 +99,27 @@ where
         .lock()
         .unwrap();
 
-    // Clear the buffer
-    {
-        let mut err_buf = QUEST_EXCEPT_ERROR
-            .get_or_init(Default::default)
-            .0
-            .lock()
-            .unwrap();
-
-        err_buf.clear();
-    }
+    // The lock here is not bound to any variable; it will be released as
+    // soon as the buffer is cleared.
+    QUEST_EXCEPT_ERROR
+        .get_or_init(Default::default)
+        .0
+        .lock()
+        .unwrap()
+        .clear();
 
     // Call QuEST API
     let res = f();
 
     // At this point all exceptions have been thrown.
-    // Take the first exception from the buffer
-    // TODO: What to do with the rest?
-    // For now, we log them as error messages via invalidQuESTInputError()
-    let err = {
-        // Wait for QueEST to finish reporting
-        let mut err_buf = QUEST_EXCEPT_ERROR
-            .get_or_init(Default::default)
-            .0
-            .lock()
-            .unwrap();
-
-        if err_buf.len() > 0 {
-            Some(err_buf.swap_remove(0))
-        } else {
-            None
-        }
-    };
+    // Take the last exception from the buffer (first reported).
+    // For now, we log the rest as error messages via invalidQuESTInputError()
+    let err = QUEST_EXCEPT_ERROR
+        .get_or_init(Default::default)
+        .0
+        .lock()
+        .unwrap()
+        .pop();
 
     // Drop the guard as soon as we don't need it anymore:
     drop(guard);
