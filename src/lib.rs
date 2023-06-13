@@ -344,16 +344,6 @@ impl<'a> Drop for Qureg<'a> {
     }
 }
 
-impl<'a> Clone for Qureg<'a> {
-    fn clone(&self) -> Self {
-        let reg_clone = unsafe { ffi::createCloneQureg(self.reg, self.env.0) };
-        Self {
-            env: self.env.clone(),
-            reg: reg_clone,
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct QuestEnv(ffi::QuESTEnv);
 
@@ -870,6 +860,24 @@ pub fn init_debug_state(qureg: &mut Qureg) {
     }
 }
 
+/// Initialize `qureg` by specifying all amplitudes.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+///
+/// init_state_from_amps(&mut qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
+/// let prob = get_prob_amp(&qureg, 0).unwrap();
+///
+/// assert!((prob - 1.).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_state_from_amps(
     qureg: &mut Qureg,
     reals: &[Qreal],
@@ -880,6 +888,38 @@ pub fn init_state_from_amps(
     })
 }
 
+/// Overwrites a contiguous subset of the amplitudes in state-vector `qureg`.
+///
+/// In distributed mode, this function assumes the subset `reals` and `imags`
+/// exist (at least) on the node containing the ultimately updated elements.
+///
+/// # Examples
+///
+/// Below is the correct way to modify the full 8 elements of `qureg`when split
+/// between 2 nodes.
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// let num_amps = 4;
+/// let mut re = [1., 2., 3., 4.];
+/// let mut im = [1., 2., 3., 4.];
+///
+/// set_amps(&mut qureg, 0, &re, &im, num_amps);
+///
+/// // modify re and im to the next set of elements
+/// for i in 0..4 {
+///     re[i] += 4.;
+///     im[i] += 4.;
+/// }
+/// set_amps(&mut qureg, 4, &re, &im, num_amps);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_amps(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -898,6 +938,28 @@ pub fn set_amps(
     })
 }
 
+/// Overwrites a contiguous subset of the amplitudes in density-matrix `qureg`.
+///
+/// In distributed mode, this function assumes the subset `reals` and `imags`
+/// exist (at least) on the node containing the ultimately updated elements.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new_density(3, &env).unwrap();
+///
+/// let num_amps = 4;
+/// let mut re = [1., 2., 3., 4.];
+/// let mut im = [1., 2., 3., 4.];
+///
+/// set_density_amps(&mut qureg, 0, 0, &re, &im, num_amps);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_density_amps(
     qureg: &mut Qureg,
     start_row: i64,
@@ -918,6 +980,22 @@ pub fn set_density_amps(
     })
 }
 
+/// Overwrite the amplitudes of `target_qureg` with those from `copy_qureg`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut target_qureg = Qureg::try_new(3, &env).unwrap();
+/// let mut copy_qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// clone_qureg(&mut target_qureg, &copy_qureg);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clone_qureg(
     target_qureg: &mut Qureg,
     copy_qureg: &Qureg,
