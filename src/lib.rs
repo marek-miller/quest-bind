@@ -3,15 +3,16 @@
 use std::ffi::CString;
 
 use exceptions::catch_quest_exception;
+
+mod exceptions;
+mod ffi;
+
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
     phaseFunc as PhaseFunc,
     phaseGateType as PhaseGateType,
 };
-
-mod exceptions;
-mod ffi;
 
 // TODO: define number abstractions for numerical types
 // (use num_traits)
@@ -34,7 +35,7 @@ pub enum QuestError {
     /// See also [`invalidQuESTInputError()`][1].
     ///
     /// [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
-    InvalidQuESTInput {
+    InvalidQuESTInputError {
         err_msg:  String,
         err_func: String,
     },
@@ -69,11 +70,37 @@ impl Complex {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ComplexMatrix2(ffi::ComplexMatrix2);
+
+impl ComplexMatrix2 {
+    #[must_use]
+    pub fn new(
+        real: [[Qreal; 2]; 2],
+        imag: [[Qreal; 2]; 2],
+    ) -> Self {
+        Self(ffi::ComplexMatrix2 {
+            real,
+            imag,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct ComplexMatrix4(ffi::ComplexMatrix4);
+
+impl ComplexMatrix4 {
+    #[must_use]
+    pub fn new(
+        real: [[Qreal; 4]; 4],
+        imag: [[Qreal; 4]; 4],
+    ) -> Self {
+        Self(ffi::ComplexMatrix4 {
+            real,
+            imag,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct ComplexMatrixN(ffi::ComplexMatrixN);
@@ -112,6 +139,21 @@ impl Drop for ComplexMatrixN {
 
 #[derive(Debug)]
 pub struct Vector(ffi::Vector);
+
+impl Vector {
+    #[must_use]
+    pub fn new(
+        x: Qreal,
+        y: Qreal,
+        z: Qreal,
+    ) -> Self {
+        Self(ffi::Vector {
+            x,
+            y,
+            z,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct PauliHamil(ffi::PauliHamil);
@@ -428,17 +470,47 @@ pub fn init_pauli_hamil(
     })
 }
 
+/// Update the GPU memory with the current values in `op`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuESTEnv::new();
+/// let mut op = DiagonalOp::try_new(1, &env).unwrap();
+///
+/// sync_diagonal_op(&mut op).unwrap();
+/// ```
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gab75d5cdc622d2778bad24e3a8130aab9
 pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
     })
 }
 
+/// Overwrites the entire `DiagonalOp` with the given `real` and `imag` complex
+/// elements.
+///
+/// # Examples
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuESTEnv::new();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// let real = [1., 2., 3., 4.];
+/// let imag = [5., 6., 7., 8.];
+/// init_diagonal_op(&mut op, &real, &imag);
+/// ```
+/// See [QuEST API][1] for more information.
+///
 /// # Panics
 ///
-/// This function will panic,
-/// if either `real` or `imag` have length smaller than
-/// `2.pow(num_qubits)`.
+/// This function will panic, if either `real` or `imag`
+/// have length smaller than `2.pow(num_qubits)`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga12a6c59ebbfba8bdb9453a4138027d46
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
@@ -453,6 +525,34 @@ pub fn init_diagonal_op(
     })
 }
 
+/// Populates the diagonal operator \p op to be equivalent to the given Pauli
+/// Hamiltonian
+///
+/// Assuming `hamil` contains only `PAULI_I` or `PAULI_Z` operators.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// use quest_bind::PauliOpType::*;
+///
+/// let mut hamil = PauliHamil::try_new(2, 2).unwrap();
+/// init_pauli_hamil(
+///     &mut hamil,
+///     &[0.5, -0.5],
+///     &[PAULI_I, PAULI_Z, PAULI_Z, PAULI_Z],
+/// )
+/// .unwrap();
+///
+/// let env = QuESTEnv::new();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_diagonal_op_from_pauli_hamil(&mut op, &hamil).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga2ecd67e0de9efcbbe37afbad28a8ffad
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp,
     hamil: &PauliHamil,
