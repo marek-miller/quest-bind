@@ -4,7 +4,7 @@ use super::*;
 
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let _ = Qureg::try_new(1, &env)?;
     let _ = Qureg::try_new(5, &env)?;
 
@@ -14,7 +14,7 @@ fn create_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     {
         let _ = Qureg::try_new_density(1, &env)?;
         let _ = Qureg::try_new_density(5, &env)?;
@@ -26,7 +26,7 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn create_clone_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     {
         let qureg = Qureg::try_new_density(2, &env)?;
         let _ = qureg.clone();
@@ -79,7 +79,7 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 
 #[test]
 fn create_diagonal_op() {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
 
     let _ = DiagonalOp::try_new(1, &env).unwrap();
     let _ = DiagonalOp::try_new(2, &env).unwrap();
@@ -118,7 +118,7 @@ fn initialize_pauli_hamil_01() {
 
 #[test]
 fn get_environment_string_01() {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let env_str = get_environment_string(&env).unwrap();
 
     assert!(env_str.contains("CUDA="));
@@ -130,7 +130,7 @@ fn get_environment_string_01() {
 
 #[test]
 fn get_quest_seeds_01() {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(&env);
 
     assert!(num_seeds > 0);

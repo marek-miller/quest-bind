@@ -212,14 +212,14 @@ impl Drop for PauliHamil {
 
 #[derive(Debug)]
 pub struct DiagonalOp<'a> {
-    env: &'a QuESTEnv,
+    env: &'a QuestEnv,
     op:  ffi::DiagonalOp,
 }
 
 impl<'a> DiagonalOp<'a> {
     pub fn try_new(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let op = catch_quest_exception(|| unsafe {
             ffi::createDiagonalOp(num_qubits, env.0)
@@ -233,7 +233,7 @@ impl<'a> DiagonalOp<'a> {
 
     pub fn try_new_from_file(
         fn_: &str,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let filename = CString::new(fn_).map_err(QuestError::NulError)?;
 
@@ -258,7 +258,7 @@ impl<'a> Drop for DiagonalOp<'a> {
 
 #[derive(Debug)]
 pub struct Qureg<'a> {
-    env: &'a QuESTEnv,
+    env: &'a QuestEnv,
     reg: ffi::Qureg,
 }
 
@@ -269,7 +269,7 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuESTEnv::new();
+    /// let env = QuestEnv::new();
     /// let qureg = Qureg::try_new(2, &env).unwrap();
     /// ```
     ///
@@ -283,7 +283,7 @@ impl<'a> Qureg<'a> {
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let reg = catch_quest_exception(|| unsafe {
             ffi::createQureg(num_qubits, env.0)
@@ -301,7 +301,7 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuESTEnv::new();
+    /// let env = QuestEnv::new();
     /// let qureg = Qureg::try_new_density(2, &env).unwrap();
     /// ```
     ///
@@ -315,7 +315,7 @@ impl<'a> Qureg<'a> {
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let reg = catch_quest_exception(|| unsafe {
             ffi::createDensityQureg(num_qubits, env.0)
@@ -355,9 +355,9 @@ impl<'a> Clone for Qureg<'a> {
 }
 
 #[derive(Debug)]
-pub struct QuESTEnv(ffi::QuESTEnv);
+pub struct QuestEnv(ffi::QuESTEnv);
 
-impl QuESTEnv {
+impl QuestEnv {
     #[must_use]
     pub fn new() -> Self {
         Self(unsafe { ffi::createQuESTEnv() })
@@ -370,13 +370,13 @@ impl QuESTEnv {
     }
 }
 
-impl Default for QuESTEnv {
+impl Default for QuestEnv {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Drop for QuESTEnv {
+impl Drop for QuestEnv {
     fn drop(&mut self) {
         unsafe { ffi::destroyQuESTEnv(self.0) }
     }
@@ -476,7 +476,7 @@ pub fn init_pauli_hamil(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuESTEnv::new();
+/// let env = QuestEnv::new();
 /// let mut op = DiagonalOp::try_new(1, &env).unwrap();
 ///
 /// sync_diagonal_op(&mut op).unwrap();
@@ -496,7 +496,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// # Examples
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuESTEnv::new();
+/// let env = QuestEnv::new();
 /// let mut op = DiagonalOp::try_new(2, &env).unwrap();
 ///
 /// let real = [1., 2., 3., 4.];
@@ -544,7 +544,7 @@ pub fn init_diagonal_op(
 /// )
 /// .unwrap();
 ///
-/// let env = QuESTEnv::new();
+/// let env = QuestEnv::new();
 /// let mut op = DiagonalOp::try_new(2, &env).unwrap();
 ///
 /// init_diagonal_op_from_pauli_hamil(&mut op, &hamil).unwrap();
@@ -614,7 +614,7 @@ pub fn report_state(qureg: &Qureg) {
 
 pub fn report_state_to_screen(
     qureg: &Qureg,
-    env: &QuESTEnv,
+    env: &QuestEnv,
     report_rank: i32,
 ) {
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
@@ -842,13 +842,13 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
     unsafe { ffi::syncQuESTSuccess(success_code) }
 }
 
-pub fn report_quest_env(env: &QuESTEnv) {
+pub fn report_quest_env(env: &QuestEnv) {
     unsafe {
         ffi::reportQuESTEnv(env.0);
     }
 }
 
-pub fn get_environment_string(env: &QuESTEnv) -> Result<String, QuestError> {
+pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
             .map_err(QuestError::NulError)?;
@@ -1258,7 +1258,7 @@ pub fn calc_density_inner_product(
     })
 }
 
-pub fn seed_quest_default(env: &mut QuESTEnv) {
+pub fn seed_quest_default(env: &mut QuestEnv) {
     unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
         ffi::seedQuESTDefault(env_ptr);
@@ -1266,7 +1266,7 @@ pub fn seed_quest_default(env: &mut QuESTEnv) {
 }
 
 pub fn seed_quest(
-    env: &mut QuESTEnv,
+    env: &mut QuestEnv,
     seed_array: &[u64],
     num_seeds: i32,
 ) {
@@ -1280,7 +1280,7 @@ pub fn seed_quest(
 
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
-pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuESTEnv) -> (&'b mut [u64], i32) {
+pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
     unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
         let mut num_seeds = 0_i32;
