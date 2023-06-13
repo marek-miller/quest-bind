@@ -1,12 +1,12 @@
-//! Catch exceptions thrown by `QuEST`.
+//! Catch exceptions thrown by QuEST.
 //!
-//! On failure, `QuEST` throws exceptions via user-configurable global
+//! On failure, QuEST throws exceptions via user-configurable global
 //! [`invalidQuESTInputError()`][1]. By default, this function prints an error
 //! message and aborts, which is problematic in a large distributed setup. We
 //! opt for catching all exceptions early. The exception handler is locked
-//! during an API call. This means that calling `QuEST` functions is synchronous
+//! during an API call. This means that calling QuEST functions is synchronous
 //! and should be thread-safe, but comes at the expense of being able to run
-//! only one `QuEST` API call at the time.
+//! only one QuEST API call at the time.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
@@ -35,15 +35,15 @@ struct ExceptError(Arc<Mutex<Option<QuestError>>>);
 static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
 static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
 
-/// Report error in a `QuEST` API call.
+/// Report error in a QuEST API call.
 ///
-/// This function is called by `QuEST` whenever an error occurs.  We redefine it
+/// This function is called by QuEST whenever an error occurs.  We redefine it
 /// to put the error message and site reported into a thread-safe global
 /// storage, instead of just aborting.
 ///
 /// # Panics
 ///
-/// This function will panic if strings returned by `QuEST` are not properly
+/// This function will panic if strings returned by QuEST are not properly
 /// formatted (null terminated) C strings, or if our mutex is poisoned.
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -72,14 +72,14 @@ unsafe extern "C" fn invalidQuESTInputError(
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
 
-/// Execute a call to `QuEST` API and catch exceptions.
+/// Execute a call to QuEST API and catch exceptions.
 ///
 /// This function achieves synchronous execution between threads
 /// by locking the global `QUEST_EXCEPTION_GUARD` each time,
 /// then executing the closure supplied, and finally checking the global
 /// storage `QUEST_EXCEPTION_ERROR` for any error messages reported downstream.
 ///
-/// This way, interacting with `QuEST` API should stay thread-safe at all times,
+/// This way, interacting with QuEST API should stay thread-safe at all times,
 /// at the expense of being able to call only one function at the time.
 /// This is not an undesired property and shouldn't matter much for the overall
 /// performance of the simulation, since each functions retains access to all
