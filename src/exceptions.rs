@@ -19,9 +19,10 @@
 // What if there's some lingering call to `invalidQuESTInputError()` and will
 // overlap with the next API call that should clear just fine?
 // We will catch an exception from the wrong call.  So far, this problem doesn't
-// manifest itself in unit tests, but it is a possibility.
+// manifest itself in unit tests (because the system is fast enough?),
+// but it is a possibility.
 //
-// A solution will be to mark somehow `invalidQuESTInputError()` to know which 
+// A solution will be to mark somehow `invalidQuESTInputError()` to know which
 // function we're calling from.
 //
 // Non-local exceptions suck! 🤦
