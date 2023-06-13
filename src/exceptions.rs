@@ -30,7 +30,7 @@ use super::QuestError;
 struct ExceptGuard(Arc<Mutex<[u8; 0]>>);
 
 #[derive(Default)]
-struct ExceptError(Arc<Mutex<Option<QuestError>>>);
+struct ExceptError(Arc<Mutex<Vec<QuestError>>>);
 
 static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
 static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
@@ -54,17 +54,13 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    let mut err = QUEST_EXCEPT_ERROR
+    let mut err_buf = QUEST_EXCEPT_ERROR
         .get_or_init(Default::default)
         .0
         .lock()
         .unwrap();
-    // assert!(
-    //     err.is_none(),
-    //     "All exceptions must be dealt with. This is a bug in quest_bind.  \
-    //     Please report it."
-    // );
-    *err = Some(QuestError::InvalidQuESTInputError {
+
+    err_buf.push(QuestError::InvalidQuESTInputError {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
     });
@@ -95,24 +91,36 @@ where
         .lock()
         .unwrap();
 
-    // Call QuEST API
-    let res = f();
-
-    // Catch the first exception
-    // TODO: What to do with the rest?
-    // For now, we log them as error messages via invalidQuESTInputError()
-    let err = {
-        // Wait for QueEST to finish reporting
-        let mut err = QUEST_EXCEPT_ERROR
+    // Clear the buffer
+    {
+        let mut err_buf = QUEST_EXCEPT_ERROR
             .get_or_init(Default::default)
             .0
             .lock()
             .unwrap();
 
-        // This is important! Wipe out error message before the next API call
-        (*err).take()
+        err_buf.clear();
+    }
 
-        // the lock to `err` is dropped here
+    // Call QuEST API
+    let res = f();
+
+    // Take the first exception from the buffer
+    // TODO: What to do with the rest?
+    // For now, we log them as error messages via invalidQuESTInputError()
+    let err = {
+        // Wait for QueEST to finish reporting
+        let mut err_buf = QUEST_EXCEPT_ERROR
+            .get_or_init(Default::default)
+            .0
+            .lock()
+            .unwrap();
+
+        if err_buf.len() > 0 {
+            Some(err_buf.swap_remove(0))
+        } else {
+            None
+        }
     };
 
     // Drop the guard as soon as we don't need it anymore:

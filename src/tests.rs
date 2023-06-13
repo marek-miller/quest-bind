@@ -82,19 +82,7 @@ fn create_diagonal_op_01() {
     let env = QuestEnv::new();
 
     let _ = DiagonalOp::try_new(1, &env).unwrap();
-}
-
-#[test]
-fn create_diagonal_op_02() {
-    let env = QuestEnv::new();
-
     let _ = DiagonalOp::try_new(0, &env).unwrap_err();
-}
-
-#[test]
-fn create_diagonal_op_03() {
-    let env = QuestEnv::new();
-
     let _ = DiagonalOp::try_new(-1, &env).unwrap_err();
 }
 
