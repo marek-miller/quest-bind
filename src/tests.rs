@@ -91,6 +91,49 @@ fn create_diagonal_op() {
 }
 
 #[test]
+fn set_diagonal_op_elems_01() {
+    let env = QuestEnv::new();
+    let mut op = DiagonalOp::try_new(3, &env).unwrap();
+
+    let num_elems = 3;
+    let re = [1., 2., 3.];
+    let im = [1., 2., 3.];
+    set_diagonal_op_elems(&mut op, 0, &re, &im, num_elems).unwrap();
+    set_diagonal_op_elems(&mut op, -1, &re, &im, num_elems).unwrap_err();
+    set_diagonal_op_elems(&mut op, 9, &re, &im, 3).unwrap_err();
+}
+
+#[test]
+fn apply_diagonal_op_01() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, &env).unwrap();
+    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+
+    init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+    apply_diagonal_op(&mut qureg, &op).unwrap();
+
+    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
+    apply_diagonal_op(&mut qureg, &op).unwrap_err();
+}
+
+#[test]
+fn calc_expec_diagonal_op_() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, &env).unwrap();
+    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+
+    init_plus_state(&mut qureg);
+    init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+
+    let _ = calc_expec_diagonal_op(&qureg, &op).unwrap();
+
+    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
+    let _ = calc_expec_diagonal_op(&qureg, &op).unwrap_err();
+}
+
+#[test]
 fn create_pauli_hamil_01() {
     let _ = PauliHamil::try_new(1, 1).unwrap();
     let _ = PauliHamil::try_new(2, 3).unwrap();

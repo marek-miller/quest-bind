@@ -490,8 +490,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     })
 }
 
-/// Overwrites the entire `DiagonalOp` with the given `real` and `imag` complex
-/// elements.
+/// Overwrites the entire `DiagonalOp` with the given elements.
 ///
 /// # Examples
 /// ```rust
@@ -562,11 +561,33 @@ pub fn init_diagonal_op_from_pauli_hamil(
     })
 }
 
+/// Modifies a subset of elements of `DiagonalOp`.
+///
+/// Starting at index `start_ind`, and ending at index
+/// `start_ind +  num_elems`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut op = DiagonalOp::try_new(3, &env).unwrap();
+///
+/// let num_elems = 4;
+/// let re = [1., 2., 3., 4.];
+/// let im = [1., 2., 3., 4.];
+/// set_diagonal_op_elems(&mut op, 0, &re, &im, num_elems).unwrap();
+/// ```
+///
 /// # Panics
 ///
 /// This function will panic if either
 /// `real.len() >= num_elems as usize`, or
 /// `imag.len() >= num_elems as usize`.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
 pub fn set_diagonal_op_elems(
@@ -590,6 +611,23 @@ pub fn set_diagonal_op_elems(
     })
 }
 
+/// Apply a diagonal operator to the entire `qureg`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+/// apply_diagonal_op(&mut qureg, &op).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_diagonal_op(
     qureg: &mut Qureg,
     op: &DiagonalOp,
@@ -599,6 +637,31 @@ pub fn apply_diagonal_op(
     })
 }
 
+/// Computes the expected value of the diagonal operator `op`.
+///
+/// Since `op` is not necessarily Hermitian, the expected value may be a complex
+/// number.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_zero_state(&mut qureg);
+/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+///
+/// let expec_val = calc_expec_diagonal_op(&qureg, &op).unwrap();
+///
+/// assert!((expec_val.real() - 1.).abs() < f64::EPSILON);
+/// assert!((expec_val.imag() - 5.).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
@@ -818,24 +881,6 @@ pub fn t_gate(
         ffi::tGate(qureg.reg, target_qubit);
     })
 }
-
-// #[must_use]
-// pub fn create_quest_env() -> QuESTEnv {
-//     QuESTEnv(unsafe { ffi::createQuESTEnv() })
-// }
-
-// #[allow(clippy::needless_pass_by_value)]
-// pub fn destroy_quest_env(env: QuESTEnv) {
-//     unsafe {
-//         ffi::destroyQuESTEnv(env.0);
-//     }
-// }
-
-// pub fn sync_quest_env(env: &QuESTEnv) {
-//     unsafe {
-//         ffi::syncQuESTEnv(env.0);
-//     }
-// }
 
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
