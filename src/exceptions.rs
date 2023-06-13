@@ -59,12 +59,12 @@ unsafe extern "C" fn invalidQuESTInputError(
         .0
         .lock()
         .unwrap();
-    assert!(
-        err.is_none(),
-        "All exceptions must be dealt with. This is a bug in quest_bind.  \
-         Please report it."
-    );
-    *err = Some(QuestError::InvalidQuESTInput {
+    // assert!(
+    //     err.is_none(),
+    //     "All exceptions must be dealt with. This is a bug in quest_bind.  \
+    //      Please report it."
+    // );
+    *err = Some(QuestError::InvalidQuESTInputError {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
     });

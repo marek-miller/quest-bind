@@ -3,13 +3,13 @@ use quest_bind::{
     measure_with_stats,
     report_quest_env,
     report_qureg_params,
-    QuESTEnv,
+    QuestEnv,
     QuestError,
     Qureg,
 };
 
 fn main() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     report_quest_env(&env);
 
     let mut qureg = Qureg::try_new(0x10, &env)?;

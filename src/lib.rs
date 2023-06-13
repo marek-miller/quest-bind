@@ -3,15 +3,16 @@
 use std::ffi::CString;
 
 use exceptions::catch_quest_exception;
+
+mod exceptions;
+mod ffi;
+
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
     phaseFunc as PhaseFunc,
     phaseGateType as PhaseGateType,
 };
-
-mod exceptions;
-mod ffi;
 
 // TODO: define number abstractions for numerical types
 // (use num_traits)
@@ -34,7 +35,7 @@ pub enum QuestError {
     /// See also [`invalidQuESTInputError()`][1].
     ///
     /// [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
-    InvalidQuESTInput {
+    InvalidQuESTInputError {
         err_msg:  String,
         err_func: String,
     },
@@ -69,11 +70,37 @@ impl Complex {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ComplexMatrix2(ffi::ComplexMatrix2);
+
+impl ComplexMatrix2 {
+    #[must_use]
+    pub fn new(
+        real: [[Qreal; 2]; 2],
+        imag: [[Qreal; 2]; 2],
+    ) -> Self {
+        Self(ffi::ComplexMatrix2 {
+            real,
+            imag,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct ComplexMatrix4(ffi::ComplexMatrix4);
+
+impl ComplexMatrix4 {
+    #[must_use]
+    pub fn new(
+        real: [[Qreal; 4]; 4],
+        imag: [[Qreal; 4]; 4],
+    ) -> Self {
+        Self(ffi::ComplexMatrix4 {
+            real,
+            imag,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct ComplexMatrixN(ffi::ComplexMatrixN);
@@ -92,10 +119,10 @@ impl ComplexMatrixN {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga815103261fb22ea9690e1427571df00e
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
         catch_quest_exception(|| {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
@@ -112,6 +139,21 @@ impl Drop for ComplexMatrixN {
 
 #[derive(Debug)]
 pub struct Vector(ffi::Vector);
+
+impl Vector {
+    #[must_use]
+    pub fn new(
+        x: Qreal,
+        y: Qreal,
+        z: Qreal,
+    ) -> Self {
+        Self(ffi::Vector {
+            x,
+            y,
+            z,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct PauliHamil(ffi::PauliHamil);
@@ -133,10 +175,10 @@ impl PauliHamil {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
     /// failure. This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga35b28710877c462927366fa602e591cb
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
         num_sum_terms: i32,
@@ -170,14 +212,14 @@ impl Drop for PauliHamil {
 
 #[derive(Debug)]
 pub struct DiagonalOp<'a> {
-    env: &'a QuESTEnv,
+    env: &'a QuestEnv,
     op:  ffi::DiagonalOp,
 }
 
 impl<'a> DiagonalOp<'a> {
     pub fn try_new(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let op = catch_quest_exception(|| unsafe {
             ffi::createDiagonalOp(num_qubits, env.0)
@@ -191,7 +233,7 @@ impl<'a> DiagonalOp<'a> {
 
     pub fn try_new_from_file(
         fn_: &str,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let filename = CString::new(fn_).map_err(QuestError::NulError)?;
 
@@ -216,7 +258,7 @@ impl<'a> Drop for DiagonalOp<'a> {
 
 #[derive(Debug)]
 pub struct Qureg<'a> {
-    env: &'a QuESTEnv,
+    env: &'a QuestEnv,
     reg: ffi::Qureg,
 }
 
@@ -227,7 +269,7 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuESTEnv::new();
+    /// let env = QuestEnv::new();
     /// let qureg = Qureg::try_new(2, &env).unwrap();
     /// ```
     ///
@@ -235,13 +277,13 @@ impl<'a> Qureg<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let reg = catch_quest_exception(|| unsafe {
             ffi::createQureg(num_qubits, env.0)
@@ -259,7 +301,7 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuESTEnv::new();
+    /// let env = QuestEnv::new();
     /// let qureg = Qureg::try_new_density(2, &env).unwrap();
     /// ```
     ///
@@ -267,13 +309,13 @@ impl<'a> Qureg<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(
         num_qubits: i32,
-        env: &'a QuESTEnv,
+        env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
         let reg = catch_quest_exception(|| unsafe {
             ffi::createDensityQureg(num_qubits, env.0)
@@ -313,9 +355,9 @@ impl<'a> Clone for Qureg<'a> {
 }
 
 #[derive(Debug)]
-pub struct QuESTEnv(ffi::QuESTEnv);
+pub struct QuestEnv(ffi::QuESTEnv);
 
-impl QuESTEnv {
+impl QuestEnv {
     #[must_use]
     pub fn new() -> Self {
         Self(unsafe { ffi::createQuESTEnv() })
@@ -328,13 +370,13 @@ impl QuESTEnv {
     }
 }
 
-impl Default for QuESTEnv {
+impl Default for QuestEnv {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Drop for QuESTEnv {
+impl Drop for QuestEnv {
     fn drop(&mut self) {
         unsafe { ffi::destroyQuESTEnv(self.0) }
     }
@@ -363,10 +405,10 @@ impl Drop for QuESTEnv {
 /// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
 /// either `real` or `imag` is not a square array of dimension equal to the
 /// number of qubits in `m`.  Otherwise, returns
-/// [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+/// [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
 /// failure. This is an exception thrown by `QuEST`.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga429f1b90b3ef06c786dec8c7f0eda4ce
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
@@ -417,7 +459,7 @@ pub fn init_complex_matrix_n(
 ///
 /// See [QuEST API][1] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gadbe6701dda1d49168f2f23253e370a7a
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
@@ -428,17 +470,47 @@ pub fn init_pauli_hamil(
     })
 }
 
+/// Update the GPU memory with the current values in `op`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut op = DiagonalOp::try_new(1, &env).unwrap();
+///
+/// sync_diagonal_op(&mut op).unwrap();
+/// ```
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
     })
 }
 
+/// Overwrites the entire `DiagonalOp` with the given elements.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// let real = [1., 2., 3., 4.];
+/// let imag = [5., 6., 7., 8.];
+/// init_diagonal_op(&mut op, &real, &imag);
+/// ```
+/// See [QuEST API][1] for more information.
+///
 /// # Panics
 ///
-/// This function will panic,
-/// if either `real` or `imag` have length smaller than
-/// `2.pow(num_qubits)`.
+/// This function will panic, if either `real` or `imag`
+/// have length smaller than `2.pow(num_qubits)`.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
@@ -453,6 +525,34 @@ pub fn init_diagonal_op(
     })
 }
 
+/// Populates the diagonal operator \p op to be equivalent to the given Pauli
+/// Hamiltonian
+///
+/// Assuming `hamil` contains only `PAULI_I` or `PAULI_Z` operators.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// use quest_bind::PauliOpType::*;
+///
+/// let mut hamil = PauliHamil::try_new(2, 2).unwrap();
+/// init_pauli_hamil(
+///     &mut hamil,
+///     &[0.5, -0.5],
+///     &[PAULI_I, PAULI_Z, PAULI_Z, PAULI_Z],
+/// )
+/// .unwrap();
+///
+/// let env = QuestEnv::new();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_diagonal_op_from_pauli_hamil(&mut op, &hamil).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp,
     hamil: &PauliHamil,
@@ -462,11 +562,33 @@ pub fn init_diagonal_op_from_pauli_hamil(
     })
 }
 
+/// Modifies a subset of elements of `DiagonalOp`.
+///
+/// Starting at index `start_ind`, and ending at index
+/// `start_ind +  num_elems`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut op = DiagonalOp::try_new(3, &env).unwrap();
+///
+/// let num_elems = 4;
+/// let re = [1., 2., 3., 4.];
+/// let im = [1., 2., 3., 4.];
+/// set_diagonal_op_elems(&mut op, 0, &re, &im, num_elems).unwrap();
+/// ```
+///
 /// # Panics
 ///
 /// This function will panic if either
 /// `real.len() >= num_elems as usize`, or
 /// `imag.len() >= num_elems as usize`.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
 pub fn set_diagonal_op_elems(
@@ -490,6 +612,23 @@ pub fn set_diagonal_op_elems(
     })
 }
 
+/// Apply a diagonal operator to the entire `qureg`.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+/// apply_diagonal_op(&mut qureg, &op).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_diagonal_op(
     qureg: &mut Qureg,
     op: &DiagonalOp,
@@ -499,6 +638,31 @@ pub fn apply_diagonal_op(
     })
 }
 
+/// Computes the expected value of the diagonal operator `op`.
+///
+/// Since `op` is not necessarily Hermitian, the expected value may be a complex
+/// number.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+///
+/// init_zero_state(&mut qureg);
+/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+///
+/// let expec_val = calc_expec_diagonal_op(&qureg, &op).unwrap();
+///
+/// assert!((expec_val.real() - 1.).abs() < f64::EPSILON);
+/// assert!((expec_val.imag() - 5.).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
@@ -514,7 +678,7 @@ pub fn report_state(qureg: &Qureg) {
 
 pub fn report_state_to_screen(
     qureg: &Qureg,
-    env: &QuESTEnv,
+    env: &QuestEnv,
     report_rank: i32,
 ) {
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
@@ -719,36 +883,18 @@ pub fn t_gate(
     })
 }
 
-// #[must_use]
-// pub fn create_quest_env() -> QuESTEnv {
-//     QuESTEnv(unsafe { ffi::createQuESTEnv() })
-// }
-
-// #[allow(clippy::needless_pass_by_value)]
-// pub fn destroy_quest_env(env: QuESTEnv) {
-//     unsafe {
-//         ffi::destroyQuESTEnv(env.0);
-//     }
-// }
-
-// pub fn sync_quest_env(env: &QuESTEnv) {
-//     unsafe {
-//         ffi::syncQuESTEnv(env.0);
-//     }
-// }
-
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
     unsafe { ffi::syncQuESTSuccess(success_code) }
 }
 
-pub fn report_quest_env(env: &QuESTEnv) {
+pub fn report_quest_env(env: &QuestEnv) {
     unsafe {
         ffi::reportQuESTEnv(env.0);
     }
 }
 
-pub fn get_environment_string(env: &QuESTEnv) -> Result<String, QuestError> {
+pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
             .map_err(QuestError::NulError)?;
@@ -1158,7 +1304,7 @@ pub fn calc_density_inner_product(
     })
 }
 
-pub fn seed_quest_default(env: &mut QuESTEnv) {
+pub fn seed_quest_default(env: &mut QuestEnv) {
     unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
         ffi::seedQuESTDefault(env_ptr);
@@ -1166,7 +1312,7 @@ pub fn seed_quest_default(env: &mut QuESTEnv) {
 }
 
 pub fn seed_quest(
-    env: &mut QuESTEnv,
+    env: &mut QuestEnv,
     seed_array: &[u64],
     num_seeds: i32,
 ) {
@@ -1180,7 +1326,7 @@ pub fn seed_quest(
 
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
-pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuESTEnv) -> (&'b mut [u64], i32) {
+pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
     unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
         let mut num_seeds = 0_i32;

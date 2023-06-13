@@ -4,7 +4,7 @@ use super::*;
 
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let _ = Qureg::try_new(1, &env)?;
     let _ = Qureg::try_new(5, &env)?;
 
@@ -14,7 +14,7 @@ fn create_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     {
         let _ = Qureg::try_new_density(1, &env)?;
         let _ = Qureg::try_new_density(5, &env)?;
@@ -26,7 +26,7 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn create_clone_qureg_01() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     {
         let qureg = Qureg::try_new_density(2, &env)?;
         let _ = qureg.clone();
@@ -78,6 +78,62 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 }
 
 #[test]
+fn create_diagonal_op() {
+    let env = QuestEnv::new();
+
+    let _ = DiagonalOp::try_new(1, &env).unwrap();
+    let _ = DiagonalOp::try_new(2, &env).unwrap();
+    let _ = DiagonalOp::try_new(3, &env).unwrap();
+
+    let _ = DiagonalOp::try_new(0, &env).unwrap_err();
+    let _ = DiagonalOp::try_new(-1, &env).unwrap_err();
+    let _ = DiagonalOp::try_new(-2, &env).unwrap_err();
+}
+
+#[test]
+fn set_diagonal_op_elems_01() {
+    let env = QuestEnv::new();
+    let mut op = DiagonalOp::try_new(3, &env).unwrap();
+
+    let num_elems = 3;
+    let re = [1., 2., 3.];
+    let im = [1., 2., 3.];
+    set_diagonal_op_elems(&mut op, 0, &re, &im, num_elems).unwrap();
+    set_diagonal_op_elems(&mut op, -1, &re, &im, num_elems).unwrap_err();
+    set_diagonal_op_elems(&mut op, 9, &re, &im, 3).unwrap_err();
+}
+
+#[test]
+fn apply_diagonal_op_01() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, &env).unwrap();
+    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+
+    init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+    apply_diagonal_op(&mut qureg, &op).unwrap();
+
+    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
+    apply_diagonal_op(&mut qureg, &op).unwrap_err();
+}
+
+#[test]
+fn calc_expec_diagonal_op_() {
+    let env = QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, &env).unwrap();
+    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+
+    init_plus_state(&mut qureg);
+    init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+
+    let _ = calc_expec_diagonal_op(&qureg, &op).unwrap();
+
+    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
+    let _ = calc_expec_diagonal_op(&qureg, &op).unwrap_err();
+}
+
+#[test]
 fn create_pauli_hamil_01() {
     let _ = PauliHamil::try_new(1, 1).unwrap();
     let _ = PauliHamil::try_new(2, 3).unwrap();
@@ -105,7 +161,7 @@ fn initialize_pauli_hamil_01() {
 
 #[test]
 fn get_environment_string_01() {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let env_str = get_environment_string(&env).unwrap();
 
     assert!(env_str.contains("CUDA="));
@@ -117,7 +173,7 @@ fn get_environment_string_01() {
 
 #[test]
 fn get_quest_seeds_01() {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(&env);
 
     assert!(num_seeds > 0);
