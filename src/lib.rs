@@ -696,33 +696,133 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     })
 }
 
+/// Returns the number of qubits represented.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// assert_eq!(get_num_qubits(&qureg), 3);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn get_num_qubits(qureg: &Qureg) -> i32 {
     unsafe { ffi::getNumQubits(qureg.reg) }
 }
 
+/// Returns the number of complex amplitudes in a state-vector.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// assert_eq!(get_num_amps(&qureg).unwrap(), 8);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getNumAmps(qureg.reg) })
 }
 
+/// Initializes a `qureg` to have all-zero-amplitudes.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// init_blank_state(&mut qureg);
+///
+/// assert!(get_prob_amp(&qureg, 0).unwrap().abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_blank_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initBlankState(qureg.reg);
     }
 }
 
+/// Initialize `qureg` into the zero state.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// init_zero_state(&mut qureg);
+///
+/// assert!((get_prob_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_zero_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initZeroState(qureg.reg);
     }
 }
 
+/// Initialize `qureg` into the plus state.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// init_plus_state(&mut qureg);
+/// let prob = get_prob_amp(&qureg, 0).unwrap();
+///
+/// assert!((prob - 0.125).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_plus_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initPlusState(qureg.reg);
     }
 }
 
+/// Initialize `qureg` into a classical state.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+///
+/// init_classical_state(&mut qureg, 8);
+/// let prob = get_prob_amp(&qureg, 0).unwrap();
+///
+/// assert!(prob.abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_classical_state(
     qureg: &mut Qureg,
     state_ind: i64,
@@ -732,6 +832,24 @@ pub fn init_classical_state(
     })
 }
 
+/// Initialize `qureg` into a pure state.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let mut qureg = Qureg::try_new_density(3, &env).unwrap();
+/// let mut pure_state = Qureg::try_new(3, &env).unwrap();
+/// init_zero_state(&mut pure_state);
+/// init_pure_state(&mut qureg, &pure_state).unwrap();
+///
+/// assert!((calc_purity(&qureg).unwrap() - 1.0).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pure_state(
     qureg: &mut Qureg,
     pure_: &Qureg,
@@ -741,6 +859,11 @@ pub fn init_pure_state(
     })
 }
 
+/// Initializes `qureg` to be in the debug state.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_debug_state(qureg: &mut Qureg) {
     unsafe {
         ffi::initDebugState(qureg.reg);
