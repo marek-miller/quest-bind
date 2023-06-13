@@ -122,7 +122,7 @@ impl ComplexMatrixN {
     /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga815103261fb22ea9690e1427571df00e
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
         catch_quest_exception(|| {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
@@ -178,7 +178,7 @@ impl PauliHamil {
     /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
     /// failure. This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga35b28710877c462927366fa602e591cb
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
         num_sum_terms: i32,
@@ -280,7 +280,7 @@ impl<'a> Qureg<'a> {
     /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga3392816c0643414165c2f5caeec17df0
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
         env: &'a QuESTEnv,
@@ -312,7 +312,7 @@ impl<'a> Qureg<'a> {
     /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga93e55b6650b408abb30a1d4a8bce757c
+    /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(
         num_qubits: i32,
         env: &'a QuESTEnv,
@@ -408,7 +408,7 @@ impl Drop for QuESTEnv {
 /// [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
 /// failure. This is an exception thrown by `QuEST`.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga429f1b90b3ef06c786dec8c7f0eda4ce
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
@@ -459,7 +459,7 @@ pub fn init_complex_matrix_n(
 ///
 /// See [QuEST API][1] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gadbe6701dda1d49168f2f23253e370a7a
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
@@ -483,7 +483,7 @@ pub fn init_pauli_hamil(
 /// ```
 /// See [QuEST API][1] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#gab75d5cdc622d2778bad24e3a8130aab9
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
@@ -510,7 +510,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// This function will panic, if either `real` or `imag`
 /// have length smaller than `2.pow(num_qubits)`.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga12a6c59ebbfba8bdb9453a4138027d46
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
@@ -552,7 +552,7 @@ pub fn init_diagonal_op(
 ///
 /// See [QuEST API][1] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/group__type.html#ga2ecd67e0de9efcbbe37afbad28a8ffad
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp,
     hamil: &PauliHamil,
