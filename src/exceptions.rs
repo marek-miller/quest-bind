@@ -62,12 +62,13 @@ unsafe extern "C" fn invalidQuESTInputError(
     // assert!(
     //     err.is_none(),
     //     "All exceptions must be dealt with. This is a bug in quest_bind.  \
-    //      Please report it."
+    //     Please report it."
     // );
     *err = Some(QuestError::InvalidQuESTInputError {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
     });
+    eprintln!("except {:?}", err);
 
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
@@ -100,12 +101,15 @@ where
 
     // Catch exception
     let err = {
+        // std::thread::sleep(std::time::Duration::from_millis(100));
         // Wait for QueEST to finish reporting
         let mut err = QUEST_EXCEPT_ERROR
             .get_or_init(Default::default)
             .0
             .lock()
             .unwrap();
+
+        // eprintln!("catch : {:?}", err);
 
         // This is important! Wipe out error message before the next API call
         (*err).take()

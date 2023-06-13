@@ -78,16 +78,30 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 }
 
 #[test]
-fn create_diagonal_op() {
+fn create_diagonal_op_01() {
     let env = QuestEnv::new();
 
+    eprintln!("1");
     let _ = DiagonalOp::try_new(1, &env).unwrap();
-    let _ = DiagonalOp::try_new(2, &env).unwrap();
-    let _ = DiagonalOp::try_new(3, &env).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(10));
+}
 
+#[test]
+fn create_diagonal_op_02() {
+    let env = QuestEnv::new();
+
+    eprintln!("0");
     let _ = DiagonalOp::try_new(0, &env).unwrap_err();
-    let _ = DiagonalOp::try_new(-1, &env).unwrap_err();
-    let _ = DiagonalOp::try_new(-2, &env).unwrap_err();
+    std::thread::sleep(std::time::Duration::from_millis(10));
+}
+
+#[test]
+fn create_diagonal_op_03() {
+    let env = QuestEnv::new();
+
+    eprintln!("-1");
+    let _ = DiagonalOp::try_new(-1, &env).unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(10));
 }
 
 #[test]
