@@ -119,7 +119,7 @@ impl ComplexMatrixN {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -175,7 +175,7 @@ impl PauliHamil {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
     /// failure. This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -277,7 +277,7 @@ impl<'a> Qureg<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -309,7 +309,7 @@ impl<'a> Qureg<'a> {
     ///
     /// # Errors
     ///
-    /// Returns [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput)
+    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -405,7 +405,7 @@ impl Drop for QuestEnv {
 /// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
 /// either `real` or `imag` is not a square array of dimension equal to the
 /// number of qubits in `m`.  Otherwise, returns
-/// [`QuestError::InvalidQuESTInput`](crate::QuestError::InvalidQuESTInput) on
+/// [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
 /// failure. This is an exception thrown by `QuEST`.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -493,6 +493,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// Overwrites the entire `DiagonalOp` with the given elements.
 ///
 /// # Examples
+///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
