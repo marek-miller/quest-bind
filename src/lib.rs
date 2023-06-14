@@ -759,7 +759,7 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// init_zero_state(qureg);
 ///
-/// assert!((get_prob_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -831,10 +831,11 @@ pub fn init_classical_state(
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 /// let pure_state = &mut Qureg::try_new(3, env).unwrap();
-/// init_zero_state(pure_state);
-/// init_pure_state(qureg, &pure_state).unwrap();
 ///
-/// assert!((calc_purity(&qureg).unwrap() - 1.0).abs() < f64::EPSILON);
+/// init_zero_state(pure_state);
+/// init_pure_state(qureg, pure_state).unwrap();
+///
+/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -903,9 +904,9 @@ pub fn init_state_from_amps(
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
-/// let num_amps = 4;
 /// let mut re = &mut [1., 2., 3., 4.];
 /// let mut im = &mut [1., 2., 3., 4.];
+/// let num_amps = 4;
 ///
 /// set_amps(qureg, 0, re, im, num_amps);
 ///
@@ -950,9 +951,9 @@ pub fn set_amps(
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 ///
-/// let num_amps = 4;
 /// let mut re = &[1., 2., 3., 4.];
 /// let mut im = &[1., 2., 3., 4.];
+/// let num_amps = 4;
 ///
 /// set_density_amps(qureg, 0, 0, re, im, num_amps);
 /// ```
@@ -1013,6 +1014,7 @@ pub fn clone_qureg(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
 /// let target_qubit = 1;
 /// let angle = 0.5;
 ///
@@ -1040,6 +1042,7 @@ pub fn phase_shift(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
 /// let id_qubit1 = 0;
 /// let id_qubit2 = 2;
 /// let angle = 0.5;
@@ -1068,6 +1071,7 @@ pub fn controlled_phase_shift(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(4, env).unwrap();
+///
 /// let control_qubits = &[0, 1, 3];
 /// let num_control_qubits = control_qubits.len() as i32;
 /// let angle = 0.5;
