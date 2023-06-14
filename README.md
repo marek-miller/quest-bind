@@ -78,7 +78,7 @@ Measure first qubit.
 Outcome: 0 with prob: 0.50
 ```
 
-## Distributed and GPU accelerated mode
+## Distributed and GPU-accelerated mode
 
 QuEST support for MPI and GPU accelerated computation is enabled by setting
 appropriate feature flags. To use QuEST's MPI mode, enable `mpi` feature for
@@ -94,7 +94,7 @@ edition = "2021"
 quest_bind = { git = "https://github.com/marek-miller/quest-bind.git", features = ["mpi",] }
 ```
 
-Now if we compile and run the above programme again, the output should be:
+Now if you compile and run the above programme again, the output should be:
 
 ```text
 EXECUTION ENVIRONMENT:
@@ -104,7 +104,7 @@ Number of ranks is 1
 ```
 
 The feature `"gpu"` enables the GPU accelerated mode. These features are
-mutually exclusive, so if you set both flags, the feature `"mpi"` takes
+mutually exclusive and in case both flags are set, the feature `"mpi"` takes
 precedence.
 
 ## Testing
@@ -164,6 +164,33 @@ an API call. This means that calling QuEST functions is synchronous and should
 be thread-safe, but comes at the expense of being able to run only one QuEST API
 call at the time. Bear in mind, though, that each QuEST function retains access
 to all parallel computation resources available in the system.
+
+## Numerical types
+
+For now, numerical types used by `quest-bind` are chosen to match exactly the C
+types that QuEST uses on `x86_64`. This is a safe, but not very portable
+strategy. We pass Rust types directly to QuEST without casting, assuming the
+following type definitions:
+
+```rust
+pub type c_double = f64;
+pub type c_int = i32;
+pub type c_longlong = i64;
+```
+
+This should work for many different architectures. If your system uses slightly
+numerical types, `quest-bind` simply won't compile and there isn't much you can
+do besides manually altering the source code. In the future, `quest-bind` will
+use numerical abstractions from
+[`num_traits`](https://docs.rs/num-traits/latest/num_traits/) for greater
+portability.
+
+To check, what C types are defined by your Rust installation, see local
+documentation of the Standard Library's module `std::ffi`:
+
+```sh
+rustup doc
+```
 
 ## Releases
 
