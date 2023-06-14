@@ -8,11 +8,11 @@
 //! and should be thread-safe, but comes at the expense of being able to run
 //! only one `QuEST` API call at the time.
 //!
-//! The present implementation works because QuEST's `invalidQuESTInputError()`
-//! is synchronous and *all* QuEST API calls from us that can
-//! potentially throw an exception are wrapped with `catch_quest_exception()`.
-//! This way we ensure the calls are atomic and all exceptions have been thrown
-//! already when it's time for us to scoop them.
+//! The present implementation works because `QuEST`'s
+//! `invalidQuESTInputError()` is synchronous and *all* `QuEST` API calls from
+//! us that can potentially throw an exception are wrapped with
+//! `catch_quest_exception()`. This way we ensure the calls are atomic and all
+//! exceptions have been thrown already when it's time for us to scoop them.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
