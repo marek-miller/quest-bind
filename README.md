@@ -239,6 +239,7 @@ New features/improvements:
 - Improve documentation
 - Add build script
 - Constructors/destructors for QuEST structs
+- Add Github workflows CT
 
 ### v0.1.0 (11/06/2023)
 
