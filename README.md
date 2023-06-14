@@ -26,22 +26,19 @@ Now write some code and put it in `./src/main.rs`:
 ```rust
 use quest_bind::*;
 
+
 fn main() -> Result<(), QuestError> {
-    let env = QuESTEnv::new();
+    let env = QuestEnv::new();
     report_quest_env(&env);
 
-    let mut qureg = Qureg::try_new(0x10, &env)?;
-    {
-        let qureg = &mut qureg;
-        init_plus_state(qureg);
-        report_qureg_params(qureg);
+    let qureg = &mut Qureg::try_new(0x10, &env)?;
+    report_qureg_params(qureg);
+    init_plus_state(qureg);
 
-        let mut outcome_prob = 0.;
-        let outcome = measure_with_stats(qureg, 1, &mut outcome_prob)?;
-
-        println!("Measure first qubit.");
-        println!("Outcome: {outcome} with prob: {outcome_prob:.2}");
-    }
+    let outcome_prob = &mut -1.;
+    let outcome = measure_with_stats(qureg, 1, outcome_prob)?;
+    println!("Measure first qubit.");
+    println!("Outcome: {outcome} with prob.: {outcome_prob:.2}");
 
     Ok(())
 }
@@ -179,14 +176,14 @@ pub type c_longlong = i64;
 ```
 
 This should work for many different architectures. If your system uses slightly
-numerical types, `quest-bind` simply won't compile and there isn't much you can
-do besides manually altering the source code. In the future, `quest-bind` will
-use numerical abstractions from
+different numerical types, `quest-bind` simply won't compile and there isn't
+much you can do besides manually altering the source code. In the future,
+`quest-bind` will use numerical abstractions from
 [`num_traits`](https://docs.rs/num-traits/latest/num_traits/) for greater
 portability.
 
-To check, what C types are defined by your Rust installation, see local
-documentation of the Standard Library's module `std::ffi`:
+To check what C types are defined by your Rust installation, see local
+documentation for the module `std::ffi` in Rust's Standard Library:
 
 ```sh
 rustup doc
