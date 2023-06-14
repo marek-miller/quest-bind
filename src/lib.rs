@@ -379,9 +379,9 @@ impl Drop for QuestEnv {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let mut mtr = ComplexMatrixN::try_new(2).unwrap();
+/// let mtr = &mut ComplexMatrixN::try_new(2).unwrap();
 /// init_complex_matrix_n(
-///     &mut mtr,
+///     mtr,
 ///     &[&[1., 2.], &[3., 4.]],
 ///     &[&[5., 6.], &[7., 8.]],
 /// )
@@ -437,10 +437,10 @@ pub fn init_complex_matrix_n(
 /// # use quest_bind::*;
 /// use quest_bind::PauliOpType::*;
 ///
-/// let mut hamil = PauliHamil::try_new(2, 2).unwrap();
+/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
 ///
 /// init_pauli_hamil(
-///     &mut hamil,
+///     hamil,
 ///     &[0.5, -0.5],
 ///     &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
 /// )
@@ -467,9 +467,9 @@ pub fn init_pauli_hamil(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut op = DiagonalOp::try_new(1, &env).unwrap();
+/// let op = &mut DiagonalOp::try_new(1, &env).unwrap();
 ///
-/// sync_diagonal_op(&mut op).unwrap();
+/// sync_diagonal_op(op).unwrap();
 /// ```
 /// See [QuEST API][1] for more information.
 ///
@@ -487,11 +487,11 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+/// let mut op = &mut DiagonalOp::try_new(2, &env).unwrap();
 ///
-/// let real = [1., 2., 3., 4.];
-/// let imag = [5., 6., 7., 8.];
-/// init_diagonal_op(&mut op, &real, &imag);
+/// let real = &[1., 2., 3., 4.];
+/// let imag = &[5., 6., 7., 8.];
+/// init_diagonal_op(op, real, imag);
 /// ```
 /// See [QuEST API][1] for more information.
 ///
@@ -526,18 +526,18 @@ pub fn init_diagonal_op(
 /// # use quest_bind::*;
 /// use quest_bind::PauliOpType::*;
 ///
-/// let mut hamil = PauliHamil::try_new(2, 2).unwrap();
+/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
 /// init_pauli_hamil(
-///     &mut hamil,
+///     hamil,
 ///     &[0.5, -0.5],
 ///     &[PAULI_I, PAULI_Z, PAULI_Z, PAULI_Z],
 /// )
 /// .unwrap();
 ///
 /// let env = QuestEnv::new();
-/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+/// let mut op = &mut DiagonalOp::try_new(2, &env).unwrap();
 ///
-/// init_diagonal_op_from_pauli_hamil(&mut op, &hamil).unwrap();
+/// init_diagonal_op_from_pauli_hamil(op, hamil).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -562,12 +562,12 @@ pub fn init_diagonal_op_from_pauli_hamil(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut op = DiagonalOp::try_new(3, &env).unwrap();
+/// let op = &mut DiagonalOp::try_new(3, &env).unwrap();
 ///
 /// let num_elems = 4;
-/// let re = [1., 2., 3., 4.];
-/// let im = [1., 2., 3., 4.];
-/// set_diagonal_op_elems(&mut op, 0, &re, &im, num_elems).unwrap();
+/// let re = &[1., 2., 3., 4.];
+/// let im = &[1., 2., 3., 4.];
+/// set_diagonal_op_elems(op, 0, re, im, num_elems).unwrap();
 /// ```
 ///
 /// # Panics
@@ -609,11 +609,11 @@ pub fn set_diagonal_op_elems(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(2, &env).unwrap();
-/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
+/// let op = &mut DiagonalOp::try_new(2, &env).unwrap();
 ///
-/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
-/// apply_diagonal_op(&mut qureg, &op).unwrap();
+/// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+/// apply_diagonal_op(qureg, &op).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -638,13 +638,13 @@ pub fn apply_diagonal_op(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(2, &env).unwrap();
-/// let mut op = DiagonalOp::try_new(2, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
+/// let op = &mut DiagonalOp::try_new(2, &env).unwrap();
 ///
-/// init_zero_state(&mut qureg);
-/// init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
+/// init_zero_state(qureg);
+/// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
 ///
-/// let expec_val = calc_expec_diagonal_op(&qureg, &op).unwrap();
+/// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();
 ///
 /// assert!((expec_val.real() - 1.).abs() < f64::EPSILON);
 /// assert!((expec_val.imag() - 5.).abs() < f64::EPSILON);
@@ -693,9 +693,9 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &Qureg::try_new(3, &env).unwrap();
 ///
-/// assert_eq!(get_num_qubits(&qureg), 3);
+/// assert_eq!(get_num_qubits(qureg), 3);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -713,9 +713,9 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &Qureg::try_new(3, &env).unwrap();
 ///
-/// assert_eq!(get_num_amps(&qureg).unwrap(), 8);
+/// assert_eq!(get_num_amps(qureg).unwrap(), 8);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -732,11 +732,11 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
 ///
-/// init_blank_state(&mut qureg);
+/// init_blank_state(qureg);
 ///
-/// assert!(get_prob_amp(&qureg, 0).unwrap().abs() < f64::EPSILON);
+/// assert!(get_prob_amp(qureg, 0).unwrap().abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -755,9 +755,9 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
 ///
-/// init_zero_state(&mut qureg);
+/// init_zero_state(qureg);
 ///
 /// assert!((get_prob_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
 /// ```
@@ -778,10 +778,10 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
 ///
-/// init_plus_state(&mut qureg);
-/// let prob = get_prob_amp(&qureg, 0).unwrap();
+/// init_plus_state(qureg);
+/// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
 /// assert!((prob - 0.125).abs() < f64::EPSILON);
 /// ```
@@ -802,10 +802,10 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
 ///
-/// init_classical_state(&mut qureg, 8);
-/// let prob = get_prob_amp(&qureg, 0).unwrap();
+/// init_classical_state(qureg, 8);
+/// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
 /// assert!(prob.abs() < f64::EPSILON);
 /// ```
@@ -829,10 +829,10 @@ pub fn init_classical_state(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new_density(3, &env).unwrap();
-/// let mut pure_state = Qureg::try_new(3, &env).unwrap();
-/// init_zero_state(&mut pure_state);
-/// init_pure_state(&mut qureg, &pure_state).unwrap();
+/// let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
+/// let pure_state = &mut Qureg::try_new(3, &env).unwrap();
+/// init_zero_state(pure_state);
+/// init_pure_state(qureg, &pure_state).unwrap();
 ///
 /// assert!((calc_purity(&qureg).unwrap() - 1.0).abs() < f64::EPSILON);
 /// ```
@@ -867,10 +867,10 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(2, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
 ///
-/// init_state_from_amps(&mut qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
-/// let prob = get_prob_amp(&qureg, 0).unwrap();
+/// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
+/// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
 /// assert!((prob - 1.).abs() < f64::EPSILON);
 /// ```
@@ -901,20 +901,20 @@ pub fn init_state_from_amps(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
 ///
 /// let num_amps = 4;
-/// let mut re = [1., 2., 3., 4.];
-/// let mut im = [1., 2., 3., 4.];
+/// let mut re = &mut [1., 2., 3., 4.];
+/// let mut im = &mut [1., 2., 3., 4.];
 ///
-/// set_amps(&mut qureg, 0, &re, &im, num_amps);
+/// set_amps(qureg, 0, re, im, num_amps);
 ///
 /// // modify re and im to the next set of elements
 /// for i in 0..4 {
 ///     re[i] += 4.;
 ///     im[i] += 4.;
 /// }
-/// set_amps(&mut qureg, 4, &re, &im, num_amps);
+/// set_amps(qureg, 4, re, im, num_amps);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -948,13 +948,13 @@ pub fn set_amps(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut qureg = Qureg::try_new_density(3, &env).unwrap();
+/// let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
 ///
 /// let num_amps = 4;
-/// let mut re = [1., 2., 3., 4.];
-/// let mut im = [1., 2., 3., 4.];
+/// let mut re = &[1., 2., 3., 4.];
+/// let mut im = &[1., 2., 3., 4.];
 ///
-/// set_density_amps(&mut qureg, 0, 0, &re, &im, num_amps);
+/// set_density_amps(qureg, 0, 0, re, im, num_amps);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -987,10 +987,10 @@ pub fn set_density_amps(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let mut target_qureg = Qureg::try_new(3, &env).unwrap();
-/// let mut copy_qureg = Qureg::try_new(3, &env).unwrap();
+/// let target_qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let copy_qureg = &Qureg::try_new(3, &env).unwrap();
 ///
-/// clone_qureg(&mut target_qureg, &copy_qureg);
+/// clone_qureg(target_qureg, copy_qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

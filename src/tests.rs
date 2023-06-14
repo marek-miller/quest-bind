@@ -168,24 +168,23 @@ fn set_amps_01() {
 #[test]
 fn set_density_amps_01() {
     let env = QuestEnv::new();
-    let mut qureg = Qureg::try_new_density(3, &env).unwrap();
+    let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
 
-    let num_amps = 4;
-    let re = [1., 2., 3., 4.];
-    let im = [1., 2., 3., 4.];
+    let re = &[1., 2., 3., 4.];
+    let im = &[1., 2., 3., 4.];
 
-    set_density_amps(&mut qureg, 0, 0, &re, &im, num_amps).unwrap();
+    set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
     assert!(
         (get_density_amp(&qureg, 0, 0).unwrap().real() - 1.).abs()
             < f64::EPSILON
     );
 
-    set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap_err();
+    set_amps(qureg, 0, re, im, 4).unwrap_err();
 
-    set_density_amps(&mut qureg, 0, 9, &re, &im, 4).unwrap_err();
-    set_density_amps(&mut qureg, 8, 7, &re, &im, 4).unwrap_err();
-    set_density_amps(&mut qureg, 0, -1, &re, &im, 9).unwrap_err();
-    set_density_amps(&mut qureg, 0, 1, &re, &im, -9).unwrap_err();
+    set_density_amps(qureg, 0, 9, re, im, 4).unwrap_err();
+    set_density_amps(qureg, 8, 7, re, im, 4).unwrap_err();
+    set_density_amps(qureg, 0, -1, re, im, 9).unwrap_err();
+    set_density_amps(qureg, 0, 1, re, im, -9).unwrap_err();
 }
 
 #[test]
