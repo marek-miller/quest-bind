@@ -9,10 +9,10 @@ use quest_bind::{
 };
 
 fn main() -> Result<(), QuestError> {
-    let env = QuestEnv::new();
-    report_quest_env(&env);
+    let env = &QuestEnv::new();
+    report_quest_env(env);
 
-    let qureg = &mut Qureg::try_new(0x10, &env)?;
+    let qureg = &mut Qureg::try_new(0x10, env)?;
     report_qureg_params(qureg);
     init_plus_state(qureg);
 

@@ -4,22 +4,22 @@ use super::*;
 
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
-    let env = QuestEnv::new();
-    let _ = Qureg::try_new(1, &env)?;
-    let _ = Qureg::try_new(5, &env)?;
+    let env = &QuestEnv::new();
+    let _ = Qureg::try_new(1, env)?;
+    let _ = Qureg::try_new(5, env)?;
 
-    let _ = Qureg::try_new(0, &env).unwrap_err();
+    let _ = Qureg::try_new(0, env).unwrap_err();
     Ok(())
 }
 
 #[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
-    let env = QuestEnv::new();
+    let env = &QuestEnv::new();
     {
-        let _ = Qureg::try_new_density(1, &env)?;
-        let _ = Qureg::try_new_density(5, &env)?;
+        let _ = Qureg::try_new_density(1, env)?;
+        let _ = Qureg::try_new_density(5, env)?;
 
-        let _ = Qureg::try_new_density(0, &env).unwrap_err();
+        let _ = Qureg::try_new_density(0, env).unwrap_err();
     }
     Ok(())
 }
@@ -69,17 +69,17 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 
 #[test]
 fn create_diagonal_op_01() {
-    let env = QuestEnv::new();
+    let env = &QuestEnv::new();
 
-    let _ = DiagonalOp::try_new(1, &env).unwrap();
-    let _ = DiagonalOp::try_new(0, &env).unwrap_err();
-    let _ = DiagonalOp::try_new(-1, &env).unwrap_err();
+    let _ = DiagonalOp::try_new(1, env).unwrap();
+    let _ = DiagonalOp::try_new(0, env).unwrap_err();
+    let _ = DiagonalOp::try_new(-1, env).unwrap_err();
 }
 
 #[test]
 fn set_diagonal_op_elems_01() {
-    let env = QuestEnv::new();
-    let mut op = DiagonalOp::try_new(3, &env).unwrap();
+    let env = &QuestEnv::new();
+    let mut op = DiagonalOp::try_new(3, env).unwrap();
 
     let num_elems = 3;
     let re = [1., 2., 3.];
@@ -91,30 +91,30 @@ fn set_diagonal_op_elems_01() {
 
 #[test]
 fn apply_diagonal_op_01() {
-    let env = QuestEnv::new();
-    let mut qureg = Qureg::try_new(2, &env).unwrap();
-    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, env).unwrap();
+    let mut op = DiagonalOp::try_new(2, env).unwrap();
 
     init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
     apply_diagonal_op(&mut qureg, &op).unwrap();
 
-    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    let mut op = DiagonalOp::try_new(1, env).unwrap();
     init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
     apply_diagonal_op(&mut qureg, &op).unwrap_err();
 }
 
 #[test]
 fn calc_expec_diagonal_op_() {
-    let env = QuestEnv::new();
-    let mut qureg = Qureg::try_new(2, &env).unwrap();
-    let mut op = DiagonalOp::try_new(2, &env).unwrap();
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, env).unwrap();
+    let mut op = DiagonalOp::try_new(2, env).unwrap();
 
     init_plus_state(&mut qureg);
     init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
 
     let _ = calc_expec_diagonal_op(&qureg, &op).unwrap();
 
-    let mut op = DiagonalOp::try_new(1, &env).unwrap();
+    let mut op = DiagonalOp::try_new(1, env).unwrap();
     init_diagonal_op(&mut op, &[1., 2.], &[5., 6.]).unwrap();
     let _ = calc_expec_diagonal_op(&qureg, &op).unwrap_err();
 }
@@ -147,8 +147,8 @@ fn initialize_pauli_hamil_01() {
 
 #[test]
 fn set_amps_01() {
-    let env = QuestEnv::new();
-    let mut qureg = Qureg::try_new(3, &env).unwrap();
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(3, env).unwrap();
 
     let num_amps = 4;
     let re = [1., 2., 3., 4.];
@@ -167,8 +167,8 @@ fn set_amps_01() {
 
 #[test]
 fn set_density_amps_01() {
-    let env = QuestEnv::new();
-    let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 
     let re = &[1., 2., 3., 4.];
     let im = &[1., 2., 3., 4.];
@@ -189,8 +189,8 @@ fn set_density_amps_01() {
 
 #[test]
 fn phase_shift_01() {
-    let env = QuestEnv::new();
-    let qureg = &mut Qureg::try_new(3, &env).unwrap();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     phase_shift(qureg, 0, 0.0).unwrap();
     phase_shift(qureg, 1, 0.5).unwrap();
@@ -202,8 +202,8 @@ fn phase_shift_01() {
 
 #[test]
 fn controlled_phase_shift_01() {
-    let env = QuestEnv::new();
-    let qureg = &mut Qureg::try_new(3, &env).unwrap();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     controlled_phase_shift(qureg, 0, 1, 0.5).unwrap();
     controlled_phase_shift(qureg, 0, 2, 0.5).unwrap();
@@ -214,8 +214,8 @@ fn controlled_phase_shift_01() {
 
 #[test]
 fn multi_controlled_phase_shift_01() {
-    let env = QuestEnv::new();
-    let qureg = &mut Qureg::try_new(4, &env).unwrap();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     multi_controlled_phase_shift(qureg, &[0, 1, 3], 3, 0.5).unwrap();
     multi_controlled_phase_shift(qureg, &[0, 1, 3], 2, 0.5).unwrap();
 
@@ -225,9 +225,33 @@ fn multi_controlled_phase_shift_01() {
 }
 
 #[test]
+fn controlled_phase_flip_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    controlled_phase_flip(qureg, 0, 1).unwrap();
+    controlled_phase_flip(qureg, 0, 2).unwrap();
+
+    controlled_phase_flip(qureg, 0, 3).unwrap_err();
+    controlled_phase_flip(qureg, -1, 1).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_phase_flip_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    multi_controlled_phase_flip(qureg, &[0, 1, 3], 3).unwrap();
+    multi_controlled_phase_flip(qureg, &[0, 1, 3], 2).unwrap();
+
+    multi_controlled_phase_flip(qureg, &[0, 4, 3, 4], 2).unwrap_err();
+    multi_controlled_phase_flip(qureg, &[0, 1], 3).unwrap_err();
+    multi_controlled_phase_flip(qureg, &[0, 1], -1).unwrap_err();
+}
+
+#[test]
 fn get_environment_string_01() {
-    let env = QuestEnv::new();
-    let env_str = get_environment_string(&env).unwrap();
+    let env = &QuestEnv::new();
+    let env_str = get_environment_string(env).unwrap();
 
     assert!(env_str.contains("CUDA="));
     assert!(env_str.contains("OpenMP="));
@@ -238,8 +262,8 @@ fn get_environment_string_01() {
 
 #[test]
 fn get_quest_seeds_01() {
-    let env = QuestEnv::new();
-    let (seeds, num_seeds) = get_quest_seeds(&env);
+    let env = &QuestEnv::new();
+    let (seeds, num_seeds) = get_quest_seeds(env);
 
     assert!(num_seeds > 0);
     assert_eq!(seeds.len(), num_seeds as usize);

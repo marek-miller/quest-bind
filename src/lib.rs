@@ -221,13 +221,11 @@ impl<'a> DiagonalOp<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let op = catch_quest_exception(|| unsafe {
-            ffi::createDiagonalOp(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            op,
+            op: catch_quest_exception(|| unsafe {
+                ffi::createDiagonalOp(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -237,13 +235,14 @@ impl<'a> DiagonalOp<'a> {
     ) -> Result<Self, QuestError> {
         let filename = CString::new(fn_).map_err(QuestError::NulError)?;
 
-        let op = catch_quest_exception(|| unsafe {
-            ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
-        })?;
-
         Ok(Self {
             env,
-            op,
+            op: catch_quest_exception(|| unsafe {
+                ffi::createDiagonalOpFromPauliHamilFile(
+                    (*filename).as_ptr(),
+                    env.0,
+                )
+            })?,
         })
     }
 }
@@ -269,8 +268,8 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuestEnv::new();
-    /// let qureg = Qureg::try_new(2, &env).unwrap();
+    /// let env = &QuestEnv::new();
+    /// let qureg = Qureg::try_new(2, env).unwrap();
     /// ```
     ///
     /// See [QuEST API][1] for more information.
@@ -285,13 +284,11 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let reg = catch_quest_exception(|| unsafe {
-            ffi::createQureg(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            reg,
+            reg: catch_quest_exception(|| unsafe {
+                ffi::createQureg(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -301,8 +298,8 @@ impl<'a> Qureg<'a> {
     ///
     /// ```rust
     /// # use quest_bind::*;
-    /// let env = QuestEnv::new();
-    /// let qureg = Qureg::try_new_density(2, &env).unwrap();
+    /// let env = &QuestEnv::new();
+    /// let qureg = Qureg::try_new_density(2, env).unwrap();
     /// ```
     ///
     /// See [QuEST API][1] for more information.
@@ -317,13 +314,11 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let reg = catch_quest_exception(|| unsafe {
-            ffi::createDensityQureg(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            reg,
+            reg: catch_quest_exception(|| unsafe {
+                ffi::createDensityQureg(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -466,8 +461,8 @@ pub fn init_pauli_hamil(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let op = &mut DiagonalOp::try_new(1, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let op = &mut DiagonalOp::try_new(1, env).unwrap();
 ///
 /// sync_diagonal_op(op).unwrap();
 /// ```
@@ -486,8 +481,8 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let mut op = &mut DiagonalOp::try_new(2, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let mut op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// let real = &[1., 2., 3., 4.];
 /// let imag = &[5., 6., 7., 8.];
@@ -534,8 +529,8 @@ pub fn init_diagonal_op(
 /// )
 /// .unwrap();
 ///
-/// let env = QuestEnv::new();
-/// let mut op = &mut DiagonalOp::try_new(2, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let mut op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op_from_pauli_hamil(op, hamil).unwrap();
 /// ```
@@ -561,8 +556,8 @@ pub fn init_diagonal_op_from_pauli_hamil(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let op = &mut DiagonalOp::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let op = &mut DiagonalOp::try_new(3, env).unwrap();
 ///
 /// let num_elems = 4;
 /// let re = &[1., 2., 3., 4.];
@@ -608,9 +603,9 @@ pub fn set_diagonal_op_elems(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
-/// let op = &mut DiagonalOp::try_new(2, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
 /// apply_diagonal_op(qureg, &op).unwrap();
@@ -637,9 +632,9 @@ pub fn apply_diagonal_op(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
-/// let op = &mut DiagonalOp::try_new(2, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_zero_state(qureg);
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
@@ -692,8 +687,8 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &Qureg::try_new(3, env).unwrap();
 ///
 /// assert_eq!(get_num_qubits(qureg), 3);
 /// ```
@@ -712,8 +707,8 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &Qureg::try_new(3, env).unwrap();
 ///
 /// assert_eq!(get_num_amps(qureg).unwrap(), 8);
 /// ```
@@ -731,8 +726,8 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
 /// init_blank_state(qureg);
 ///
@@ -754,12 +749,12 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
 /// init_zero_state(qureg);
 ///
-/// assert!((get_prob_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -777,8 +772,8 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
 /// init_plus_state(qureg);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
@@ -801,8 +796,8 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
 /// init_classical_state(qureg, 8);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
@@ -828,13 +823,14 @@ pub fn init_classical_state(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
-/// let pure_state = &mut Qureg::try_new(3, &env).unwrap();
-/// init_zero_state(pure_state);
-/// init_pure_state(qureg, &pure_state).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// let pure_state = &mut Qureg::try_new(3, env).unwrap();
 ///
-/// assert!((calc_purity(&qureg).unwrap() - 1.0).abs() < f64::EPSILON);
+/// init_zero_state(pure_state);
+/// init_pure_state(qureg, pure_state).unwrap();
+///
+/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -866,8 +862,8 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
 /// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
@@ -900,12 +896,12 @@ pub fn init_state_from_amps(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
+/// let re = &mut [1., 2., 3., 4.];
+/// let im = &mut [1., 2., 3., 4.];
 /// let num_amps = 4;
-/// let mut re = &mut [1., 2., 3., 4.];
-/// let mut im = &mut [1., 2., 3., 4.];
 ///
 /// set_amps(qureg, 0, re, im, num_amps);
 ///
@@ -947,12 +943,12 @@ pub fn set_amps(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new_density(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 ///
-/// let num_amps = 4;
 /// let mut re = &[1., 2., 3., 4.];
 /// let mut im = &[1., 2., 3., 4.];
+/// let num_amps = 4;
 ///
 /// set_density_amps(qureg, 0, 0, re, im, num_amps);
 /// ```
@@ -986,9 +982,9 @@ pub fn set_density_amps(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let target_qureg = &mut Qureg::try_new(3, &env).unwrap();
-/// let copy_qureg = &Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let target_qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let copy_qureg = &Qureg::try_new(3, env).unwrap();
 ///
 /// clone_qureg(target_qureg, copy_qureg);
 /// ```
@@ -1011,8 +1007,9 @@ pub fn clone_qureg(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
 /// let target_qubit = 1;
 /// let angle = 0.5;
 ///
@@ -1038,8 +1035,9 @@ pub fn phase_shift(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
 /// let id_qubit1 = 0;
 /// let id_qubit2 = 2;
 /// let angle = 0.5;
@@ -1066,8 +1064,9 @@ pub fn controlled_phase_shift(
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(4, &env).unwrap();
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+///
 /// let control_qubits = &[0, 1, 3];
 /// let num_control_qubits = control_qubits.len() as i32;
 /// let angle = 0.5;
@@ -1100,10 +1099,19 @@ pub fn multi_controlled_phase_shift(
     })
 }
 
+/// Apply the (two-qubit) controlled phase flip gate
+///
+/// Also known as the controlled pauliZ gate.
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// controlled_phase_flip(qureg, 0, 1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1119,6 +1127,25 @@ pub fn controlled_phase_flip(
     })
 }
 
+/// Apply the (multiple-qubit) controlled phase flip gate.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let control_qubits = &[0, 1, 3];
+/// let num_control_qubits = 3;
+///
+/// multi_controlled_phase_flip(qureg, control_qubits, num_control_qubits);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1133,6 +1160,15 @@ pub fn multi_controlled_phase_flip(
     })
 }
 
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn s_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
