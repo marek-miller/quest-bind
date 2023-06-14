@@ -29,7 +29,19 @@ jobs:
       run: |
         git submodule update --init --recursive
         git submodule update --remote --recursive
-    - name: Compile QuEST
+    - name: Build with build script
+      run: |
+        cargo build --verbose
+        cargo build --verbose --release
+    - name: Run unit tests
+      run: |
+       cargo test --tests --verbose
+       cargo test --tests --verbose --release
+    - name: Clean artifacts
+      run: |
+        cargo clean
+        rm -fv build.rs
+    - name: Compile QuEST manually
       run: |
         cd QuEST
         mkdir build && cd build
@@ -40,9 +52,7 @@ jobs:
         cd ./target/debug/deps
         ln -s ../../../QuEST/build/QuEST/libQuEST.so .
         cd ../../../        
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
+    - name: Run doc tests
       run: |
-       cargo test --tests --verbose
        cargo test --doc --verbose
+       cargo doc
