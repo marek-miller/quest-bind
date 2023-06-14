@@ -221,13 +221,11 @@ impl<'a> DiagonalOp<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let op = catch_quest_exception(|| unsafe {
-            ffi::createDiagonalOp(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            op,
+            op: catch_quest_exception(|| unsafe {
+                ffi::createDiagonalOp(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -237,13 +235,14 @@ impl<'a> DiagonalOp<'a> {
     ) -> Result<Self, QuestError> {
         let filename = CString::new(fn_).map_err(QuestError::NulError)?;
 
-        let op = catch_quest_exception(|| unsafe {
-            ffi::createDiagonalOpFromPauliHamilFile((*filename).as_ptr(), env.0)
-        })?;
-
         Ok(Self {
             env,
-            op,
+            op: catch_quest_exception(|| unsafe {
+                ffi::createDiagonalOpFromPauliHamilFile(
+                    (*filename).as_ptr(),
+                    env.0,
+                )
+            })?,
         })
     }
 }
@@ -285,13 +284,11 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let reg = catch_quest_exception(|| unsafe {
-            ffi::createQureg(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            reg,
+            reg: catch_quest_exception(|| unsafe {
+                ffi::createQureg(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -317,13 +314,11 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
-        let reg = catch_quest_exception(|| unsafe {
-            ffi::createDensityQureg(num_qubits, env.0)
-        })?;
-
         Ok(Self {
             env,
-            reg,
+            reg: catch_quest_exception(|| unsafe {
+                ffi::createDensityQureg(num_qubits, env.0)
+            })?,
         })
     }
 
@@ -904,8 +899,8 @@ pub fn init_state_from_amps(
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
 ///
-/// let mut re = &mut [1., 2., 3., 4.];
-/// let mut im = &mut [1., 2., 3., 4.];
+/// let re = &mut [1., 2., 3., 4.];
+/// let im = &mut [1., 2., 3., 4.];
 /// let num_amps = 4;
 ///
 /// set_amps(qureg, 0, re, im, num_amps);
