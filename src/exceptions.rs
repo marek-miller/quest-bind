@@ -26,20 +26,34 @@ use std::{
     sync::{
         Arc,
         Mutex,
+        MutexGuard,
         OnceLock,
+        PoisonError,
     },
 };
 
 use super::QuestError;
 
 #[derive(Default)]
-struct ExceptGuard(Arc<Mutex<[u8; 0]>>);
+struct QuestExcept<T: Default>(OnceLock<Arc<Mutex<T>>>);
 
-#[derive(Default)]
-struct ExceptError(Arc<Mutex<Vec<QuestError>>>);
+impl<T> QuestExcept<T>
+where
+    T: Default,
+{
+    const fn new() -> Self {
+        Self(OnceLock::new())
+    }
 
-static QUEST_EXCEPT_GUARD: OnceLock<ExceptGuard> = OnceLock::new();
-static QUEST_EXCEPT_ERROR: OnceLock<ExceptError> = OnceLock::new();
+    fn get_lock(
+        &self
+    ) -> Result<MutexGuard<'_, T>, PoisonError<MutexGuard<'_, T>>> {
+        self.0.get_or_init(Default::default).lock()
+    }
+}
+
+static QUEST_EXCEPT_GUARD: QuestExcept<[u8; 0]> = QuestExcept::new();
+static QUEST_EXCEPT_ERROR: QuestExcept<Vec<QuestError>> = QuestExcept::new();
 
 /// Report error in a `QuEST` API call.
 ///
@@ -60,18 +74,13 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    QUEST_EXCEPT_ERROR
-        .get_or_init(Default::default)
-        .0
-        .lock()
-        .unwrap()
-        .insert(
-            0,
-            QuestError::InvalidQuESTInputError {
-                err_msg:  err_msg.to_owned(),
-                err_func: err_func.to_owned(),
-            },
-        );
+    QUEST_EXCEPT_ERROR.get_lock().unwrap().insert(
+        0,
+        QuestError::InvalidQuESTInputError {
+            err_msg:  err_msg.to_owned(),
+            err_func: err_func.to_owned(),
+        },
+    );
 
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
@@ -93,20 +102,11 @@ where
     F: FnOnce() -> T,
 {
     // Lock QuEST to our call
-    let guard = QUEST_EXCEPT_GUARD
-        .get_or_init(Default::default)
-        .0
-        .lock()
-        .unwrap();
+    let guard = QUEST_EXCEPT_GUARD.get_lock().unwrap();
 
     // The lock here is not bound to any variable; it will be released as
     // soon as the buffer is cleared.
-    QUEST_EXCEPT_ERROR
-        .get_or_init(Default::default)
-        .0
-        .lock()
-        .unwrap()
-        .clear();
+    QUEST_EXCEPT_ERROR.get_lock().unwrap().clear();
 
     // Call QuEST API
     let res = f();
@@ -114,12 +114,7 @@ where
     // At this point all exceptions have been thrown.
     // Take the last exception from the buffer (first reported).
     // For now, we log the rest as error messages via invalidQuESTInputError()
-    let err = QUEST_EXCEPT_ERROR
-        .get_or_init(Default::default)
-        .0
-        .lock()
-        .unwrap()
-        .pop();
+    let err = QUEST_EXCEPT_ERROR.get_lock().unwrap().pop();
 
     // Drop the guard as soon as we don't need it anymore:
     drop(guard);

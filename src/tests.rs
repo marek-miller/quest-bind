@@ -175,7 +175,7 @@ fn set_density_amps_01() {
 
     set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
     assert!(
-        (get_density_amp(&qureg, 0, 0).unwrap().real() - 1.).abs()
+        (get_density_amp(qureg, 0, 0).unwrap().real() - 1.).abs()
             < f64::EPSILON
     );
 
