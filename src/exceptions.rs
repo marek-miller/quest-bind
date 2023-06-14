@@ -52,7 +52,7 @@ where
     }
 }
 
-static QUEST_EXCEPT_GUARD: QuestExcept<[u8; 0]> = QuestExcept::new();
+static QUEST_EXCEPT_GUARD: QuestExcept<()> = QuestExcept::new();
 static QUEST_EXCEPT_ERROR: QuestExcept<Vec<QuestError>> = QuestExcept::new();
 
 /// Report error in a `QuEST` API call.
