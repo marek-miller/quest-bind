@@ -189,6 +189,43 @@ fn set_density_amps_01() {
 }
 
 #[test]
+fn phase_shift_01() {
+    let env = QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, &env).unwrap();
+
+    phase_shift(qureg, 0, 0.0).unwrap();
+    phase_shift(qureg, 1, 0.5).unwrap();
+    phase_shift(qureg, 2, 1.0).unwrap();
+
+    phase_shift(qureg, 3, 0.0).unwrap_err();
+    phase_shift(qureg, -11, 0.0).unwrap_err();
+}
+
+#[test]
+fn controlled_phase_shift_01() {
+    let env = QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, &env).unwrap();
+
+    controlled_phase_shift(qureg, 0, 1, 0.5).unwrap();
+    controlled_phase_shift(qureg, 0, 2, 0.5).unwrap();
+
+    controlled_phase_shift(qureg, 0, 3, 0.5).unwrap_err();
+    controlled_phase_shift(qureg, -1, 1, 0.5).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_phase_shift_01() {
+    let env = QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, &env).unwrap();
+    multi_controlled_phase_shift(qureg, &[0, 1, 3], 3, 0.5).unwrap();
+    multi_controlled_phase_shift(qureg, &[0, 1, 3], 2, 0.5).unwrap();
+
+    multi_controlled_phase_shift(qureg, &[0, 4, 3, 4], 2, 0.5).unwrap_err();
+    multi_controlled_phase_shift(qureg, &[0, 1], 3, 0.5).unwrap_err();
+    multi_controlled_phase_shift(qureg, &[0, 1], -1, 0.5).unwrap_err();
+}
+
+#[test]
 fn get_environment_string_01() {
     let env = QuestEnv::new();
     let env_str = get_environment_string(&env).unwrap();

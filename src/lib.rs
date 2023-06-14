@@ -1005,6 +1005,23 @@ pub fn clone_qureg(
     })
 }
 
+/// Shift the phase between `|0>` and `|1>` of a single qubit by a given angle.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let target_qubit = 1;
+/// let angle = 0.5;
+///
+/// phase_shift(qureg, target_qubit, angle).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn phase_shift(
     qureg: &mut Qureg,
     target_quibit: i32,
@@ -1015,6 +1032,23 @@ pub fn phase_shift(
     })
 }
 
+/// Introduce a phase factor on state of qubits.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, &env).unwrap();
+/// let id_qubit1 = 0;
+/// let id_qubit2 = 2;
+/// let angle = 0.5;
+/// controlled_phase_shift(qureg, id_qubit1, id_qubit2, angle).unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_shift(
     qureg: &mut Qureg,
     id_qubit1: i32,
@@ -1026,6 +1060,30 @@ pub fn controlled_phase_shift(
     })
 }
 
+/// Introduce a phase factor of the passed qubits.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, &env).unwrap();
+/// let control_qubits = &[0, 1, 3];
+/// let num_control_qubits = control_qubits.len() as i32;
+/// let angle = 0.5;
+///
+/// multi_controlled_phase_shift(
+///     qureg,
+///     control_qubits,
+///     num_control_qubits,
+///     angle,
+/// )
+/// .unwrap();
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1042,6 +1100,15 @@ pub fn multi_controlled_phase_shift(
     })
 }
 
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_flip(
     qureg: &mut Qureg,
     id_qubit1: i32,
