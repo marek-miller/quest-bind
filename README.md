@@ -162,6 +162,46 @@ be thread-safe, but comes at the expense of being able to run only one QuEST API
 call at the time. Bear in mind, though, that each QuEST function retains access
 to all parallel computation resources available in the system.
 
+Current implementation returns inside `Result<_, QuestError>` only the first
+exception caught. All subsequent messages reported by QuEST, together with that
+first one, are nevertheless logged as errors. To review them, add a logger as a
+dependency to your crate, e.g.:
+
+```sh
+cargo add env_logger
+```
+
+Then enable logging in your application:
+
+```rust
+fn main()  {
+    env_logger::init();
+
+    // (...)
+
+}
+```
+
+and run:
+
+```sh
+RUST_LOG=info cargo run
+```
+
+See [`log` crate](https://docs.rs/log/latest/log/) for more on logging in Rust.
+
+The type `QuestError` doesn't contain (possibly malformed) data returned by the
+API call on failure. Only successful calls can reach the library user. This is
+intentional, following guidelines in QuEST documentation. Upon failure...
+
+> Users must ensure that the triggered API call does not continue (e.g. the user
+> exits or throws an exception), else QuEST will continue with the valid [sic!]
+> input and likely trigger a seg-fault.
+
+See
+[Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
+for more information.
+
 ## Numerical types
 
 For now, numerical types used by `quest-bind` are chosen to match exactly the C

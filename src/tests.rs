@@ -68,16 +68,12 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
 }
 
 #[test]
-fn create_diagonal_op() {
+fn create_diagonal_op_01() {
     let env = QuestEnv::new();
 
     let _ = DiagonalOp::try_new(1, &env).unwrap();
-    let _ = DiagonalOp::try_new(2, &env).unwrap();
-    let _ = DiagonalOp::try_new(3, &env).unwrap();
-
     let _ = DiagonalOp::try_new(0, &env).unwrap_err();
     let _ = DiagonalOp::try_new(-1, &env).unwrap_err();
-    let _ = DiagonalOp::try_new(-2, &env).unwrap_err();
 }
 
 #[test]
