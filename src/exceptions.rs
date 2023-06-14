@@ -152,8 +152,8 @@ mod tests {
 
     #[test]
     fn catch_exception_02() {
-        let _ = PauliHamil::try_new(2, 2).unwrap();
         let _ = PauliHamil::try_new(-11, -3).unwrap_err();
+        let _ = PauliHamil::try_new(2, 2).unwrap();
     }
 
     #[test]
@@ -180,6 +180,20 @@ mod tests {
             s.spawn(|| {
                 catch_exception_02();
                 catch_exception_02();
+            });
+        });
+    }
+
+    #[test]
+    fn catch_exception_parallel_03() {
+        thread::scope(|s| {
+            s.spawn(|| {
+                catch_exception_parallel_01();
+                catch_exception_parallel_02();
+            });
+            s.spawn(|| {
+                catch_exception_parallel_02();
+                catch_exception_parallel_01();
             });
         });
     }
