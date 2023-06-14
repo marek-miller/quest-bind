@@ -1,5 +1,10 @@
-// This is an adapted example from: grovers_search.c in
-// QuEST repository.  QuEST is distributed under MIT License
+//! This is an adapted example from: `grovers_search.c` in
+//! `QuEST` repository.  `QuEST` is distributed under MIT License
+//!
+//! Implements Grover's algorithm for unstructured search,
+//! using only X, H and multi-controlled Z gates.
+//!
+//! author: Tyson Jones
 
 use std::f64::consts::PI;
 
@@ -14,91 +19,91 @@ use quest_bind::{
     Qureg,
 };
 
+fn tensor_gate<F>(
+    qureg: &mut Qureg<'_>,
+    gate: F,
+    qubits: &[i32],
+) -> Result<(), QuestError>
+where
+    F: Fn(&mut Qureg, i32) -> Result<(), QuestError>,
+{
+    qubits.iter().try_for_each(|q| gate(qureg, *q))
+}
+
 fn apply_oracle(
     qureg: &mut Qureg,
-    num_qubits: i32,
+    qubits: &[i32],
     sol_elem: i64,
-) {
-    // apply X to transform |111> into |solElem>
-    for q in 0..num_qubits {
-        if ((sol_elem >> q) & 1) == 0 {
-            pauli_x(qureg, q).unwrap();
-        }
-    }
-
-    // effect |111> -> -|111>
-    let ctrls = (0..num_qubits).collect::<Vec<_>>();
-    multi_controlled_phase_flip(qureg, &ctrls, num_qubits).unwrap();
+) -> Result<(), QuestError> {
+    let sol_ctrls = &qubits
+        .iter()
+        .filter_map(|&q| ((sol_elem >> q) & 1 == 0).then_some(q))
+        .collect::<Vec<_>>();
 
     // apply X to transform |solElem> into |111>
-    for q in 0..num_qubits {
-        if ((sol_elem >> q) & 1) == 0 {
-            pauli_x(qureg, q).unwrap();
-        }
-    }
+    tensor_gate(qureg, pauli_x, sol_ctrls)?;
+
+    // effect |111> -> -|111>
+    let num_qubits = qubits.len() as i32;
+    multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
+
+    // apply X to transform |111> into |solElem>
+    tensor_gate(qureg, pauli_x, sol_ctrls)
 }
 
 fn apply_diffuser(
     qureg: &mut Qureg,
-    num_qubits: i32,
-) {
+    qubits: &[i32],
+) -> Result<(), QuestError> {
     // apply H to transform |+> into |0>
-    for q in 0..num_qubits {
-        hadamard(qureg, q).unwrap();
-    }
-
     // apply X to transform |11..1> into |00..0>
-    for q in 0..num_qubits {
-        pauli_x(qureg, q).unwrap();
-    }
+    tensor_gate(qureg, hadamard, qubits)?;
+    tensor_gate(qureg, pauli_x, qubits)?;
 
-    //      // effect |11..1> -> -|11..1>
-    let ctrls = (0..num_qubits).collect::<Vec<_>>();
-    multi_controlled_phase_flip(qureg, &ctrls, num_qubits).unwrap();
+    // effect |11..1> -> -|11..1>
+    let num_qubits = qubits.len() as i32;
+    multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
 
-    // apply X to transform |11..1> into |00..0>
-    for q in 0..num_qubits {
-        pauli_x(qureg, q).unwrap();
-    }
+    tensor_gate(qureg, pauli_x, qubits)?;
+    tensor_gate(qureg, hadamard, qubits)
+}
 
-    // apply H to transform |+> into |0>
-    for q in 0..num_qubits {
-        hadamard(qureg, q).unwrap();
-    }
+fn grovers_step(
+    qureg: &mut Qureg<'_>,
+    qubits: &[i32],
+    sol_elem: i64,
+) -> Result<(), QuestError> {
+    apply_oracle(qureg, qubits, sol_elem)?;
+    apply_diffuser(qureg, qubits)
 }
 
 fn main() -> Result<(), QuestError> {
-    //      // prepare the hardware-agnostic QuEST environment
+    // prepare the hardware-agnostic QuEST environment
     let env = &QuestEnv::new();
 
     // choose the system size
-    let num_qubits = 15_i32;
-    let num_elems = 2_i64.pow(num_qubits as u32);
-    let num_reps = (f64::ceil(PI / 4.0 * (num_elems as f64).sqrt())) as usize;
-
+    let num_qubits = 0x10;
+    let num_elems = 2.0_f64.powi(num_qubits);
+    let num_reps = (PI / 4.0 * (num_elems).sqrt()).ceil() as usize;
     println!(
         "num_qubits: {num_qubits}, num_elems: {num_elems}, num_reps: \
          {num_reps}"
     );
-
     // randomly choose the element for which to search
-    let sol_elem = 34325 % num_elems;
+    let sol_elem = 344_525 % num_elems as i64;
 
     // prepare |+>
-    let qureg = &mut Qureg::try_new(num_qubits, env).unwrap();
+    let qureg = &mut Qureg::try_new(num_qubits, env)?;
     init_plus_state(qureg);
+    // use all qubits in the register
+    let qubits = &(0..num_qubits).collect::<Vec<_>>();
 
     // apply Grover's algorithm
-    for _ in 0..num_reps {
-        apply_oracle(qureg, num_qubits, sol_elem);
-        apply_diffuser(qureg, num_qubits);
-
-        // monitor the probability of the solution state
+    (0..num_reps).try_for_each(|_| {
         println!(
             "prob of solution |{sol_elem}> = {}",
-            get_prob_amp(qureg, sol_elem).unwrap()
+            get_prob_amp(qureg, sol_elem)?
         );
-    }
-
-    Ok(())
+        grovers_step(qureg, qubits, sol_elem)
+    })
 }
