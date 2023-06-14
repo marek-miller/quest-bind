@@ -225,6 +225,30 @@ fn multi_controlled_phase_shift_01() {
 }
 
 #[test]
+fn controlled_phase_flip_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    controlled_phase_flip(qureg, 0, 1).unwrap();
+    controlled_phase_flip(qureg, 0, 2).unwrap();
+
+    controlled_phase_flip(qureg, 0, 3).unwrap_err();
+    controlled_phase_flip(qureg, -1, 1).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_phase_flip_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    multi_controlled_phase_flip(qureg, &[0, 1, 3], 3).unwrap();
+    multi_controlled_phase_flip(qureg, &[0, 1, 3], 2).unwrap();
+
+    multi_controlled_phase_flip(qureg, &[0, 4, 3, 4], 2).unwrap_err();
+    multi_controlled_phase_flip(qureg, &[0, 1], 3).unwrap_err();
+    multi_controlled_phase_flip(qureg, &[0, 1], -1).unwrap_err();
+}
+
+#[test]
 fn get_environment_string_01() {
     let env = &QuestEnv::new();
     let env_str = get_environment_string(env).unwrap();

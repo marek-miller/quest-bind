@@ -1099,10 +1099,19 @@ pub fn multi_controlled_phase_shift(
     })
 }
 
+/// Apply the (two-qubit) controlled phase flip gate
+///
+/// Also known as the controlled pauliZ gate.
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// controlled_phase_flip(qureg, 0, 1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1118,6 +1127,25 @@ pub fn controlled_phase_flip(
     })
 }
 
+/// Apply the (multiple-qubit) controlled phase flip gate.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let control_qubits = &[0, 1, 3];
+/// let num_control_qubits = 3;
+///
+/// multi_controlled_phase_flip(qureg, control_qubits, num_control_qubits);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1132,6 +1160,15 @@ pub fn multi_controlled_phase_flip(
     })
 }
 
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn s_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
