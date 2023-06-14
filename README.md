@@ -174,7 +174,7 @@ dependency to your crate, e.g.:
 cargo add env_logger
 ```
 
-Then enable logging in your applications:
+Then enable logging in your application:
 
 ```rust
 fn main()  {
@@ -197,9 +197,9 @@ The type `QuestError` doesn't contain (possibly malformed) data returned by the
 API call on failure. Only successful calls can reach the library user. This is
 intentional, following guidelines in QuEST documentation. Upon failure...
 
-```text
-Users must ensure that the triggered API call does not continue (e.g. the user exits or throws an exception), else QuEST will continue with the valid [sic!] input and likely trigger a seg-fault.
-```
+> Users must ensure that the triggered API call does not continue (e.g. the user
+> exits or throws an exception), else QuEST will continue with the valid [sic!]
+> input and likely trigger a seg-fault.
 
 See
 [Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
