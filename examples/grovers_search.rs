@@ -18,6 +18,10 @@ use quest_bind::{
     QuestError,
     Qureg,
 };
+use rand::Rng;
+
+const NUM_QUBITS: i32 = 0x10;
+const NUM_ELEMS: i64 = 1 << NUM_QUBITS;
 
 fn tensor_gate<F>(
     qureg: &mut Qureg<'_>,
@@ -70,21 +74,21 @@ fn main() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
 
     // choose the system size
-    let num_qubits = 0x10;
-    let num_elems = 2.0_f64.powi(num_qubits);
-    let num_reps = (PI / 4.0 * (num_elems).sqrt()).ceil() as usize;
+
+    let num_reps = (PI / 4.0 * (NUM_ELEMS as f64).sqrt()).ceil() as usize;
     println!(
-        "num_qubits: {num_qubits}, num_elems: {num_elems}, num_reps: \
+        "num_qubits: {NUM_QUBITS}, num_elems: {NUM_ELEMS}, num_reps: \
          {num_reps}"
     );
     // randomly choose the element for which to search
-    let sol_elem = 344_525 % num_elems as i64;
+    let mut rng = rand::thread_rng();
+    let sol_elem = rng.gen_range(0..NUM_ELEMS);
 
     // prepare |+>
-    let qureg = &mut Qureg::try_new(num_qubits, env)?;
+    let qureg = &mut Qureg::try_new(NUM_QUBITS, env)?;
     init_plus_state(qureg);
     // use all qubits in the register
-    let qubits = &(0..num_qubits).collect::<Vec<_>>();
+    let qubits = &(0..NUM_QUBITS).collect::<Vec<_>>();
 
     // apply Grover's algorithm
     (0..num_reps).try_for_each(|_| {
