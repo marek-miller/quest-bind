@@ -1434,6 +1434,12 @@ pub fn get_prob_amp(
 
 /// Desc.
 ///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
 /// See [QuEST API][1] for more information.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
@@ -1447,11 +1453,33 @@ pub fn get_density_amp(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
     unsafe { ffi::calcTotalProb(qureg.reg) }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1463,6 +1491,17 @@ pub fn compact_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1473,6 +1512,17 @@ pub fn unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_x(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -1483,6 +1533,17 @@ pub fn rotate_x(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_y(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -1493,6 +1554,17 @@ pub fn rotate_y(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_z(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -1503,6 +1575,17 @@ pub fn rotate_z(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_around_axis(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -1514,6 +1597,17 @@ pub fn rotate_around_axis(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_x(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1525,6 +1619,17 @@ pub fn controlled_rotate_x(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_y(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1536,6 +1641,17 @@ pub fn controlled_rotate_y(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_z(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1547,6 +1663,17 @@ pub fn controlled_rotate_z(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_around_axis(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1565,6 +1692,17 @@ pub fn controlled_rotate_around_axis(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1583,6 +1721,17 @@ pub fn controlled_compact_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1594,6 +1743,17 @@ pub fn controlled_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1612,6 +1772,17 @@ pub fn multi_controlled_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1621,6 +1792,17 @@ pub fn pauli_x(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1630,6 +1812,17 @@ pub fn pauli_y(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1639,6 +1832,17 @@ pub fn pauli_z(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn hadamard(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1648,6 +1852,17 @@ pub fn hadamard(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_not(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1658,6 +1873,17 @@ pub fn controlled_not(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -1676,6 +1902,17 @@ pub fn multi_controlled_multi_qubit_not(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_not(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -1687,6 +1924,17 @@ pub fn multi_qubit_not(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_pauli_y(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -1697,6 +1945,17 @@ pub fn controlled_pauli_y(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_prob_of_outcome(
     qureg: &Qureg,
     measure_qubit: i32,
@@ -1707,10 +1966,22 @@ pub fn calc_prob_of_outcome(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
 /// # Panics
 ///
 /// This function will panic if
 /// `outcome_probs.len() < num_qubits as usize`
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
@@ -1729,6 +2000,17 @@ pub fn calc_prob_of_all_outcomes(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn collapse_to_outcome(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -1739,6 +2021,17 @@ pub fn collapse_to_outcome(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -1746,6 +2039,17 @@ pub fn measure(
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure_with_stats(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -1757,6 +2061,17 @@ pub fn measure_with_stats(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
@@ -1766,6 +2081,17 @@ pub fn calc_inner_product(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
@@ -1775,6 +2101,17 @@ pub fn calc_density_inner_product(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest_default(env: &mut QuestEnv) {
     unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
@@ -1782,6 +2119,17 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest(
     env: &mut QuestEnv,
     seed_array: &[u64],
@@ -1795,6 +2143,17 @@ pub fn seed_quest(
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
 pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
@@ -1809,30 +2168,85 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn start_recording_qasm(qureg: &mut Qureg) {
     unsafe {
         ffi::startRecordingQASM(qureg.reg);
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn stop_recording_qasm(qureg: &mut Qureg) {
     unsafe {
         ffi::stopRecordingQASM(qureg.reg);
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clear_recorded_qasm(qureg: &mut Qureg) {
     unsafe {
         ffi::clearRecordedQASM(qureg.reg);
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn print_recorded_qasm(qureg: &mut Qureg) {
     unsafe {
         ffi::printRecordedQASM(qureg.reg);
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg,
     filename: &str,
@@ -1846,6 +2260,17 @@ pub fn write_recorded_qasm_to_file(
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_dephasing(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1856,6 +2281,17 @@ pub fn mix_dephasing(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_dephasing(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -1867,6 +2303,17 @@ pub fn mix_two_qubit_dephasing(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_depolarising(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1877,6 +2324,17 @@ pub fn mix_depolarising(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_damping(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1887,6 +2345,17 @@ pub fn mix_damping(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_depolarising(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -1898,6 +2367,17 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_pauli(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1910,6 +2390,17 @@ pub fn mix_pauli(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_density_matrix(
     combine_qureg: &mut Qureg,
     prob: Qreal,
@@ -1920,10 +2411,32 @@ pub fn mix_density_matrix(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_fidelity(
     qureg: &Qureg,
     pure_state: &Qureg,
@@ -1933,6 +2446,17 @@ pub fn calc_fidelity(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn swap_gate(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -1943,6 +2467,17 @@ pub fn swap_gate(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sqrt_swap_gate(
     qureg: &mut Qureg,
     qb1: i32,
@@ -1953,6 +2488,17 @@ pub fn sqrt_swap_gate(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_state_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1973,6 +2519,17 @@ pub fn multi_state_controlled_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_z(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -1984,6 +2541,17 @@ pub fn multi_rotate_z(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_pauli(
     qureg: &mut Qureg,
     target_qubits: &[i32],
@@ -2002,6 +2570,17 @@ pub fn multi_rotate_pauli(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_z(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -2022,6 +2601,17 @@ pub fn multi_controlled_multi_rotate_z(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_pauli(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -2044,6 +2634,17 @@ pub fn multi_controlled_multi_rotate_pauli(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_prod(
     qureg: &Qureg,
     target_qubits: &[i32],
@@ -2062,6 +2663,17 @@ pub fn calc_expec_pauli_prod(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_sum(
     qureg: &Qureg,
     all_pauli_codes: &[PauliOpType],
@@ -2080,6 +2692,17 @@ pub fn calc_expec_pauli_sum(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_hamil(
     qureg: &Qureg,
     hamil: &PauliHamil,
@@ -2090,6 +2713,17 @@ pub fn calc_expec_pauli_hamil(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn two_qubit_unitary(
     qureg: &mut Qureg,
     target_qubit1: i32,
@@ -2101,6 +2735,17 @@ pub fn two_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_two_qubit_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2119,6 +2764,17 @@ pub fn controlled_two_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_two_qubit_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -2139,6 +2795,17 @@ pub fn multi_controlled_two_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_unitary(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -2150,6 +2817,17 @@ pub fn multi_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrl: i32,
@@ -2168,6 +2846,17 @@ pub fn controlled_multi_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -2188,6 +2877,17 @@ pub fn multi_controlled_multi_qubit_unitary(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_kraus_map(
     qureg: &mut Qureg,
     target: i32,
@@ -2200,6 +2900,17 @@ pub fn mix_kraus_map(
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
@@ -2219,6 +2930,17 @@ pub fn mix_two_qubit_kraus_map(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
@@ -2238,6 +2960,17 @@ pub fn mix_multi_qubit_kraus_map(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg,
     target: i32,
@@ -2250,6 +2983,17 @@ pub fn mix_nontp_kraus_map(
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
@@ -2269,6 +3013,17 @@ pub fn mix_nontp_two_qubit_kraus_map(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
@@ -2288,6 +3043,17 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_hilbert_schmidt_distance(
     a: &Qureg,
     b: &Qureg,
@@ -2297,6 +3063,17 @@ pub fn calc_hilbert_schmidt_distance(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
     fac1: Complex,
     qureg1: &Qureg,
@@ -2312,6 +3089,17 @@ pub fn set_weighted_qureg(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_sum(
     in_qureg: &Qureg,
     all_pauli_codes: &[PauliOpType],
@@ -2330,6 +3118,17 @@ pub fn apply_pauli_sum(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_hamil(
     in_qureg: &Qureg,
     hamil: &PauliHamil,
@@ -2340,6 +3139,17 @@ pub fn apply_pauli_hamil(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_trotter_circuitit(
     qureg: &mut Qureg,
     hamil: &PauliHamil,
@@ -2352,6 +3162,17 @@ pub fn apply_trotter_circuitit(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix2(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2362,6 +3183,17 @@ pub fn apply_matrix2(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix4(
     qureg: &mut Qureg,
     target_qubit1: i32,
@@ -2373,6 +3205,17 @@ pub fn apply_matrix4(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix_n(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -2384,6 +3227,17 @@ pub fn apply_matrix_n(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_multi_controlled_matrix_n(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -2404,6 +3258,17 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_phase_func(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -2426,6 +3291,17 @@ pub fn apply_phase_func(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
     qureg: &mut Qureg,
@@ -2455,6 +3331,17 @@ pub fn apply_phase_func_overrides(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func(
     qureg: &mut Qureg,
@@ -2480,6 +3367,17 @@ pub fn apply_multi_var_phase_func(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func_overrides(
     qureg: &mut Qureg,
@@ -2511,6 +3409,17 @@ pub fn apply_multi_var_phase_func_overrides(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_named_phase_func(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -2531,6 +3440,17 @@ pub fn apply_named_phase_func(
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_named_phase_func_overrides(
     qureg: &mut Qureg,
@@ -2558,6 +3478,17 @@ pub fn apply_named_phase_func_overrides(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func(
     qureg: &mut Qureg,
@@ -2583,6 +3514,17 @@ pub fn apply_param_named_phase_func(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func_overrides(
     qureg: &mut Qureg,
@@ -2614,12 +3556,34 @@ pub fn apply_param_named_phase_func_overrides(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_full_qft(qureg: &mut Qureg) {
     unsafe {
         ffi::applyFullQFT(qureg.reg);
     }
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_qft(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -2630,6 +3594,17 @@ pub fn apply_qft(
     })
 }
 
+/// Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_projector(
     qureg: &mut Qureg,
     qubit: i32,
