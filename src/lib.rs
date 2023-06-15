@@ -1138,9 +1138,7 @@ pub fn controlled_phase_flip(
 /// init_zero_state(qureg);
 ///
 /// let control_qubits = &[0, 1, 3];
-/// let num_control_qubits = 3;
-///
-/// multi_controlled_phase_flip(qureg, control_qubits, num_control_qubits);
+/// multi_controlled_phase_flip(qureg, control_qubits);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1149,13 +1147,12 @@ pub fn controlled_phase_flip(
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg,
     control_qubits: &[i32],
-    num_control_qubits: i32,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::multiControlledPhaseFlip(
             qureg.reg,
             control_qubits.as_ptr(),
-            num_control_qubits,
+            control_qubits.len() as i32,
         );
     })
 }

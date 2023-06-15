@@ -41,12 +41,11 @@ fn apply_oracle(
         .iter()
         .filter_map(|&q| ((sol_elem >> q) & 1 == 0).then_some(q))
         .collect::<Vec<_>>();
-    let num_qubits = qubits.len() as i32;
 
     // apply X to transform |solElem> into |111>
     tensor_gate(qureg, pauli_x, sol_ctrls)
         // effect |111> -> -|111>
-        .and(multi_controlled_phase_flip(qureg, qubits, num_qubits))
+        .and(multi_controlled_phase_flip(qureg, qubits))
         // apply X to transform |111> into |solElem>
         .and(tensor_gate(qureg, pauli_x, sol_ctrls))
 }
@@ -61,8 +60,7 @@ fn apply_diffuser(
         .and(tensor_gate(qureg, pauli_x, qubits))?;
 
     // effect |11..1> -> -|11..1>
-    let num_qubits = qubits.len() as i32;
-    multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
+    multi_controlled_phase_flip(qureg, qubits)?;
 
     tensor_gate(qureg, pauli_x, qubits)
         .and(tensor_gate(qureg, hadamard, qubits))
