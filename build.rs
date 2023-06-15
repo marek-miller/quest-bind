@@ -2,26 +2,23 @@ extern crate cmake;
 
 fn main() {
     let mut config = cmake::Config::new("QuEST");
-    let mut config = config.no_build_target(true);
-
-    config = config
+    let config = config
+        .no_build_target(true)
         .define("MULTITHREADED", "ON")
         .define("GPUACCELERATED", "OFF")
         .define("DISTRIBUTED", "OFF");
 
-    if cfg!(feature = "gpu") {
-        config = config
-            .define("MULTITHREADED", "OFF")
-            .define("GPUACCELERATED", "ON")
-            .define("DISTRIBUTED", "OFF");
-    }
+    #[cfg(feature = "gpu")]
+    config
+        .define("MULTITHREADED", "OFF")
+        .define("GPUACCELERATED", "ON")
+        .define("DISTRIBUTED", "OFF");
 
-    if cfg!(feature = "mpi") {
-        config = config
-            .define("MULTITHREADED", "ON")
-            .define("GPUACCELERATED", "OFF")
-            .define("DISTRIBUTED", "ON");
-    }
+    #[cfg(feature = "mpi")]
+    config
+        .define("MULTITHREADED", "ON")
+        .define("GPUACCELERATED", "OFF")
+        .define("DISTRIBUTED", "ON");
 
     let dst = config.build();
 
