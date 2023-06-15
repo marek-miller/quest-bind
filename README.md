@@ -264,6 +264,7 @@ New features/improvements:
 - Add build script
 - Constructors/destructors for QuEST structs
 - Add Github workflows CT
+- Add example: grovers_search.rs
 
 ### v0.1.0 (11/06/2023)
 

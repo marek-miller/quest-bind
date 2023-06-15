@@ -3,8 +3,6 @@
 //!
 //! Implements Grover's algorithm for unstructured search,
 //! using only X, H and multi-controlled Z gates.
-//!
-//! author: Tyson Jones
 
 use std::f64::consts::PI;
 
@@ -43,14 +41,14 @@ fn apply_oracle(
         .iter()
         .filter_map(|&q| ((sol_elem >> q) & 1 == 0).then_some(q))
         .collect::<Vec<_>>();
+    let num_qubits = qubits.len() as i32;
 
     // apply X to transform |solElem> into |111>
-    tensor_gate(qureg, pauli_x, sol_ctrls)?;
-    // effect |111> -> -|111>
-    let num_qubits = qubits.len() as i32;
-    multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
-    // apply X to transform |111> into |solElem>
     tensor_gate(qureg, pauli_x, sol_ctrls)
+        // effect |111> -> -|111>
+        .and(multi_controlled_phase_flip(qureg, qubits, num_qubits))
+        // apply X to transform |111> into |solElem>
+        .and(tensor_gate(qureg, pauli_x, sol_ctrls))
 }
 
 fn apply_diffuser(
@@ -58,22 +56,20 @@ fn apply_diffuser(
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     // apply H to transform |+> into |0>
-    // apply X to transform |11..1> into |00..0>
-    tensor_gate(qureg, hadamard, qubits)?;
-    tensor_gate(qureg, pauli_x, qubits)?;
+    tensor_gate(qureg, hadamard, qubits)
+        // apply X to transform |11..1> into |00..0>
+        .and(tensor_gate(qureg, pauli_x, qubits))?;
 
     // effect |11..1> -> -|11..1>
     let num_qubits = qubits.len() as i32;
     multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
 
-    tensor_gate(qureg, pauli_x, qubits)?;
-    tensor_gate(qureg, hadamard, qubits)
+    tensor_gate(qureg, pauli_x, qubits)
+        .and(tensor_gate(qureg, hadamard, qubits))
 }
 
 fn main() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
-
-    // choose the system size
 
     let num_reps = (PI / 4.0 * (NUM_ELEMS as f64).sqrt()).ceil() as usize;
     println!(
@@ -92,11 +88,12 @@ fn main() -> Result<(), QuestError> {
 
     // apply Grover's algorithm
     (0..num_reps).try_for_each(|_| {
-        println!(
-            "prob of solution |{sol_elem}> = {}",
-            get_prob_amp(qureg, sol_elem)?
-        );
-        apply_oracle(qureg, qubits, sol_elem)?;
-        apply_diffuser(qureg, qubits)
+        apply_oracle(qureg, qubits, sol_elem)
+            .and(apply_diffuser(qureg, qubits))
+            .and(get_prob_amp(qureg, sol_elem))
+            .and_then(|prob| {
+                println!("prob of solution |{sol_elem}> = {}", prob);
+                Ok(())
+            })
     })
 }
