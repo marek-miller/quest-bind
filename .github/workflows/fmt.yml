@@ -23,9 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Update
-        run:
+        run: |
           rustup update ${{ matrix.toolchain }} && rustup default ${{
           matrix.toolchain }}
+          rustup component add rustfmt
       - name: Format
         run: |
           cargo fmt --check --verbose
