@@ -1160,10 +1160,21 @@ pub fn multi_controlled_phase_flip(
     })
 }
 
+/// Apply the single-qubit S gate.
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// s_gate(qureg, 0).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1178,6 +1189,27 @@ pub fn s_gate(
     })
 }
 
+/// Apply the single-qubit T gate.
+///
+/// # Examples
+///
+/// ```rust
+/// # use std::f64::consts::SQRT_2;
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// t_gate(qureg, 0).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 1).unwrap();
+/// assert!((amp - SQRT_2 / 2.).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn t_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1187,17 +1219,49 @@ pub fn t_gate(
     })
 }
 
+/// Performs a logical AND on all successCodes held by all processes.
+///
+/// If any one process has a zero `success_code`, all processes will return a
+/// zero success code.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
     unsafe { ffi::syncQuESTSuccess(success_code) }
 }
 
+/// Report information about the QuEST environment
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_quest_env(env: &QuestEnv) {
     unsafe {
         ffi::reportQuESTEnv(env.0);
     }
 }
 
+/// Get a string containing information about the runtime environment,
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let env_str = get_environment_string(env).unwrap();
+///
+/// assert!(env_str.contains("OpenMP="));
+/// assert!(env_str.contains("threads="));
+/// assert!(env_str.contains("MPI="));
+/// assert!(env_str.contains("ranks="));
+/// assert!(env_str.contains("CUDA="));
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
@@ -1210,18 +1274,40 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     cstr.into_string().map_err(QuestError::IntoStringError)
 }
 
+/// >>>Desc.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     unsafe {
         ffi::copyStateToGPU(qureg.reg);
     }
 }
 
+/// In GPU mode, this copies the state-vector (or density matrix) from RAM.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_from_gpu(qureg: &mut Qureg) {
     unsafe {
         ffi::copyStateFromGPU(qureg.reg);
     }
 }
 
+/// In GPU mode, this copies the state-vector (or density matrix) from GPU
+/// memory.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_to_gpu(
     qureg: &mut Qureg,
     start_ind: i64,

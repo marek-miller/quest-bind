@@ -249,15 +249,33 @@ fn multi_controlled_phase_flip_01() {
 }
 
 #[test]
-fn get_environment_string_01() {
+fn s_gate_01() {
     let env = &QuestEnv::new();
-    let env_str = get_environment_string(env).unwrap();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
 
-    assert!(env_str.contains("CUDA="));
-    assert!(env_str.contains("OpenMP="));
-    assert!(env_str.contains("MPI="));
-    assert!(env_str.contains("threads="));
-    assert!(env_str.contains("ranks="));
+    s_gate(qureg, 0).unwrap();
+    assert!((get_imag_amp(qureg, 0).unwrap()).abs() < f64::EPSILON);
+
+    pauli_x(qureg, 0).unwrap();
+    s_gate(qureg, 0).unwrap();
+
+    let amp = get_imag_amp(qureg, 1).unwrap();
+    assert!((amp - 1.).abs() < f64::EPSILON);
+
+    s_gate(qureg, -1).unwrap_err();
+    s_gate(qureg, 3).unwrap_err();
+}
+
+#[test]
+fn t_gate_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    t_gate(qureg, 0).unwrap();
+    t_gate(qureg, -1).unwrap_err();
+    t_gate(qureg, 3).unwrap_err();
 }
 
 #[test]
