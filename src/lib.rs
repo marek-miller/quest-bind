@@ -1334,6 +1334,23 @@ pub fn copy_substate_from_gpu(
     })
 }
 
+/// Get the complex amplitude at a given index in the state vector.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = get_amp(qureg, 0).unwrap().real();
+/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
@@ -1341,6 +1358,24 @@ pub fn get_amp(
     catch_quest_exception(|| Complex(unsafe { ffi::getAmp(qureg.reg, index) }))
 }
 
+/// Get the real component of the complex probability amplitude at an index in
+/// the state vector.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = get_real_amp(qureg, 0).unwrap();
+/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_real_amp(
     qureg: &Qureg,
     index: i64,
@@ -1348,6 +1383,24 @@ pub fn get_real_amp(
     catch_quest_exception(|| unsafe { ffi::getRealAmp(qureg.reg, index) })
 }
 
+/// Get the imaginary component of the complex probability amplitude at an index
+/// in the state vector.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = get_imag_amp(qureg, 0).unwrap();
+/// assert!(amp.abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_imag_amp(
     qureg: &Qureg,
     index: i64,
@@ -1355,6 +1408,23 @@ pub fn get_imag_amp(
     catch_quest_exception(|| unsafe { ffi::getImagAmp(qureg.reg, index) })
 }
 
+/// Get the probability of a state-vector at an index in the full state vector.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = get_prob_amp(qureg, 0).unwrap();
+/// assert!((amp - 0.25).abs() < f64::EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_prob_amp(
     qureg: &Qureg,
     index: i64,
@@ -1362,6 +1432,11 @@ pub fn get_prob_amp(
     catch_quest_exception(|| unsafe { ffi::getProbAmp(qureg.reg, index) })
 }
 
+/// Desc.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,

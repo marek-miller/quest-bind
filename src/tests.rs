@@ -279,6 +279,66 @@ fn t_gate_01() {
 }
 
 #[test]
+fn get_amp_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_plus_state(qureg);
+
+    get_amp(qureg, 0).unwrap();
+    get_amp(qureg, 1).unwrap();
+    get_amp(qureg, 2).unwrap();
+    get_amp(qureg, 3).unwrap();
+
+    get_amp(qureg, 4).unwrap_err();
+    get_amp(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn get_real_amp_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_plus_state(qureg);
+
+    get_real_amp(qureg, 0).unwrap();
+    get_real_amp(qureg, 1).unwrap();
+    get_real_amp(qureg, 2).unwrap();
+    get_real_amp(qureg, 3).unwrap();
+
+    get_real_amp(qureg, 4).unwrap_err();
+    get_real_amp(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn get_imag_amp_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_plus_state(qureg);
+
+    get_imag_amp(qureg, 0).unwrap();
+    get_imag_amp(qureg, 1).unwrap();
+    get_imag_amp(qureg, 2).unwrap();
+    get_imag_amp(qureg, 3).unwrap();
+
+    get_imag_amp(qureg, 4).unwrap_err();
+    get_imag_amp(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn get_prob_amp_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_plus_state(qureg);
+
+    get_prob_amp(qureg, 0).unwrap();
+    get_prob_amp(qureg, 1).unwrap();
+    get_prob_amp(qureg, 2).unwrap();
+    get_prob_amp(qureg, 3).unwrap();
+
+    get_prob_amp(qureg, 4).unwrap_err();
+    get_prob_amp(qureg, -1).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
