@@ -1318,6 +1318,12 @@ pub fn copy_substate_to_gpu(
     })
 }
 
+/// In GPU mode, this copies a substate of the state-vector (or density matrix)
+/// from RAM.
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_from_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
