@@ -1,0 +1,52 @@
+name: Rust
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update
+        run:
+          rustup update ${{ matrix.toolchain }} && rustup default ${{
+          matrix.toolchain }}
+      - name: Update Git Sumbodule
+        run: |
+          git submodule update --init --recursive
+          git submodule update --remote --recursive
+      - name: Delete build script
+        run: |
+          rm -fv build.rs
+      - name: Compile QuEST manually
+        run: |
+          cd QuEST
+          mkdir build && cd build
+          cmake -DDISTRIBUTED=OFF ..
+          make
+          cd ../../
+          mkdir -p ./target/debug/deps
+          cd ./target/debug/deps
+          ln -s ../../../QuEST/build/QuEST/libQuEST.so .
+          cd ../../../
+      - name: Build documentation
+        run: |
+          cargo doc
+      - name: Run doc tests
+        run: |
+          cargo test --doc --verbose
