@@ -17,7 +17,7 @@ fn main() -> Result<(), QuestError> {
     init_plus_state(qureg);
 
     let outcome_prob = &mut -1.;
-    let outcome = measure_with_stats(qureg, 1, outcome_prob)?;
+    let outcome = measure_with_stats(qureg, 0, outcome_prob)?;
     println!("Measure first qubit.");
     println!("Outcome: {outcome} with prob.: {outcome_prob:.2}");
 
