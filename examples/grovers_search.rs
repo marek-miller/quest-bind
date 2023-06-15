@@ -27,7 +27,7 @@ fn tensor_gate<F>(
 where
     F: Fn(&mut Qureg, i32) -> Result<(), QuestError>,
 {
-    qubits.iter().try_for_each(|q| gate(qureg, *q))
+    qubits.iter().try_for_each(|&q| gate(qureg, q))
 }
 
 fn apply_oracle(
@@ -42,11 +42,9 @@ fn apply_oracle(
 
     // apply X to transform |solElem> into |111>
     tensor_gate(qureg, pauli_x, sol_ctrls)?;
-
     // effect |111> -> -|111>
     let num_qubits = qubits.len() as i32;
     multi_controlled_phase_flip(qureg, qubits, num_qubits)?;
-
     // apply X to transform |111> into |solElem>
     tensor_gate(qureg, pauli_x, sol_ctrls)
 }
@@ -68,17 +66,7 @@ fn apply_diffuser(
     tensor_gate(qureg, hadamard, qubits)
 }
 
-fn grovers_step(
-    qureg: &mut Qureg<'_>,
-    qubits: &[i32],
-    sol_elem: i64,
-) -> Result<(), QuestError> {
-    apply_oracle(qureg, qubits, sol_elem)?;
-    apply_diffuser(qureg, qubits)
-}
-
 fn main() -> Result<(), QuestError> {
-    // prepare the hardware-agnostic QuEST environment
     let env = &QuestEnv::new();
 
     // choose the system size
@@ -104,6 +92,7 @@ fn main() -> Result<(), QuestError> {
             "prob of solution |{sol_elem}> = {}",
             get_prob_amp(qureg, sol_elem)?
         );
-        grovers_step(qureg, qubits, sol_elem)
+        apply_oracle(qureg, qubits, sol_elem)?;
+        apply_diffuser(qureg, qubits)
     })
 }

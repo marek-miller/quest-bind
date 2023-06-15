@@ -91,7 +91,7 @@ edition = "2021"
 quest_bind = { git = "https://github.com/marek-miller/quest-bind.git", features = ["mpi",] }
 ```
 
-Now if you compile and run the above programme again, the output should be:
+Now if you compile and run the above program again, the output should be:
 
 ```text
 EXECUTION ENVIRONMENT:
@@ -147,6 +147,30 @@ Now, we can run all unit tests:
 
 ```sh
 cargo test
+```
+
+You can also check available examples by running, e.g.:
+
+```sh
+ cargo run --release --example grovers_search
+```
+
+To see all available examples, try:
+
+```sh
+cargo run --example
+```
+
+## Note on performance
+
+In the typical case when it's the numerical computation that dominates the CPU
+usage, and not API calls, there should be no discernible difference in
+performance between programs calling QuEST routines directly and analogous
+applications using `quest_bind`. Remember, however, to enable compiler
+optimizations by running your code using the `--release` profile:
+
+```sh
+cargo run --release
 ```
 
 ## Handling exceptions
