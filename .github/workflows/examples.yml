@@ -20,6 +20,7 @@ jobs:
           - beta
           - nightly
         example:
+          - grovers_search
           - measure_first
 
     steps:
