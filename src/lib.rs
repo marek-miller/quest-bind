@@ -1569,12 +1569,18 @@ pub fn unitary(
     })
 }
 
-/// Desc.
+/// Rotate a single qubit by a given angle around the X-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let theta = std::f64::consts::PI;
+///
+/// rotate_x(qureg, 0, theta).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1585,17 +1591,28 @@ pub fn rotate_x(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if rot_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::rotateX(qureg.reg, rot_qubit, angle);
     })
 }
 
-/// Desc.
+/// Rotate a single qubit by a given angle around the Y-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let theta = std::f64::consts::PI;
+///
+/// rotate_y(qureg, 0, theta).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1606,17 +1623,28 @@ pub fn rotate_y(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if rot_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::rotateY(qureg.reg, rot_qubit, angle);
     })
 }
 
-/// Desc.
+/// Rotate a single qubit by a given angle around the Z-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let theta = std::f64::consts::PI;
+///
+/// rotate_z(qureg, 0, theta).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1627,6 +1655,11 @@ pub fn rotate_z(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if rot_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::rotateZ(qureg.reg, rot_qubit, angle);
     })

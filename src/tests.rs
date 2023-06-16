@@ -430,6 +430,45 @@ fn unitary_02() {
 }
 
 #[test]
+fn rotate_x_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    let theta = std::f64::consts::PI;
+    rotate_x(qureg, 0, theta).unwrap();
+    rotate_x(qureg, 1, theta).unwrap();
+    rotate_x(qureg, 2, theta).unwrap();
+
+    rotate_x(qureg, 3, theta).unwrap_err();
+    rotate_x(qureg, -1, theta).unwrap_err();
+}
+
+#[test]
+fn rotate_y_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    let theta = std::f64::consts::PI;
+    rotate_y(qureg, 0, theta).unwrap();
+    rotate_y(qureg, 1, theta).unwrap();
+    rotate_y(qureg, 2, theta).unwrap();
+
+    rotate_y(qureg, 3, theta).unwrap_err();
+    rotate_y(qureg, -1, theta).unwrap_err();
+}
+
+#[test]
+fn rotate_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    let theta = std::f64::consts::PI;
+    rotate_z(qureg, 0, theta).unwrap();
+    rotate_z(qureg, 1, theta).unwrap();
+    rotate_z(qureg, 2, theta).unwrap();
+
+    rotate_z(qureg, 3, theta).unwrap_err();
+    rotate_z(qureg, -1, theta).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
