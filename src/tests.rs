@@ -338,6 +338,67 @@ fn get_prob_amp_01() {
 }
 
 #[test]
+fn get_density_amp_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    get_density_amp(qureg, 0, 0).unwrap_err();
+    get_density_amp(qureg, 1, 0).unwrap_err();
+    get_density_amp(qureg, 2, 0).unwrap_err();
+    get_density_amp(qureg, 3, 0).unwrap_err();
+    get_density_amp(qureg, -1, 5).unwrap_err();
+    get_density_amp(qureg, 4, 0).unwrap_err();
+}
+
+#[test]
+fn get_density_amp_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+
+    get_density_amp(qureg, 0, 0).unwrap();
+    get_density_amp(qureg, 1, 0).unwrap();
+    get_density_amp(qureg, 2, 0).unwrap();
+    get_density_amp(qureg, 3, 0).unwrap();
+    get_density_amp(qureg, -1, 0).unwrap_err();
+    get_density_amp(qureg, 4, 0).unwrap_err();
+}
+
+#[test]
+fn compact_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let norm = std::f64::consts::SQRT_2.recip();
+    let alpha = Complex::new(0., norm);
+    let beta = Complex::new(0., norm);
+
+    compact_unitary(qureg, 0, alpha, beta).unwrap();
+    compact_unitary(qureg, 1, alpha, beta).unwrap();
+
+    compact_unitary(qureg, 4, alpha, beta).unwrap_err();
+    compact_unitary(qureg, -1, alpha, beta).unwrap_err();
+}
+
+#[test]
+fn compact_unitary_02() {
+    // env_logger::init();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // this doesn't define a unitary matrix
+    let alpha = Complex::new(1., 2.);
+    let beta = Complex::new(2., 1.);
+
+    compact_unitary(qureg, 0, alpha, beta).unwrap_err();
+    compact_unitary(qureg, 1, alpha, beta).unwrap_err();
+
+    // TODO: this causes test to crash. Investigate.
+    // compact_unitary(qureg, 4, alpha, beta).unwrap_err();
+    // compact_unitary(qureg, -1, alpha, beta).unwrap_err();
+}
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

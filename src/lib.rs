@@ -1229,7 +1229,7 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
     unsafe { ffi::syncQuESTSuccess(success_code) }
 }
 
-/// Report information about the QuEST environment
+/// Report information about the `QuEST` environment
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -1429,12 +1429,18 @@ pub fn get_prob_amp(
     catch_quest_exception(|| unsafe { ffi::getProbAmp(qureg.reg, index) })
 }
 
-/// Desc.
+/// Get an amplitude from a density matrix at a given row and column.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = get_density_amp(qureg, 0, 0).unwrap().real();
+/// assert!((amp - 0.25).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1450,12 +1456,22 @@ pub fn get_density_amp(
     })
 }
 
-/// Desc.
+/// A debugging function which calculates the probability of the qubits in
+/// `qureg`
+///
+/// This function should always be 1 for correctly normalised states
+/// (hence returning a real number).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let amp = calc_total_prob(qureg);
+/// assert!((amp - 1.).abs() < f64::EPSILON)
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1466,12 +1482,27 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
     unsafe { ffi::calcTotalProb(qureg.reg) }
 }
 
-/// Desc.
+/// Apply a single-qubit unitary parameterised by two given complex scalars.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let norm = std::f64::consts::SQRT_2.recip();
+/// let alpha = Complex::new(0., norm);
+/// let beta = Complex::new(0., norm);
+/// compact_unitary(qureg, 0, alpha, beta).unwrap();
+///
+/// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(other_qureg);
+/// hadamard(other_qureg, 0).unwrap();
+///
+/// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
+/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

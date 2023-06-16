@@ -89,9 +89,8 @@ fn main() -> Result<(), QuestError> {
         apply_oracle(qureg, qubits, sol_elem)
             .and(apply_diffuser(qureg, qubits))
             .and(get_prob_amp(qureg, sol_elem))
-            .and_then(|prob| {
+            .map(|prob| {
                 println!("prob of solution |{sol_elem}> = {}", prob);
-                Ok(())
             })
     })
 }
