@@ -42,6 +42,7 @@ pub enum QuestError {
     NulError(std::ffi::NulError),
     IntoStringError(std::ffi::IntoStringError),
     ArrayLengthError,
+    QubitIndexError,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1482,7 +1483,7 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
     unsafe { ffi::calcTotalProb(qureg.reg) }
 }
 
-/// Apply a single-qubit unitary parameterised by two given complex scalars.
+/// Apply a single-qubit unitary parameterized by two given complex scalars.
 ///
 /// # Examples
 ///
@@ -1514,17 +1515,39 @@ pub fn compact_unitary(
     alpha: Complex,
     beta: Complex,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::compactUnitary(qureg.reg, target_qubit, alpha.0, beta.0);
     })
 }
 
-/// Desc.
+/// Apply a general single-qubit unitary (including a global phase factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let norm = std::f64::consts::SQRT_2.recip();
+/// let mtr = ComplexMatrix2::new(
+///     [[norm, norm], [norm, -norm]],
+///     [[0., 0.], [0., 0.]],
+/// );
+/// unitary(qureg, 0, &mtr).unwrap();
+///
+/// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(other_qureg);
+/// hadamard(other_qureg, 0).unwrap();
+///
+/// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
+/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1535,6 +1558,12 @@ pub fn unitary(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+
     catch_quest_exception(|| unsafe {
         ffi::unitary(qureg.reg, target_qubit, u.0);
     })

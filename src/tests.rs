@@ -394,10 +394,41 @@ fn compact_unitary_02() {
     compact_unitary(qureg, 0, alpha, beta).unwrap_err();
     compact_unitary(qureg, 1, alpha, beta).unwrap_err();
 
-    // TODO: this causes test to crash. Investigate.
-    // compact_unitary(qureg, 4, alpha, beta).unwrap_err();
-    // compact_unitary(qureg, -1, alpha, beta).unwrap_err();
+    compact_unitary(qureg, 4, alpha, beta).unwrap_err();
+    compact_unitary(qureg, -1, alpha, beta).unwrap_err();
 }
+
+#[test]
+fn unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let norm = std::f64::consts::SQRT_2.recip();
+    let mtr = ComplexMatrix2::new(
+        [[norm, norm], [norm, -norm]],
+        [[0., 0.], [0., 0.]],
+    );
+    unitary(qureg, 0, &mtr).unwrap();
+    unitary(qureg, 1, &mtr).unwrap();
+    unitary(qureg, 2, &mtr).unwrap_err();
+    unitary(qureg, -1, &mtr).unwrap_err();
+}
+
+#[test]
+fn unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // This isn't a unitary
+    let mtr = ComplexMatrix2::new([[1., 2.], [0., 0.]], [[0., 0.], [1., 2.]]);
+    unitary(qureg, 0, &mtr).unwrap_err();
+    unitary(qureg, 1, &mtr).unwrap_err();
+    unitary(qureg, 2, &mtr).unwrap_err();
+    unitary(qureg, -1, &mtr).unwrap_err();
+}
+
 #[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
