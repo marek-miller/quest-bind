@@ -469,6 +469,39 @@ fn rotate_z_01() {
 }
 
 #[test]
+fn rotate_around_axis_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let angle = 0.;
+    let axis = &Vector::new(0., 0., 1.);
+    rotate_around_axis(qureg, 0, angle, axis).unwrap();
+    rotate_around_axis(qureg, 1, angle, axis).unwrap();
+    rotate_around_axis(qureg, 2, angle, axis).unwrap();
+
+    rotate_around_axis(qureg, 3, angle, axis).unwrap_err();
+    rotate_around_axis(qureg, -1, angle, axis).unwrap_err();
+}
+
+#[test]
+fn rotate_around_axis_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let angle = 0.;
+    // zero vector should throw an exception
+    let axis = &Vector::new(0., 0., 0.);
+    rotate_around_axis(qureg, 0, angle, axis).unwrap_err();
+    rotate_around_axis(qureg, 1, angle, axis).unwrap_err();
+    rotate_around_axis(qureg, 2, angle, axis).unwrap_err();
+
+    rotate_around_axis(qureg, 3, angle, axis).unwrap_err();
+    rotate_around_axis(qureg, -1, angle, axis).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

@@ -1665,12 +1665,19 @@ pub fn rotate_z(
     })
 }
 
-/// Desc.
+/// Rotate a single qubit by a given angle around a given axis.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let angle = std::f64::consts::TAU;
+/// let axis = &Vector::new(0., 0., 1.);
+/// rotate_around_axis(qureg, 0, angle, axis).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1682,6 +1689,11 @@ pub fn rotate_around_axis(
     angle: Qreal,
     axis: &Vector,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if rot_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::rotateAroundAxis(qureg.reg, rot_qubit, angle, axis.0);
     })
