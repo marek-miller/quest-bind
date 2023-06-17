@@ -35,10 +35,10 @@ jobs:
           cargo build --verbose
       - name: Run unit tests
         run: |
-          cargo test --tests --verbose
+          cargo test --verbose
       - name: Build with build script (release)
         run: |
           cargo build --verbose --release
       - name: Run unit tests (release)
         run: |
-          cargo test --tests --verbose --release
+          cargo test --verbose --release
