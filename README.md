@@ -120,7 +120,7 @@ Then run:
 cargo test
 ```
 
-Please note that `quest-bin` will not run `QuEST`'s test suite, not will it
+Please note that `quest-bind` will not run `QuEST`'s test suite, not will it
 check `QuEST`'s correctness. These tests are intended to check if the C API is
 invoked correctly, and Rust's types are passed safely back and forth across FFI
 boundaries.
