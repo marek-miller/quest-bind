@@ -1,8 +1,11 @@
+use std::path::Path;
+
 extern crate cmake;
 
 fn main() {
     let mut config = cmake::Config::new("QuEST");
-    let config = config
+
+    config
         .no_build_target(true)
         .define("MULTITHREADED", "ON")
         .define("GPUACCELERATED", "OFF")
@@ -32,4 +35,12 @@ fn main() {
         dst.display()
     );
     println!("cargo:rustc-link-lib=dylib=QuEST");
+
+    // Make a link to libQuEST
+    let out_dir = std::env::var_os("OUT_DIR").unwrap();
+    let libfile = Path::new(&out_dir).join("build/QuEST/libQuEST.so");
+    let linkfile = Path::new(&out_dir).join("../../../deps/libQuEST.so");
+    let _ = std::fs::remove_file(&linkfile);
+    std::os::unix::fs::symlink(libfile, linkfile).unwrap();
+    // panic!();
 }
