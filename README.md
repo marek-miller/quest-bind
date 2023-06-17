@@ -265,6 +265,7 @@ New features/improvements:
 - Constructors/destructors for QuEST structs
 - Add Github workflows CT
 - Add example: grovers_search.rs
+- Use `Complex<f64>` type from `num` crate (as `QComplex`)
 
 ### v0.1.0 (11/06/2023)
 
