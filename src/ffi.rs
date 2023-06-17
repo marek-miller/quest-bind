@@ -5,15 +5,21 @@
 #![allow(dead_code)]
 #![allow(clippy::upper_case_acronyms)]
 
+#[allow(unused_imports)]
 use std::ffi::{
     c_char,
     c_double,
+    c_float,
     c_int,
     c_longlong,
     c_ulong,
 };
 
+#[cfg(not(feature = "f32"))]
 pub type qreal = c_double;
+
+#[cfg(feature = "f32")]
+pub type qreal = c_float;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]

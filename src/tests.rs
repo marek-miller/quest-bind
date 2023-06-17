@@ -34,11 +34,11 @@ fn init_complex_matrix_n_02() -> Result<(), QuestError> {
     )?;
 
     unsafe {
-        let row = &*(*m.0.real).cast::<[&[f64; 2]; 2]>();
+        let row = &*(*m.0.real).cast::<[&[Qreal; 2]; 2]>();
         assert_eq!(row, &[&[1., 2.,], &[3., 4.]]);
     }
     unsafe {
-        let row = &*(*m.0.imag).cast::<[&[f64; 2]; 2]>();
+        let row = &*(*m.0.imag).cast::<[&[Qreal; 2]; 2]>();
         assert_eq!(row, &[&[11., 12.], &[13., 14.],]);
     }
     Ok(())
@@ -54,11 +54,11 @@ fn init_complex_matrix_n_03() -> Result<(), QuestError> {
     )?;
 
     unsafe {
-        let row = &*(*m.0.real).cast::<[&[f64; 3]; 3]>();
+        let row = &*(*m.0.real).cast::<[&[Qreal; 3]; 3]>();
         assert_eq!(row, &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]]);
     }
     unsafe {
-        let row = &*(*m.0.imag).cast::<[&[f64; 3]; 3]>();
+        let row = &*(*m.0.imag).cast::<[&[Qreal; 3]; 3]>();
         assert_eq!(
             row,
             &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]]
@@ -156,7 +156,7 @@ fn set_amps_01() {
 
     set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap();
 
-    assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+    assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < EPSILON);
 
     set_amps(&mut qureg, 9, &re, &im, 4).unwrap_err();
     set_amps(&mut qureg, 7, &re, &im, 4).unwrap_err();
@@ -174,9 +174,7 @@ fn set_density_amps_01() {
     let im = &[1., 2., 3., 4.];
 
     set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
-    assert!(
-        (get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < f64::EPSILON
-    );
+    assert!((get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < EPSILON);
 
     set_amps(qureg, 0, re, im, 4).unwrap_err();
 
@@ -253,13 +251,13 @@ fn s_gate_01() {
     init_zero_state(qureg);
 
     s_gate(qureg, 0).unwrap();
-    assert!((get_imag_amp(qureg, 0).unwrap()).abs() < f64::EPSILON);
+    assert!((get_imag_amp(qureg, 0).unwrap()).abs() < EPSILON);
 
     pauli_x(qureg, 0).unwrap();
     s_gate(qureg, 0).unwrap();
 
     let amp = get_imag_amp(qureg, 1).unwrap();
-    assert!((amp - 1.).abs() < f64::EPSILON);
+    assert!((amp - 1.).abs() < EPSILON);
 
     s_gate(qureg, -1).unwrap_err();
     s_gate(qureg, 3).unwrap_err();
@@ -368,7 +366,7 @@ fn compact_unitary_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let norm = std::f64::consts::SQRT_2.recip();
+    let norm = SQRT_2.recip();
     let alpha = Qcomplex::new(0., norm);
     let beta = Qcomplex::new(0., norm);
 
@@ -403,7 +401,7 @@ fn unitary_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let norm = std::f64::consts::SQRT_2.recip();
+    let norm = SQRT_2.recip();
     let mtr = ComplexMatrix2::new(
         [[norm, norm], [norm, -norm]],
         [[0., 0.], [0., 0.]],
@@ -432,7 +430,7 @@ fn unitary_02() {
 fn rotate_x_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(3, env).unwrap();
-    let theta = std::f64::consts::PI;
+    let theta = PI;
     rotate_x(qureg, 0, theta).unwrap();
     rotate_x(qureg, 1, theta).unwrap();
     rotate_x(qureg, 2, theta).unwrap();
@@ -445,7 +443,7 @@ fn rotate_x_01() {
 fn rotate_y_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(3, env).unwrap();
-    let theta = std::f64::consts::PI;
+    let theta = PI;
     rotate_y(qureg, 0, theta).unwrap();
     rotate_y(qureg, 1, theta).unwrap();
     rotate_y(qureg, 2, theta).unwrap();
@@ -458,7 +456,7 @@ fn rotate_y_01() {
 fn rotate_z_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(3, env).unwrap();
-    let theta = std::f64::consts::PI;
+    let theta = PI;
     rotate_z(qureg, 0, theta).unwrap();
     rotate_z(qureg, 1, theta).unwrap();
     rotate_z(qureg, 2, theta).unwrap();

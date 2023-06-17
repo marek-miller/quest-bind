@@ -7,6 +7,19 @@ use exceptions::catch_quest_exception;
 mod exceptions;
 mod ffi;
 
+#[cfg(feature = "f32")]
+pub use std::f32::consts::PI;
+#[cfg(feature = "f32")]
+pub use std::f32::consts::SQRT_2;
+#[cfg(feature = "f32")]
+pub use std::f32::EPSILON;
+#[cfg(not(feature = "f32"))]
+pub use std::f64::consts::PI;
+#[cfg(not(feature = "f32"))]
+pub use std::f64::consts::SQRT_2;
+#[cfg(not(feature = "f32"))]
+pub use std::f64::EPSILON;
+
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -14,9 +27,11 @@ pub use ffi::{
     phaseGateType as PhaseGateType,
 };
 
-// TODO: define number abstractions for numerical types
-// (use num_traits)
+#[cfg(not(feature = "f32"))]
 pub type Qreal = f64;
+
+#[cfg(feature = "f32")]
+pub type Qreal = f32;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
@@ -633,8 +648,8 @@ pub fn apply_diagonal_op(
 ///
 /// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();
 ///
-/// assert!((expec_val.re - 1.).abs() < f64::EPSILON);
-/// assert!((expec_val.im - 5.).abs() < f64::EPSILON);
+/// assert!((expec_val.re - 1.).abs() < EPSILON);
+/// assert!((expec_val.im - 5.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -724,7 +739,7 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 ///
 /// init_blank_state(qureg);
 ///
-/// assert!(get_prob_amp(qureg, 0).unwrap().abs() < f64::EPSILON);
+/// assert!(get_prob_amp(qureg, 0).unwrap().abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -747,7 +762,7 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// init_zero_state(qureg);
 ///
-/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -771,7 +786,7 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 /// init_plus_state(qureg);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!((prob - 0.125).abs() < f64::EPSILON);
+/// assert!((prob - 0.125).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -795,7 +810,7 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// init_classical_state(qureg, 8);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!(prob.abs() < f64::EPSILON);
+/// assert!(prob.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -823,7 +838,7 @@ pub fn init_classical_state(
 /// init_zero_state(pure_state);
 /// init_pure_state(qureg, pure_state).unwrap();
 ///
-/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < f64::EPSILON);
+/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -861,7 +876,7 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 /// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!((prob - 1.).abs() < f64::EPSILON);
+/// assert!((prob - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1164,7 +1179,7 @@ pub fn multi_controlled_phase_flip(
 /// s_gate(qureg, 0).unwrap();
 ///
 /// let amp = get_imag_amp(qureg, 1).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1184,7 +1199,6 @@ pub fn s_gate(
 /// # Examples
 ///
 /// ```rust
-/// # use std::f64::consts::SQRT_2;
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
@@ -1194,7 +1208,7 @@ pub fn s_gate(
 /// t_gate(qureg, 0).unwrap();
 ///
 /// let amp = get_imag_amp(qureg, 1).unwrap();
-/// assert!((amp - SQRT_2 / 2.).abs() < f64::EPSILON);
+/// assert!((amp - SQRT_2 / 2.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1335,7 +1349,7 @@ pub fn copy_substate_from_gpu(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_amp(qureg, 0).unwrap().re;
-/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1361,7 +1375,7 @@ pub fn get_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_real_amp(qureg, 0).unwrap();
-/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1386,7 +1400,7 @@ pub fn get_real_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_imag_amp(qureg, 0).unwrap();
-/// assert!(amp.abs() < f64::EPSILON);
+/// assert!(amp.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1410,7 +1424,7 @@ pub fn get_imag_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_prob_amp(qureg, 0).unwrap();
-/// assert!((amp - 0.25).abs() < f64::EPSILON);
+/// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1434,7 +1448,7 @@ pub fn get_prob_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_density_amp(qureg, 0, 0).unwrap().re;
-/// assert!((amp - 0.25).abs() < f64::EPSILON);
+/// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1464,7 +1478,7 @@ pub fn get_density_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = calc_total_prob(qureg);
-/// assert!((amp - 1.).abs() < f64::EPSILON)
+/// assert!((amp - 1.).abs() < EPSILON)
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1485,7 +1499,7 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let alpha = Qcomplex::new(0., norm);
 /// let beta = Qcomplex::new(0., norm);
 /// compact_unitary(qureg, 0, alpha, beta).unwrap();
@@ -1495,7 +1509,7 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// hadamard(other_qureg, 0).unwrap();
 ///
 /// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
-/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
+/// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1527,7 +1541,7 @@ pub fn compact_unitary(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let mtr = ComplexMatrix2::new(
 ///     [[norm, norm], [norm, -norm]],
 ///     [[0., 0.], [0., 0.]],
@@ -1539,7 +1553,7 @@ pub fn compact_unitary(
 /// hadamard(other_qureg, 0).unwrap();
 ///
 /// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
-/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
+/// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1570,7 +1584,7 @@ pub fn unitary(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_x(qureg, 0, theta).unwrap();
 /// ```
@@ -1602,7 +1616,7 @@ pub fn rotate_x(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_y(qureg, 0, theta).unwrap();
 /// ```
@@ -1634,7 +1648,7 @@ pub fn rotate_y(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_z(qureg, 0, theta).unwrap();
 /// ```
@@ -1667,7 +1681,7 @@ pub fn rotate_z(
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let angle = std::f64::consts::TAU;
+/// let angle = 2.0 * PI;
 /// let axis = &Vector::new(0., 0., 1.);
 /// rotate_around_axis(qureg, 0, angle, axis).unwrap();
 /// ```
@@ -1703,7 +1717,7 @@ pub fn rotate_around_axis(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_x(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1740,7 +1754,7 @@ pub fn controlled_rotate_x(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_y(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1777,7 +1791,7 @@ pub fn controlled_rotate_y(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_z(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1814,7 +1828,7 @@ pub fn controlled_rotate_z(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// let vector = &Vector::new(0., 0., 1.);
 /// controlled_rotate_around_axis(
 ///     qureg,
@@ -2256,7 +2270,7 @@ pub fn calc_inner_product(
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
-) -> Result<f64, QuestError> {
+) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
     })

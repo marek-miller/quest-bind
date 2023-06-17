@@ -8,6 +8,11 @@ fn main() {
         .define("GPUACCELERATED", "OFF")
         .define("DISTRIBUTED", "OFF");
 
+    config.define("PRECISION", "2");
+
+    #[cfg(feature = "f32")]
+    config.define("PRECISION", "1");
+
     #[cfg(feature = "gpu")]
     config
         .define("MULTITHREADED", "OFF")

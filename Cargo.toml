@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+f32 = []
 gpu = []
 mpi = []
+
 
 [dependencies]
 env_logger = "0.10.0"
