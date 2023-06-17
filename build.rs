@@ -36,11 +36,13 @@ fn main() {
     );
     println!("cargo:rustc-link-lib=dylib=QuEST");
 
-    // Make a link to libQuEST
+    // To be able to run documentation tests, we need to work around a known
+    // issue with `cargo`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
+    //
+    // Create a link to libQuEST
     let out_dir = std::env::var_os("OUT_DIR").unwrap();
     let libfile = Path::new(&out_dir).join("build/QuEST/libQuEST.so");
     let linkfile = Path::new(&out_dir).join("../../../deps/libQuEST.so");
     let _ = std::fs::remove_file(&linkfile);
     std::os::unix::fs::symlink(libfile, linkfile).unwrap();
-    // panic!();
 }
