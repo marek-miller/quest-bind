@@ -694,6 +694,42 @@ fn multi_controlled_unitary_02() {
 }
 
 #[test]
+fn pauli_x_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+    pauli_x(qureg, 2).unwrap_err();
+    pauli_x(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn pauli_y_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    pauli_y(qureg, 0).unwrap();
+    pauli_y(qureg, 1).unwrap();
+    pauli_y(qureg, 2).unwrap_err();
+    pauli_y(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn pauli_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    pauli_z(qureg, 0).unwrap();
+    pauli_z(qureg, 1).unwrap();
+    pauli_z(qureg, 2).unwrap_err();
+    pauli_z(qureg, -1).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

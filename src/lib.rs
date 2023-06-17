@@ -1966,12 +1966,20 @@ pub fn multi_controlled_unitary(
     })
 }
 
-/// Desc.
+/// Apply the single-qubit Pauli-X gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1981,17 +1989,28 @@ pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::pauliX(qureg.reg, target_qubit);
     })
 }
 
-/// Desc.
+/// Apply the single-qubit Pauli-Y gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// pauli_y(qureg, 0).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2001,17 +2020,28 @@ pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::pauliY(qureg.reg, target_qubit);
     })
 }
 
-/// Desc.
+/// Apply the single-qubit Pauli-Z gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// pauli_z(qureg, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 0).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2021,6 +2051,9 @@ pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::pauliZ(qureg.reg, target_qubit);
     })
