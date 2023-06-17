@@ -9,7 +9,7 @@ use quest_bind::{
     hadamard,
     init_plus_state,
     multi_controlled_phase_flip,
-    pauli_x,
+    multi_qubit_not,
     Qreal,
     QuestEnv,
     QuestError,
@@ -43,11 +43,11 @@ fn apply_oracle(
         .collect::<Vec<_>>();
 
     // apply X to transform |solElem> into |111>
-    tensor_gate(qureg, pauli_x, sol_ctrls)
+    multi_qubit_not(qureg, sol_ctrls)
         // effect |111> -> -|111>
         .and(multi_controlled_phase_flip(qureg, qubits))
         // apply X to transform |111> into |solElem>
-        .and(tensor_gate(qureg, pauli_x, sol_ctrls))
+        .and(multi_qubit_not(qureg, sol_ctrls))
 }
 
 fn apply_diffuser(
@@ -57,13 +57,12 @@ fn apply_diffuser(
     // apply H to transform |+> into |0>
     tensor_gate(qureg, hadamard, qubits)
         // apply X to transform |11..1> into |00..0>
-        .and(tensor_gate(qureg, pauli_x, qubits))?;
+        .and(multi_qubit_not(qureg, qubits))?;
 
     // effect |11..1> -> -|11..1>
     multi_controlled_phase_flip(qureg, qubits)?;
 
-    tensor_gate(qureg, pauli_x, qubits)
-        .and(tensor_gate(qureg, hadamard, qubits))
+    multi_qubit_not(qureg, qubits).and(tensor_gate(qureg, hadamard, qubits))
 }
 
 fn main() -> Result<(), QuestError> {
@@ -90,7 +89,7 @@ fn main() -> Result<(), QuestError> {
             .and(apply_diffuser(qureg, qubits))
             .and(get_prob_amp(qureg, sol_elem))
             .map(|prob| {
-                println!("prob of solution |{sol_elem}> = {}", prob);
+                println!("prob of solution |{sol_elem}> = {:.8}", prob);
             })
     })
 }
