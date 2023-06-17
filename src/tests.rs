@@ -175,8 +175,7 @@ fn set_density_amps_01() {
 
     set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
     assert!(
-        (get_density_amp(qureg, 0, 0).unwrap().real() - 1.).abs()
-            < f64::EPSILON
+        (get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < f64::EPSILON
     );
 
     set_amps(qureg, 0, re, im, 4).unwrap_err();
@@ -370,8 +369,8 @@ fn compact_unitary_01() {
     init_zero_state(qureg);
 
     let norm = std::f64::consts::SQRT_2.recip();
-    let alpha = Complex::new(0., norm);
-    let beta = Complex::new(0., norm);
+    let alpha = QComplex::new(0., norm);
+    let beta = QComplex::new(0., norm);
 
     compact_unitary(qureg, 0, alpha, beta).unwrap();
     compact_unitary(qureg, 1, alpha, beta).unwrap();
@@ -388,8 +387,8 @@ fn compact_unitary_02() {
     init_zero_state(qureg);
 
     // this doesn't define a unitary matrix
-    let alpha = Complex::new(1., 2.);
-    let beta = Complex::new(2., 1.);
+    let alpha = QComplex::new(1., 2.);
+    let beta = QComplex::new(2., 1.);
 
     compact_unitary(qureg, 0, alpha, beta).unwrap_err();
     compact_unitary(qureg, 1, alpha, beta).unwrap_err();

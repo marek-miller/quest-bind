@@ -45,29 +45,19 @@ pub enum QuestError {
     QubitIndexError,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Complex(ffi::Complex);
-
-impl Complex {
-    #[must_use]
-    pub fn new(
-        real: Qreal,
-        imag: Qreal,
-    ) -> Self {
-        Self(ffi::Complex {
-            real,
-            imag,
-        })
+type QComplex = num::Complex<Qreal>;
+impl From<QComplex> for ffi::Complex {
+    fn from(value: QComplex) -> Self {
+        ffi::Complex {
+            real: value.re,
+            imag: value.im,
+        }
     }
+}
 
-    #[must_use]
-    pub fn real(&self) -> Qreal {
-        self.0.real
-    }
-
-    #[must_use]
-    pub fn imag(&self) -> Qreal {
-        self.0.imag
+impl From<ffi::Complex> for QComplex {
+    fn from(value: ffi::Complex) -> Self {
+        Self::new(value.real, value.imag)
     }
 }
 
@@ -652,10 +642,11 @@ pub fn apply_diagonal_op(
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::calcExpecDiagonalOp(qureg.reg, op.op) })
+) -> Result<QComplex, QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::calcExpecDiagonalOp(qureg.reg, op.op)
     })
+    .map(|z| z.into())
 }
 
 pub fn report_state(qureg: &Qureg) {
@@ -1352,8 +1343,9 @@ pub fn copy_substate_from_gpu(
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| Complex(unsafe { ffi::getAmp(qureg.reg, index) }))
+) -> Result<QComplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::getAmp(qureg.reg, index) })
+        .map(|z| z.into())
 }
 
 /// Get the real component of the complex probability amplitude at an index in
@@ -1451,10 +1443,9 @@ pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
     col: i64,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
-    })
+) -> Result<QComplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
+        .map(|z| z.into())
 }
 
 /// A debugging function which calculates the probability of the qubits in
@@ -1512,8 +1503,8 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
-    alpha: Complex,
-    beta: Complex,
+    alpha: QComplex,
+    beta: QComplex,
 ) -> Result<(), QuestError> {
     // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
     // sometimes
@@ -1521,7 +1512,7 @@ pub fn compact_unitary(
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
-        ffi::compactUnitary(qureg.reg, target_qubit, alpha.0, beta.0);
+        ffi::compactUnitary(qureg.reg, target_qubit, alpha.into(), beta.into());
     })
 }
 
@@ -1877,16 +1868,16 @@ pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
     target_qubit: i32,
-    alpha: Complex,
-    beta: Complex,
+    alpha: QComplex,
+    beta: QComplex,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::controlledCompactUnitary(
             qureg.reg,
             control_qubit,
             target_qubit,
-            alpha.0,
-            beta.0,
+            alpha.into(),
+            beta.into(),
         );
     })
 }
@@ -2245,10 +2236,9 @@ pub fn measure_with_stats(
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
-    })
+) -> Result<QComplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
+        .map(|z| z.into())
 }
 
 /// Desc.
@@ -3245,16 +3235,21 @@ pub fn calc_hilbert_schmidt_distance(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
-    fac1: Complex,
+    fac1: QComplex,
     qureg1: &Qureg,
-    fac2: Complex,
+    fac2: QComplex,
     qureg2: &Qureg,
-    fac_out: Complex,
+    fac_out: QComplex,
     out: &mut Qureg,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
-            fac1.0, qureg1.reg, fac2.0, qureg2.reg, fac_out.0, out.reg,
+            fac1.into(),
+            qureg1.reg,
+            fac2.into(),
+            qureg2.reg,
+            fac_out.into(),
+            out.reg,
         );
     })
 }
