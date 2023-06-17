@@ -4,8 +4,6 @@
 //! Implements Grover's algorithm for unstructured search,
 //! using only X, H and multi-controlled Z gates.
 
-use std::f64::consts::PI;
-
 use quest_bind::{
     get_prob_amp,
     hadamard,
@@ -15,6 +13,7 @@ use quest_bind::{
     QuestEnv,
     QuestError,
     Qureg,
+    PI,
 };
 use rand::Rng;
 
