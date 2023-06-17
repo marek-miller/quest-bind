@@ -15,11 +15,7 @@ use std::ffi::{
     c_ulong,
 };
 
-#[cfg(not(feature = "f32"))]
-pub type qreal = c_double;
-
-#[cfg(feature = "f32")]
-pub type qreal = c_float;
+use super::precision::qreal;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]

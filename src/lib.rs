@@ -2,24 +2,10 @@
 
 use std::ffi::CString;
 
+mod exceptions;
 use exceptions::catch_quest_exception;
 
-mod exceptions;
 mod ffi;
-
-#[cfg(feature = "f32")]
-pub use std::f32::consts::PI;
-#[cfg(feature = "f32")]
-pub use std::f32::consts::SQRT_2;
-#[cfg(feature = "f32")]
-pub use std::f32::EPSILON;
-#[cfg(not(feature = "f32"))]
-pub use std::f64::consts::PI;
-#[cfg(not(feature = "f32"))]
-pub use std::f64::consts::SQRT_2;
-#[cfg(not(feature = "f32"))]
-pub use std::f64::EPSILON;
-
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -27,11 +13,16 @@ pub use ffi::{
     phaseGateType as PhaseGateType,
 };
 
-#[cfg(not(feature = "f32"))]
-pub type Qreal = f64;
-
-#[cfg(feature = "f32")]
-pub type Qreal = f32;
+mod precision;
+pub use precision::{
+    Qreal,
+    EPSILON,
+    LN_10,
+    LN_2,
+    PI,
+    SQRT_2,
+    TAU,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
