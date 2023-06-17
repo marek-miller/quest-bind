@@ -234,9 +234,11 @@ strategy. We pass Rust types directly to QuEST without casting, assuming the
 following type definitions:
 
 ```rust
+pub type c_float = f32;
 pub type c_double = f64;
 pub type c_int = i32;
 pub type c_longlong = i64;
+pub type c_ulong = u64;
 ```
 
 This should work for many different architectures. If your system uses slightly
@@ -266,6 +268,7 @@ New features/improvements:
 - Add Github workflows CT
 - Add example: grovers_search.rs
 - Use `Complex<f64>` type from `num` crate (as `QComplex`)
+- Use compile flag `"f32"` to set floating point precision
 
 ### v0.1.0 (11/06/2023)
 
