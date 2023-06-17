@@ -1851,8 +1851,8 @@ pub fn controlled_rotate_around_axis(
 /// init_zero_state(qureg);
 ///
 /// let norm = std::f64::consts::SQRT_2.recip();
-/// let alpha = Complex::new(0., norm);
-/// let beta = Complex::new(0., norm);
+/// let alpha = Qcomplex::new(0., norm);
+/// let beta = Qcomplex::new(0., norm);
 /// controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
 /// ```
 ///

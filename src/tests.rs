@@ -581,8 +581,8 @@ fn controlled_compact_unitary_01() {
     init_zero_state(qureg);
 
     let norm = std::f64::consts::SQRT_2.recip();
-    let alpha = Complex::new(0., norm);
-    let beta = Complex::new(0., norm);
+    let alpha = Qcomplex::new(0., norm);
+    let beta = Qcomplex::new(0., norm);
 
     controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
     controlled_compact_unitary(qureg, 1, 0, alpha, beta).unwrap();
@@ -601,8 +601,8 @@ fn controlled_compact_unitary_02() {
     init_zero_state(qureg);
 
     // this doesn't define a unitary matrix
-    let alpha = Complex::new(1., 2.);
-    let beta = Complex::new(2., 1.);
+    let alpha = Qcomplex::new(1., 2.);
+    let beta = Qcomplex::new(2., 1.);
 
     controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap_err();
     controlled_compact_unitary(qureg, 1, 0, alpha, beta).unwrap_err();
