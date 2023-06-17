@@ -10,6 +10,7 @@ use quest_bind::{
     init_plus_state,
     multi_controlled_phase_flip,
     pauli_x,
+    Qreal,
     QuestEnv,
     QuestError,
     Qureg,
@@ -68,7 +69,7 @@ fn apply_diffuser(
 fn main() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
 
-    let num_reps = (PI / 4.0 * (NUM_ELEMS as f64).sqrt()).ceil() as usize;
+    let num_reps = (PI / 4.0 * (NUM_ELEMS as Qreal).sqrt()).ceil() as usize;
     println!(
         "num_qubits: {NUM_QUBITS}, num_elems: {NUM_ELEMS}, num_reps: \
          {num_reps}"

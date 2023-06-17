@@ -580,7 +580,7 @@ fn controlled_compact_unitary_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let norm = std::f64::consts::SQRT_2.recip();
+    let norm = SQRT_2.recip();
     let alpha = Qcomplex::new(0., norm);
     let beta = Qcomplex::new(0., norm);
 
@@ -618,7 +618,7 @@ fn controlled_unitary_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let norm = std::f64::consts::SQRT_2.recip();
+    let norm = SQRT_2.recip();
     let mtr = &ComplexMatrix2::new(
         [[norm, norm], [norm, -norm]],
         [[0., 0.], [0., 0.]],
@@ -657,7 +657,7 @@ fn multi_controlled_unitary_01() {
     let qureg = &mut Qureg::try_new(3, env).unwrap();
     init_zero_state(qureg);
 
-    let norm = std::f64::consts::SQRT_2.recip();
+    let norm = SQRT_2.recip();
     let mtr = &ComplexMatrix2::new(
         [[norm, norm], [norm, -norm]],
         [[0., 0.], [0., 0.]],

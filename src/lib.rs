@@ -1850,7 +1850,7 @@ pub fn controlled_rotate_around_axis(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let alpha = Qcomplex::new(0., norm);
 /// let beta = Qcomplex::new(0., norm);
 /// controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
@@ -1892,7 +1892,7 @@ pub fn controlled_compact_unitary(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let mtr = &ComplexMatrix2::new(
 ///     [[norm, norm], [norm, -norm]],
 ///     [[0., 0.], [0., 0.]],
@@ -1929,7 +1929,7 @@ pub fn controlled_unitary(
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let mtr = &ComplexMatrix2::new(
 ///     [[norm, norm], [norm, -norm]],
 ///     [[0., 0.], [0., 0.]],
@@ -1976,7 +1976,7 @@ pub fn multi_controlled_unitary(
 /// pauli_x(qureg, 0).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 1).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2007,7 +2007,7 @@ pub fn pauli_x(
 /// pauli_y(qureg, 0).unwrap();
 ///
 /// let amp = get_imag_amp(qureg, 1).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2038,7 +2038,7 @@ pub fn pauli_y(
 /// pauli_z(qureg, 0).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 0).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2069,7 +2069,7 @@ pub fn pauli_z(
 /// hadamard(qureg, 0).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 0).unwrap();
-/// assert!((amp - 0.5_f64.sqrt()).abs() < f64::EPSILON);
+/// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2101,7 +2101,7 @@ pub fn hadamard(
 /// controlled_not(qureg, 1, 0).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 3).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2168,7 +2168,7 @@ pub fn multi_controlled_multi_qubit_not(
 /// multi_qubit_not(qureg, targs).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 3).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
