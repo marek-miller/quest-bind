@@ -502,6 +502,82 @@ fn rotate_around_axis_02() {
 }
 
 #[test]
+fn controlled_rotate_x_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    controlled_rotate_x(qureg, 1, 0, 0.5).unwrap();
+    controlled_rotate_x(qureg, 1, 2, 0.5).unwrap();
+
+    controlled_rotate_x(qureg, 1, 1, 0.5).unwrap_err();
+    controlled_rotate_x(qureg, 2, 2, 0.5).unwrap_err();
+    controlled_rotate_x(qureg, -1, 2, 0.5).unwrap_err();
+    controlled_rotate_x(qureg, 2, -1, 0.5).unwrap_err();
+    controlled_rotate_x(qureg, 0, 4, 0.5).unwrap_err();
+    controlled_rotate_x(qureg, 4, 0, 0.5).unwrap_err();
+}
+
+#[test]
+fn controlled_rotate_y_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    controlled_rotate_y(qureg, 1, 0, 0.5).unwrap();
+    controlled_rotate_y(qureg, 1, 2, 0.5).unwrap();
+
+    controlled_rotate_y(qureg, 1, 1, 0.5).unwrap_err();
+    controlled_rotate_y(qureg, 2, 2, 0.5).unwrap_err();
+    controlled_rotate_y(qureg, -1, 2, 0.5).unwrap_err();
+    controlled_rotate_y(qureg, 2, -1, 0.5).unwrap_err();
+    controlled_rotate_y(qureg, 0, 4, 0.5).unwrap_err();
+    controlled_rotate_y(qureg, 4, 0, 0.5).unwrap_err();
+}
+
+#[test]
+fn controlled_rotate_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    controlled_rotate_z(qureg, 1, 0, 0.5).unwrap();
+    controlled_rotate_z(qureg, 1, 2, 0.5).unwrap();
+
+    controlled_rotate_z(qureg, 1, 1, 0.5).unwrap_err();
+    controlled_rotate_z(qureg, 2, 2, 0.5).unwrap_err();
+    controlled_rotate_z(qureg, -1, 2, 0.5).unwrap_err();
+    controlled_rotate_z(qureg, 2, -1, 0.5).unwrap_err();
+    controlled_rotate_z(qureg, 0, 4, 0.5).unwrap_err();
+    controlled_rotate_z(qureg, 4, 0, 0.5).unwrap_err();
+}
+
+#[test]
+fn controlled_rotate_around_axis_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    let vector = &Vector::new(0., 0., 1.);
+
+    controlled_rotate_around_axis(qureg, 1, 0, 0.5, vector).unwrap();
+    controlled_rotate_around_axis(qureg, 1, 2, 0.5, vector).unwrap();
+
+    controlled_rotate_around_axis(qureg, 1, 1, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, 2, 2, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, -1, 2, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, 2, -1, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, 0, 4, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, 4, 0, 0.5, vector).unwrap_err();
+}
+
+#[test]
+fn controlled_rotate_around_axis_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    // vector cannot be zero
+    let vector = &Vector::new(0., 0., 0.);
+
+    controlled_rotate_around_axis(qureg, 1, 0, 0.5, vector).unwrap_err();
+    controlled_rotate_around_axis(qureg, 1, 2, 0.5, vector).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

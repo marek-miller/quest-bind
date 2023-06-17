@@ -1699,12 +1699,20 @@ pub fn rotate_around_axis(
     })
 }
 
-/// Desc.
+/// Applies a controlled rotation by a given angle around the X-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
+/// let control_qubit = 1;
+/// let target_qubit = 0;
+/// let angle = std::f64::consts::PI;
+/// controlled_rotate_x(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1716,17 +1724,32 @@ pub fn controlled_rotate_x(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateX(qureg.reg, control_qubit, target_qubit, angle);
     })
 }
 
-/// Desc.
+/// Applies a controlled rotation by a given angle around the Y-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
+/// let control_qubit = 1;
+/// let target_qubit = 0;
+/// let angle = std::f64::consts::PI;
+/// controlled_rotate_y(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1738,17 +1761,32 @@ pub fn controlled_rotate_y(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateY(qureg.reg, control_qubit, target_qubit, angle);
     })
 }
 
-/// Desc.
+/// Applies a controlled rotation by a given angle around the Z-axis of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
+/// let control_qubit = 1;
+/// let target_qubit = 0;
+/// let angle = std::f64::consts::PI;
+/// controlled_rotate_z(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1760,17 +1798,40 @@ pub fn controlled_rotate_z(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateZ(qureg.reg, control_qubit, target_qubit, angle);
     })
 }
 
-/// Desc.
+/// Applies a controlled rotation by a given angle around a given vector of the
+/// Bloch-sphere.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+///
+/// let control_qubit = 1;
+/// let target_qubit = 0;
+/// let angle = std::f64::consts::PI;
+/// let vector = &Vector::new(0., 0., 1.);
+/// controlled_rotate_around_axis(
+///     qureg,
+///     control_qubit,
+///     target_qubit,
+///     angle,
+///     vector,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1783,6 +1844,13 @@ pub fn controlled_rotate_around_axis(
     angle: Qreal,
     axis: &Vector,
 ) -> Result<(), QuestError> {
+    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
+    // sometimes
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateAroundAxis(
             qureg.reg,
