@@ -1,10 +1,10 @@
-name: Doctest
+name: Docs
 
 on:
   push:
     branches: ["main", "dev"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "dev"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -30,23 +30,7 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --remote --recursive
-      - name: Delete build script
-        run: |
-          rm -fv build.rs
-      - name: Compile QuEST manually
-        run: |
-          cd QuEST
-          mkdir build && cd build
-          cmake -DDISTRIBUTED=OFF ..
-          make
-          cd ../../
-          mkdir -p ./target/debug/deps
-          cd ./target/debug/deps
-          ln -s ../../../QuEST/build/QuEST/libQuEST.so .
-          cd ../../../
       - name: Build documentation
         run: |
           cargo doc
-      - name: Run doc tests
-        run: |
-          cargo test --doc --verbose
+          cargo test --doc  

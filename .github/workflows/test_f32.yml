@@ -1,4 +1,4 @@
-name: Examples
+name: Test_f32
 
 on:
   push:
@@ -19,9 +19,6 @@ jobs:
           - stable
           - beta
           - nightly
-        example:
-          - grovers_search
-          - measure_first
 
     steps:
       - uses: actions/checkout@v3
@@ -33,9 +30,15 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --remote --recursive
-      - name: Run example ${{ matrix.example }}
+      - name: Build with build script
         run: |
-          cargo run --example ${{ matrix.example }}
-      - name: Run example ${{ matrix.example }}  (release)
+          cargo build --verbose --features=f32
+      - name: Run unit tests
         run: |
-          cargo run --release --example ${{ matrix.example }}
+          cargo test --verbose --features=f32
+      - name: Build with build script (release)
+        run: |
+          cargo build --verbose --release --features=f32
+      - name: Run unit tests (release)
+        run: |
+          cargo test --verbose --release --features=f32
