@@ -11,10 +11,11 @@ env:
 
 jobs:
   build:
-    runs-on: [ubuntu-latest, ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
+        os: [ubuntu-20.04, ubuntu-latest]
         toolchain:
           - stable
           - beta
