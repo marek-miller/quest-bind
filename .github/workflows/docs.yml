@@ -19,6 +19,7 @@ jobs:
           - stable
           - beta
           - nightly
+        precision: ["", "f32"]
 
     steps:
       - uses: actions/checkout@v3
@@ -32,5 +33,5 @@ jobs:
           git submodule update --remote --recursive
       - name: Build documentation
         run: |
-          cargo doc
-          cargo test --doc  
+          cargo doc --features=${{ matrix.precision }}
+          cargo test --doc --features=${{ matrix.precision }}

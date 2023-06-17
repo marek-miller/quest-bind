@@ -19,6 +19,7 @@ jobs:
           - stable
           - beta
           - nightly
+        precision: ["", "f32"]
         example:
           - grovers_search
           - measure_first
@@ -35,7 +36,7 @@ jobs:
           git submodule update --remote --recursive
       - name: Run example ${{ matrix.example }}
         run: |
-          cargo run --example ${{ matrix.example }}
+          cargo run --example ${{ matrix.example }} --features=${{ matrix.precision }}
       - name: Run example ${{ matrix.example }}  (release)
         run: |
-          cargo run --release --example ${{ matrix.example }}
+          cargo run --release --example ${{ matrix.example }} --features=${{ matrix.precision }}
