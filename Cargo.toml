@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+f32 = []
 gpu = []
 mpi = []
+
 
 [dependencies]
 env_logger = "0.10.0"
 log = "0.4.19"
+num = "0.4.0"
 rand = "0.8.5"
 
 [build-dependencies]

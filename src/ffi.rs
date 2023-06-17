@@ -5,15 +5,17 @@
 #![allow(dead_code)]
 #![allow(clippy::upper_case_acronyms)]
 
+#[allow(unused_imports)]
 use std::ffi::{
     c_char,
     c_double,
+    c_float,
     c_int,
     c_longlong,
     c_ulong,
 };
 
-pub type qreal = c_double;
+use super::precision::qreal;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -1149,6 +1151,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(feature = "f32"))]
     #[test]
     fn bindgen_test_layout_Complex() {
         assert_eq!(
@@ -1189,6 +1192,48 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "f32")]
+    #[test]
+    fn bindgen_test_layout_Complex() {
+        assert_eq!(
+            ::std::mem::size_of::<Complex>(),
+            8usize,
+            concat!("Size of: ", stringify!(Complex))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<Complex>(),
+            4usize,
+            concat!("Alignment of ", stringify!(Complex))
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!((*(::std::ptr::null::<Complex>())).real)
+                    as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(Complex),
+                "::",
+                stringify!(real)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!((*(::std::ptr::null::<Complex>())).imag)
+                    as usize
+            },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(Complex),
+                "::",
+                stringify!(imag)
+            )
+        );
+    }
+
+    #[cfg(not(feature = "f32"))]
     #[test]
     fn bindgen_test_layout_ComplexMatrix2() {
         assert_eq!(
@@ -1231,6 +1276,50 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "f32")]
+    #[test]
+    fn bindgen_test_layout_ComplexMatrix2() {
+        assert_eq!(
+            ::std::mem::size_of::<ComplexMatrix2>(),
+            32usize,
+            concat!("Size of: ", stringify!(ComplexMatrix2))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<ComplexMatrix2>(),
+            4usize,
+            concat!("Alignment of ", stringify!(ComplexMatrix2))
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix2>())).real
+                ) as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ComplexMatrix2),
+                "::",
+                stringify!(real)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix2>())).imag
+                ) as usize
+            },
+            16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ComplexMatrix2),
+                "::",
+                stringify!(imag)
+            )
+        );
+    }
+
+    #[cfg(not(feature = "f32"))]
     #[test]
     fn bindgen_test_layout_ComplexMatrix4() {
         assert_eq!(
@@ -1264,6 +1353,49 @@ mod tests {
                 ) as usize
             },
             128usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ComplexMatrix4),
+                "::",
+                stringify!(imag)
+            )
+        );
+    }
+
+    #[cfg(feature = "f32")]
+    #[test]
+    fn bindgen_test_layout_ComplexMatrix4() {
+        assert_eq!(
+            ::std::mem::size_of::<ComplexMatrix4>(),
+            128usize,
+            concat!("Size of: ", stringify!(ComplexMatrix4))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<ComplexMatrix4>(),
+            4usize,
+            concat!("Alignment of ", stringify!(ComplexMatrix4))
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix4>())).real
+                ) as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(ComplexMatrix4),
+                "::",
+                stringify!(real)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<ComplexMatrix4>())).imag
+                ) as usize
+            },
+            64usize,
             concat!(
                 "Offset of field: ",
                 stringify!(ComplexMatrix4),
@@ -1329,6 +1461,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(feature = "f32"))]
     #[test]
     fn bindgen_test_layout_Vector() {
         assert_eq!(
@@ -1370,6 +1503,57 @@ mod tests {
                 std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).z) as usize
             },
             16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(Vector),
+                "::",
+                stringify!(z)
+            )
+        );
+    }
+
+    #[cfg(feature = "f32")]
+    #[test]
+    fn bindgen_test_layout_Vector() {
+        assert_eq!(
+            ::std::mem::size_of::<Vector>(),
+            12usize,
+            concat!("Size of: ", stringify!(Vector))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<Vector>(),
+            4usize,
+            concat!("Alignment of ", stringify!(Vector))
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).x) as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(Vector),
+                "::",
+                stringify!(x)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).y) as usize
+            },
+            4usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(Vector),
+                "::",
+                stringify!(y)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!((*(::std::ptr::null::<Vector>())).z) as usize
+            },
+            8usize,
             concat!(
                 "Offset of field: ",
                 stringify!(Vector),

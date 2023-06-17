@@ -2,11 +2,10 @@
 
 use std::ffi::CString;
 
+mod exceptions;
 use exceptions::catch_quest_exception;
 
-mod exceptions;
 mod ffi;
-
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -14,9 +13,16 @@ pub use ffi::{
     phaseGateType as PhaseGateType,
 };
 
-// TODO: define number abstractions for numerical types
-// (use num_traits)
-pub type Qreal = f64;
+mod precision;
+pub use precision::{
+    Qreal,
+    EPSILON,
+    LN_10,
+    LN_2,
+    PI,
+    SQRT_2,
+    TAU,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
@@ -45,29 +51,20 @@ pub enum QuestError {
     QubitIndexError,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Complex(ffi::Complex);
+pub type Qcomplex = num::Complex<Qreal>;
 
-impl Complex {
-    #[must_use]
-    pub fn new(
-        real: Qreal,
-        imag: Qreal,
-    ) -> Self {
-        Self(ffi::Complex {
-            real,
-            imag,
-        })
+impl From<Qcomplex> for ffi::Complex {
+    fn from(value: Qcomplex) -> Self {
+        ffi::Complex {
+            real: value.re,
+            imag: value.im,
+        }
     }
+}
 
-    #[must_use]
-    pub fn real(&self) -> Qreal {
-        self.0.real
-    }
-
-    #[must_use]
-    pub fn imag(&self) -> Qreal {
-        self.0.imag
+impl From<ffi::Complex> for Qcomplex {
+    fn from(value: ffi::Complex) -> Self {
+        Self::new(value.real, value.imag)
     }
 }
 
@@ -642,8 +639,8 @@ pub fn apply_diagonal_op(
 ///
 /// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();
 ///
-/// assert!((expec_val.real() - 1.).abs() < f64::EPSILON);
-/// assert!((expec_val.imag() - 5.).abs() < f64::EPSILON);
+/// assert!((expec_val.re - 1.).abs() < EPSILON);
+/// assert!((expec_val.im - 5.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -652,10 +649,11 @@ pub fn apply_diagonal_op(
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::calcExpecDiagonalOp(qureg.reg, op.op) })
+) -> Result<Qcomplex, QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::calcExpecDiagonalOp(qureg.reg, op.op)
     })
+    .map(Into::into)
 }
 
 pub fn report_state(qureg: &Qureg) {
@@ -732,7 +730,7 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 ///
 /// init_blank_state(qureg);
 ///
-/// assert!(get_prob_amp(qureg, 0).unwrap().abs() < f64::EPSILON);
+/// assert!(get_prob_amp(qureg, 0).unwrap().abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -755,7 +753,7 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// init_zero_state(qureg);
 ///
-/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < f64::EPSILON);
+/// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -779,7 +777,7 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 /// init_plus_state(qureg);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!((prob - 0.125).abs() < f64::EPSILON);
+/// assert!((prob - 0.125).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -803,7 +801,7 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// init_classical_state(qureg, 8);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!(prob.abs() < f64::EPSILON);
+/// assert!(prob.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -831,7 +829,7 @@ pub fn init_classical_state(
 /// init_zero_state(pure_state);
 /// init_pure_state(qureg, pure_state).unwrap();
 ///
-/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < f64::EPSILON);
+/// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -869,7 +867,7 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 /// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!((prob - 1.).abs() < f64::EPSILON);
+/// assert!((prob - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1172,7 +1170,7 @@ pub fn multi_controlled_phase_flip(
 /// s_gate(qureg, 0).unwrap();
 ///
 /// let amp = get_imag_amp(qureg, 1).unwrap();
-/// assert!((amp - 1.).abs() < f64::EPSILON);
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1192,7 +1190,6 @@ pub fn s_gate(
 /// # Examples
 ///
 /// ```rust
-/// # use std::f64::consts::SQRT_2;
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
@@ -1202,7 +1199,7 @@ pub fn s_gate(
 /// t_gate(qureg, 0).unwrap();
 ///
 /// let amp = get_imag_amp(qureg, 1).unwrap();
-/// assert!((amp - SQRT_2 / 2.).abs() < f64::EPSILON);
+/// assert!((amp - SQRT_2 / 2.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1342,8 +1339,8 @@ pub fn copy_substate_from_gpu(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_plus_state(qureg);
 ///
-/// let amp = get_amp(qureg, 0).unwrap().real();
-/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// let amp = get_amp(qureg, 0).unwrap().re;
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1352,8 +1349,9 @@ pub fn copy_substate_from_gpu(
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| Complex(unsafe { ffi::getAmp(qureg.reg, index) }))
+) -> Result<Qcomplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::getAmp(qureg.reg, index) })
+        .map(Into::into)
 }
 
 /// Get the real component of the complex probability amplitude at an index in
@@ -1368,7 +1366,7 @@ pub fn get_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_real_amp(qureg, 0).unwrap();
-/// assert!((amp - 0.5).abs() < f64::EPSILON);
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1393,7 +1391,7 @@ pub fn get_real_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_imag_amp(qureg, 0).unwrap();
-/// assert!(amp.abs() < f64::EPSILON);
+/// assert!(amp.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1417,7 +1415,7 @@ pub fn get_imag_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = get_prob_amp(qureg, 0).unwrap();
-/// assert!((amp - 0.25).abs() < f64::EPSILON);
+/// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1440,8 +1438,8 @@ pub fn get_prob_amp(
 /// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
 /// init_plus_state(qureg);
 ///
-/// let amp = get_density_amp(qureg, 0, 0).unwrap().real();
-/// assert!((amp - 0.25).abs() < f64::EPSILON);
+/// let amp = get_density_amp(qureg, 0, 0).unwrap().re;
+/// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1451,10 +1449,9 @@ pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
     col: i64,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
-    })
+) -> Result<Qcomplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
+        .map(Into::into)
 }
 
 /// A debugging function which calculates the probability of the qubits in
@@ -1472,7 +1469,7 @@ pub fn get_density_amp(
 /// init_plus_state(qureg);
 ///
 /// let amp = calc_total_prob(qureg);
-/// assert!((amp - 1.).abs() < f64::EPSILON)
+/// assert!((amp - 1.).abs() < EPSILON)
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1493,9 +1490,9 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
-/// let alpha = Complex::new(0., norm);
-/// let beta = Complex::new(0., norm);
+/// let norm = SQRT_2.recip();
+/// let alpha = Qcomplex::new(0., norm);
+/// let beta = Qcomplex::new(0., norm);
 /// compact_unitary(qureg, 0, alpha, beta).unwrap();
 ///
 /// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
@@ -1503,7 +1500,7 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// hadamard(other_qureg, 0).unwrap();
 ///
 /// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
-/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
+/// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1512,14 +1509,14 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
-    alpha: Complex,
-    beta: Complex,
+    alpha: Qcomplex,
+    beta: Qcomplex,
 ) -> Result<(), QuestError> {
     if target_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
-        ffi::compactUnitary(qureg.reg, target_qubit, alpha.0, beta.0);
+        ffi::compactUnitary(qureg.reg, target_qubit, alpha.into(), beta.into());
     })
 }
 
@@ -1533,7 +1530,7 @@ pub fn compact_unitary(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let norm = std::f64::consts::SQRT_2.recip();
+/// let norm = SQRT_2.recip();
 /// let mtr = ComplexMatrix2::new(
 ///     [[norm, norm], [norm, -norm]],
 ///     [[0., 0.], [0., 0.]],
@@ -1545,7 +1542,7 @@ pub fn compact_unitary(
 /// hadamard(other_qureg, 0).unwrap();
 ///
 /// let fidelity = calc_fidelity(qureg, other_qureg).unwrap();
-/// assert!((fidelity - 1.).abs() < 10. * f64::EPSILON,);
+/// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1574,7 +1571,7 @@ pub fn unitary(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_x(qureg, 0, theta).unwrap();
 /// ```
@@ -1604,7 +1601,7 @@ pub fn rotate_x(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_y(qureg, 0, theta).unwrap();
 /// ```
@@ -1634,7 +1631,7 @@ pub fn rotate_y(
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-/// let theta = std::f64::consts::PI;
+/// let theta = PI;
 ///
 /// rotate_z(qureg, 0, theta).unwrap();
 /// ```
@@ -1665,7 +1662,7 @@ pub fn rotate_z(
 /// let qureg = &mut Qureg::try_new(3, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// let angle = std::f64::consts::TAU;
+/// let angle = 2.0 * PI;
 /// let axis = &Vector::new(0., 0., 1.);
 /// rotate_around_axis(qureg, 0, angle, axis).unwrap();
 /// ```
@@ -1699,7 +1696,7 @@ pub fn rotate_around_axis(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_x(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1734,7 +1731,7 @@ pub fn controlled_rotate_x(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_y(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1769,7 +1766,7 @@ pub fn controlled_rotate_y(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// controlled_rotate_z(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
@@ -1804,7 +1801,7 @@ pub fn controlled_rotate_z(
 ///
 /// let control_qubit = 1;
 /// let target_qubit = 0;
-/// let angle = std::f64::consts::PI;
+/// let angle = PI;
 /// let vector = &Vector::new(0., 0., 1.);
 /// controlled_rotate_around_axis(
 ///     qureg,
@@ -1866,8 +1863,8 @@ pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
     target_qubit: i32,
-    alpha: Complex,
-    beta: Complex,
+    alpha: Qcomplex,
+    beta: Qcomplex,
 ) -> Result<(), QuestError> {
     if control_qubit >= qureg.num_qubits_represented()
         || target_qubit >= qureg.num_qubits_represented()
@@ -1879,8 +1876,8 @@ pub fn controlled_compact_unitary(
             qureg.reg,
             control_qubit,
             target_qubit,
-            alpha.0,
-            beta.0,
+            alpha.into(),
+            beta.into(),
         );
     })
 }
@@ -2347,10 +2344,9 @@ pub fn measure_with_stats(
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
-) -> Result<Complex, QuestError> {
-    catch_quest_exception(|| {
-        Complex(unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
-    })
+) -> Result<Qcomplex, QuestError> {
+    catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
+        .map(Into::into)
 }
 
 /// Desc.
@@ -2367,7 +2363,7 @@ pub fn calc_inner_product(
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
-) -> Result<f64, QuestError> {
+) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
     })
@@ -3347,16 +3343,21 @@ pub fn calc_hilbert_schmidt_distance(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
-    fac1: Complex,
+    fac1: Qcomplex,
     qureg1: &Qureg,
-    fac2: Complex,
+    fac2: Qcomplex,
     qureg2: &Qureg,
-    fac_out: Complex,
+    fac_out: Qcomplex,
     out: &mut Qureg,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
-            fac1.0, qureg1.reg, fac2.0, qureg2.reg, fac_out.0, out.reg,
+            fac1.into(),
+            qureg1.reg,
+            fac2.into(),
+            qureg2.reg,
+            fac_out.into(),
+            out.reg,
         );
     })
 }

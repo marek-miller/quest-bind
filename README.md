@@ -117,37 +117,25 @@ cd quest-bind
 Then run:
 
 ```sh
-cargo test --tests
-```
-
-To be able to run documentation tests, we need to work around a known issue with
-`cargo`: [#8531](https://github.com/rust-lang/cargo/issues/8531).
-
-Make sure you compile QuEST _without_ MPI support:
-
-```sh
-cd QuEST
-mkdir build
-cd build
-cmake -DDISTRIBUTED=OFF ..
-make
-```
-
-Put a symlink to `libQuEST.so` where cargo can find it:
-
-```sh
-cd ../../
-mkdir -p target/debug/deps
-cd target/debug/deps/
-ln -s ../../../QuEST/build/QuEST/libQuEST.so .
-cd ../../../
-```
-
-Now, we can run all unit tests:
-
-```sh
 cargo test
 ```
+
+Please note that `quest-bin` will not run `QuEST`'s test suite, not will it
+check `QuEST`'s correctness. These tests are intended to check if the C API is
+invoked correctly, and Rust's types are passed safely back and forth across FFI
+boundaries.
+
+If you want to run the test suite in the single-precision floating point mode,
+make sure the build script recompiles `libQuEST.so` with the right type
+definitions:
+
+```sh
+cargo clean
+cargo test --features=f32
+```
+
+By defualt, `quest-bind` uses double precision floating-point types: `f64`. See
+[Numercal types](#numerical-types) section below.
 
 You can also check available examples by running, e.g.:
 
@@ -234,9 +222,11 @@ strategy. We pass Rust types directly to QuEST without casting, assuming the
 following type definitions:
 
 ```rust
+pub type c_float = f32;
 pub type c_double = f64;
 pub type c_int = i32;
 pub type c_longlong = i64;
+pub type c_ulong = u64;
 ```
 
 This should work for many different architectures. If your system uses slightly
@@ -265,6 +255,8 @@ New features/improvements:
 - Constructors/destructors for QuEST structs
 - Add Github workflows CT
 - Add example: grovers_search.rs
+- Use `Complex<f64>` type from `num` crate (as `QComplex`)
+- Use compile flag `"f32"` to set floating point precision
 
 ### v0.1.0 (11/06/2023)
 
