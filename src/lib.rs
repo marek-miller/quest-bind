@@ -45,7 +45,7 @@ pub enum QuestError {
     QubitIndexError,
 }
 
-type QComplex = num::Complex<Qreal>;
+pub type QComplex = num::Complex<Qreal>;
 impl From<QComplex> for ffi::Complex {
     fn from(value: QComplex) -> Self {
         ffi::Complex {
@@ -632,8 +632,8 @@ pub fn apply_diagonal_op(
 ///
 /// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();
 ///
-/// assert!((expec_val.real() - 1.).abs() < f64::EPSILON);
-/// assert!((expec_val.imag() - 5.).abs() < f64::EPSILON);
+/// assert!((expec_val.re - 1.).abs() < f64::EPSILON);
+/// assert!((expec_val.im - 5.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1333,7 +1333,7 @@ pub fn copy_substate_from_gpu(
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_plus_state(qureg);
 ///
-/// let amp = get_amp(qureg, 0).unwrap().real();
+/// let amp = get_amp(qureg, 0).unwrap().re;
 /// assert!((amp - 0.5).abs() < f64::EPSILON);
 /// ```
 ///
@@ -1432,7 +1432,7 @@ pub fn get_prob_amp(
 /// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
 /// init_plus_state(qureg);
 ///
-/// let amp = get_density_amp(qureg, 0, 0).unwrap().real();
+/// let amp = get_density_amp(qureg, 0, 0).unwrap().re;
 /// assert!((amp - 0.25).abs() < f64::EPSILON);
 /// ```
 ///
@@ -1485,8 +1485,8 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// init_zero_state(qureg);
 ///
 /// let norm = std::f64::consts::SQRT_2.recip();
-/// let alpha = Complex::new(0., norm);
-/// let beta = Complex::new(0., norm);
+/// let alpha = QComplex::new(0., norm);
+/// let beta = QComplex::new(0., norm);
 /// compact_unitary(qureg, 0, alpha, beta).unwrap();
 ///
 /// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
