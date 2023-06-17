@@ -1515,8 +1515,6 @@ pub fn compact_unitary(
     alpha: Complex,
     beta: Complex,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if target_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1558,8 +1556,6 @@ pub fn unitary(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if target_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1591,8 +1587,6 @@ pub fn rotate_x(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if rot_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1623,8 +1617,6 @@ pub fn rotate_y(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if rot_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1655,8 +1647,6 @@ pub fn rotate_z(
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if rot_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1689,8 +1679,6 @@ pub fn rotate_around_axis(
     angle: Qreal,
     axis: &Vector,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if rot_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
@@ -1724,8 +1712,6 @@ pub fn controlled_rotate_x(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if control_qubit >= qureg.num_qubits_represented()
         || target_qubit >= qureg.num_qubits_represented()
     {
@@ -1761,8 +1747,6 @@ pub fn controlled_rotate_y(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if control_qubit >= qureg.num_qubits_represented()
         || target_qubit >= qureg.num_qubits_represented()
     {
@@ -1798,8 +1782,6 @@ pub fn controlled_rotate_z(
     target_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if control_qubit >= qureg.num_qubits_represented()
         || target_qubit >= qureg.num_qubits_represented()
     {
@@ -1844,8 +1826,6 @@ pub fn controlled_rotate_around_axis(
     angle: Qreal,
     axis: &Vector,
 ) -> Result<(), QuestError> {
-    // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
-    // sometimes
     if control_qubit >= qureg.num_qubits_represented()
         || target_qubit >= qureg.num_qubits_represented()
     {
@@ -1862,12 +1842,21 @@ pub fn controlled_rotate_around_axis(
     })
 }
 
-/// Desc.
+/// Apply a controlled unitary parameterized by
+/// two given complex scalars.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let norm = std::f64::consts::SQRT_2.recip();
+/// let alpha = Complex::new(0., norm);
+/// let beta = Complex::new(0., norm);
+/// controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1880,6 +1869,11 @@ pub fn controlled_compact_unitary(
     alpha: Complex,
     beta: Complex,
 ) -> Result<(), QuestError> {
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledCompactUnitary(
             qureg.reg,
@@ -1891,12 +1885,22 @@ pub fn controlled_compact_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general controlled unitary which can include a global phase factor.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let norm = std::f64::consts::SQRT_2.recip();
+/// let mtr = &ComplexMatrix2::new(
+///     [[norm, norm], [norm, -norm]],
+///     [[0., 0.], [0., 0.]],
+/// );
+/// controlled_unitary(qureg, 0, 1, mtr).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1908,17 +1912,32 @@ pub fn controlled_unitary(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    if control_qubit >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledUnitary(qureg.reg, control_qubit, target_qubit, u.0);
     })
 }
 
-/// Desc.
+/// Apply a general multiple-control single-target unitary.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let norm = std::f64::consts::SQRT_2.recip();
+/// let mtr = &ComplexMatrix2::new(
+///     [[norm, norm], [norm, -norm]],
+///     [[0., 0.], [0., 0.]],
+/// );
+/// multi_controlled_unitary(qureg, &[1, 2], 0, mtr).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1927,10 +1946,15 @@ pub fn controlled_unitary(
 pub fn multi_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
-    num_control_qubits: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    let num_control_qubits = control_qubits.len() as i32;
+    if num_control_qubits >= qureg.num_qubits_represented()
+        || target_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledUnitary(
             qureg.reg,

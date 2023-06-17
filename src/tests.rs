@@ -578,6 +578,122 @@ fn controlled_rotate_around_axis_02() {
 }
 
 #[test]
+fn controlled_compact_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let norm = std::f64::consts::SQRT_2.recip();
+    let alpha = Complex::new(0., norm);
+    let beta = Complex::new(0., norm);
+
+    controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
+    controlled_compact_unitary(qureg, 1, 0, alpha, beta).unwrap();
+
+    controlled_compact_unitary(qureg, 1, 1, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, 2, 2, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, 4, 1, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, -1, 1, alpha, beta).unwrap_err();
+}
+
+#[test]
+fn controlled_compact_unitary_02() {
+    // env_logger::init();
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // this doesn't define a unitary matrix
+    let alpha = Complex::new(1., 2.);
+    let beta = Complex::new(2., 1.);
+
+    controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, 1, 0, alpha, beta).unwrap_err();
+
+    controlled_compact_unitary(qureg, 1, 1, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, 4, 1, alpha, beta).unwrap_err();
+    controlled_compact_unitary(qureg, -1, 2, alpha, beta).unwrap_err();
+}
+
+#[test]
+fn controlled_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let norm = std::f64::consts::SQRT_2.recip();
+    let mtr = &ComplexMatrix2::new(
+        [[norm, norm], [norm, -norm]],
+        [[0., 0.], [0., 0.]],
+    );
+
+    controlled_unitary(qureg, 0, 1, mtr).unwrap();
+    controlled_unitary(qureg, 1, 0, mtr).unwrap();
+
+    controlled_unitary(qureg, 1, 1, mtr).unwrap_err();
+    controlled_unitary(qureg, 2, 2, mtr).unwrap_err();
+    controlled_unitary(qureg, 4, 1, mtr).unwrap_err();
+    controlled_unitary(qureg, -1, 1, mtr).unwrap_err();
+}
+
+#[test]
+fn controlled_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // this doesn't define a unitary matrix
+    let mtr = &ComplexMatrix2::new([[1., 2.], [3., 4.]], [[5., 6.], [7., 8.]]);
+
+    controlled_unitary(qureg, 0, 1, mtr).unwrap_err();
+    controlled_unitary(qureg, 1, 0, mtr).unwrap_err();
+
+    controlled_unitary(qureg, 1, 1, mtr).unwrap_err();
+    controlled_unitary(qureg, 2, 2, mtr).unwrap_err();
+    controlled_unitary(qureg, 4, 1, mtr).unwrap_err();
+    controlled_unitary(qureg, -1, 1, mtr).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let norm = std::f64::consts::SQRT_2.recip();
+    let mtr = &ComplexMatrix2::new(
+        [[norm, norm], [norm, -norm]],
+        [[0., 0.], [0., 0.]],
+    );
+
+    multi_controlled_unitary(qureg, &[0], 2, mtr).unwrap();
+    multi_controlled_unitary(qureg, &[0, 1], 2, mtr).unwrap();
+    multi_controlled_unitary(qureg, &[1, 0], 2, mtr).unwrap();
+    multi_controlled_unitary(qureg, &[1, 2], 0, mtr).unwrap();
+
+    multi_controlled_unitary(qureg, &[1, 1], 1, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[1, 1], 4, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[-1, 1], 0, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[1, 1, 1], 0, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[0, 1, 2, 3], 0, mtr).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    // this doesn't define a unitary matrix
+    let mtr = &ComplexMatrix2::new([[1., 2.], [3., 4.]], [[5., 6.], [7., 8.]]);
+
+    multi_controlled_unitary(qureg, &[0, 1], 2, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[1, 2], 0, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[1, 1], 1, mtr).unwrap_err();
+    multi_controlled_unitary(qureg, &[1, 1], 4, mtr).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
