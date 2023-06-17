@@ -730,6 +730,49 @@ fn pauli_z_01() {
 }
 
 #[test]
+fn hadamard_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    hadamard(qureg, 0).unwrap();
+    hadamard(qureg, 1).unwrap();
+    hadamard(qureg, 2).unwrap_err();
+    hadamard(qureg, -1).unwrap_err();
+}
+
+#[test]
+fn controlled_not_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    controlled_not(qureg, 1, 0).unwrap();
+    controlled_not(qureg, 0, 1).unwrap();
+
+    controlled_not(qureg, 0, 0).unwrap_err();
+    controlled_not(qureg, 1, 1).unwrap_err();
+    controlled_not(qureg, 1, 2).unwrap_err();
+    controlled_not(qureg, 2, 4).unwrap_err();
+    controlled_not(qureg, 2, -1).unwrap_err();
+}
+
+#[test]
+fn multi_qubit_not_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    multi_qubit_not(qureg, &[0, 1]).unwrap();
+    multi_qubit_not(qureg, &[1, 0]).unwrap();
+    multi_qubit_not(qureg, &[0, 0]).unwrap_err();
+    multi_qubit_not(qureg, &[1, 1]).unwrap_err();
+    multi_qubit_not(qureg, &[4, 1]).unwrap_err();
+    multi_qubit_not(qureg, &[0, -1]).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

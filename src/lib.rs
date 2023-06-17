@@ -2059,12 +2059,20 @@ pub fn pauli_z(
     })
 }
 
-/// Desc.
+/// Apply the single-qubit Hadamard gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// hadamard(qureg, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 0).unwrap();
+/// assert!((amp - 0.5_f64.sqrt()).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2074,17 +2082,29 @@ pub fn hadamard(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::hadamard(qureg.reg, target_qubit);
     })
 }
 
-/// Desc.
+/// Apply the controlled not (single control, single target) gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// controlled_not(qureg, 1, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2095,6 +2115,11 @@ pub fn controlled_not(
     control_qubit: i32,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented()
+        || control_qubit >= qureg.num_qubits_represented()
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledNot(qureg.reg, control_qubit, target_qubit);
     })
@@ -2129,12 +2154,24 @@ pub fn multi_controlled_multi_qubit_not(
     })
 }
 
-/// Desc.
+/// Apply a NOT (or Pauli X) gate with multiple target qubits,
+///
+/// which has the same  effect as (but is much faster than) applying each
+/// single-qubit NOT gate in turn.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let targs = &[0, 1];
+/// multi_qubit_not(qureg, targs).unwrap();
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < f64::EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2143,8 +2180,16 @@ pub fn multi_controlled_multi_qubit_not(
 pub fn multi_qubit_not(
     qureg: &mut Qureg,
     targs: &[i32],
-    num_targs: i32,
 ) -> Result<(), QuestError> {
+    let num_targs = targs.len() as i32;
+    if num_targs > qureg.num_qubits_represented() {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for idx in targs {
+        if *idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         let targs_ptr = targs.as_ptr();
         ffi::multiQubitNot(qureg.reg, targs_ptr, num_targs);
