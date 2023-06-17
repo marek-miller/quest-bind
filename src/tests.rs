@@ -369,8 +369,8 @@ fn compact_unitary_01() {
     init_zero_state(qureg);
 
     let norm = std::f64::consts::SQRT_2.recip();
-    let alpha = QComplex::new(0., norm);
-    let beta = QComplex::new(0., norm);
+    let alpha = Qcomplex::new(0., norm);
+    let beta = Qcomplex::new(0., norm);
 
     compact_unitary(qureg, 0, alpha, beta).unwrap();
     compact_unitary(qureg, 1, alpha, beta).unwrap();
@@ -387,8 +387,8 @@ fn compact_unitary_02() {
     init_zero_state(qureg);
 
     // this doesn't define a unitary matrix
-    let alpha = QComplex::new(1., 2.);
-    let beta = QComplex::new(2., 1.);
+    let alpha = Qcomplex::new(1., 2.);
+    let beta = Qcomplex::new(2., 1.);
 
     compact_unitary(qureg, 0, alpha, beta).unwrap_err();
     compact_unitary(qureg, 1, alpha, beta).unwrap_err();

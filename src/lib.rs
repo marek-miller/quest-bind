@@ -45,9 +45,10 @@ pub enum QuestError {
     QubitIndexError,
 }
 
-pub type QComplex = num::Complex<Qreal>;
-impl From<QComplex> for ffi::Complex {
-    fn from(value: QComplex) -> Self {
+pub type Qcomplex = num::Complex<Qreal>;
+
+impl From<Qcomplex> for ffi::Complex {
+    fn from(value: Qcomplex) -> Self {
         ffi::Complex {
             real: value.re,
             imag: value.im,
@@ -55,7 +56,7 @@ impl From<QComplex> for ffi::Complex {
     }
 }
 
-impl From<ffi::Complex> for QComplex {
+impl From<ffi::Complex> for Qcomplex {
     fn from(value: ffi::Complex) -> Self {
         Self::new(value.real, value.imag)
     }
@@ -642,11 +643,11 @@ pub fn apply_diagonal_op(
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
-) -> Result<QComplex, QuestError> {
+) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcExpecDiagonalOp(qureg.reg, op.op)
     })
-    .map(|z| z.into())
+    .map(Into::into)
 }
 
 pub fn report_state(qureg: &Qureg) {
@@ -1343,9 +1344,9 @@ pub fn copy_substate_from_gpu(
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
-) -> Result<QComplex, QuestError> {
+) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getAmp(qureg.reg, index) })
-        .map(|z| z.into())
+        .map(Into::into)
 }
 
 /// Get the real component of the complex probability amplitude at an index in
@@ -1443,9 +1444,9 @@ pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
     col: i64,
-) -> Result<QComplex, QuestError> {
+) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
-        .map(|z| z.into())
+        .map(Into::into)
 }
 
 /// A debugging function which calculates the probability of the qubits in
@@ -1485,8 +1486,8 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// init_zero_state(qureg);
 ///
 /// let norm = std::f64::consts::SQRT_2.recip();
-/// let alpha = QComplex::new(0., norm);
-/// let beta = QComplex::new(0., norm);
+/// let alpha = Qcomplex::new(0., norm);
+/// let beta = Qcomplex::new(0., norm);
 /// compact_unitary(qureg, 0, alpha, beta).unwrap();
 ///
 /// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
@@ -1503,8 +1504,8 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
-    alpha: QComplex,
-    beta: QComplex,
+    alpha: Qcomplex,
+    beta: Qcomplex,
 ) -> Result<(), QuestError> {
     // Check if target_qubit is within bounds.  QuEST doesn't and seg-faults
     // sometimes
@@ -1868,8 +1869,8 @@ pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
     target_qubit: i32,
-    alpha: QComplex,
-    beta: QComplex,
+    alpha: Qcomplex,
+    beta: Qcomplex,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::controlledCompactUnitary(
@@ -2236,9 +2237,9 @@ pub fn measure_with_stats(
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
-) -> Result<QComplex, QuestError> {
+) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
-        .map(|z| z.into())
+        .map(Into::into)
 }
 
 /// Desc.
@@ -3235,11 +3236,11 @@ pub fn calc_hilbert_schmidt_distance(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
-    fac1: QComplex,
+    fac1: Qcomplex,
     qureg1: &Qureg,
-    fac2: QComplex,
+    fac2: Qcomplex,
     qureg2: &Qureg,
-    fac_out: QComplex,
+    fac_out: Qcomplex,
     out: &mut Qureg,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
