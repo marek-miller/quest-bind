@@ -19,6 +19,7 @@ jobs:
           - stable
           - beta
           - nightly
+        precision: ["", "f32"]
 
     steps:
       - uses: actions/checkout@v3
@@ -32,13 +33,13 @@ jobs:
           git submodule update --remote --recursive
       - name: Build with build script
         run: |
-          cargo build --verbose
+          cargo build --verbose --features=${{ matrix.precision }}
       - name: Run unit tests
         run: |
-          cargo test --verbose
+          cargo test --verbose --features=${{ matrix.precision }}
       - name: Build with build script (release)
         run: |
-          cargo build --verbose --release
+          cargo build --verbose --release --features=${{ matrix.precision }}
       - name: Run unit tests (release)
         run: |
-          cargo test --verbose --release
+          cargo test --verbose --release --features=${{ matrix.precision }}
