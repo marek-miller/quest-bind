@@ -2276,12 +2276,21 @@ pub fn calc_prob_of_outcome(
     })
 }
 
-/// Desc.
+/// Populates `outcome_probs` with the probabilities of every outcome of the
+/// sub-register.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[1, 2];
+/// let outcome_probs = &mut vec![0.; 4];
+/// calc_prob_of_all_outcomes(outcome_probs, qureg, qubits).unwrap();
+/// assert_eq!(outcome_probs, &vec![1., 0., 0., 0.]);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2297,9 +2306,14 @@ pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
     qureg: &Qureg,
     qubits: &[i32],
-    num_qubits: i32,
 ) -> Result<(), QuestError> {
-    assert!(outcome_probs.len() >= num_qubits as usize);
+    let num_qubits = qubits.len() as i32;
+    if num_qubits > qureg.num_qubits_represented()
+        || outcome_probs.len() < (1 << num_qubits)
+    {
+        return Err(QuestError::ArrayLengthError);
+    }
+
     catch_quest_exception(|| unsafe {
         ffi::calcProbOfAllOutcomes(
             outcome_probs.as_mut_ptr(),
@@ -2310,12 +2324,22 @@ pub fn calc_prob_of_all_outcomes(
     })
 }
 
-/// Desc.
+/// Updates `qureg` to be consistent with measuring `measure_qubit`  in the
+/// given `outcome`: (0, 1).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// collapse_to_outcome(qureg, 0, 0).unwrap();
+///
+/// // QuEST throws an exception if probability of outcome is 0.
+/// init_zero_state(qureg);
+/// collapse_to_outcome(qureg, 0, 1).unwrap_err();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2326,17 +2350,48 @@ pub fn collapse_to_outcome(
     measure_qubit: i32,
     outcome: i32,
 ) -> Result<Qreal, QuestError> {
+    if measure_qubit >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::collapseToOutcome(qureg.reg, measure_qubit, outcome)
     })
 }
 
-/// Desc.
+#[test]
+fn measure_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    // Prepare a triplet state `|00> + |11>`
+    init_zero_state(qureg);
+    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+
+    // Qubits are entangled now
+    let outcome1 = measure(qureg, 0).unwrap();
+    let outcome2 = measure(qureg, 1).unwrap();
+
+    assert_eq!(outcome1, outcome2);
+}
+
+/// Measures a single qubit, collapsing it randomly to 0 or 1.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // Prepare a triplet state `|00> + |11>`
+/// init_zero_state(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+///
+/// // Qubits are entangled now
+/// let outcome1 = measure(qureg, 0).unwrap();
+/// let outcome2 = measure(qureg, 1).unwrap();
+///
+/// assert_eq!(outcome1, outcome2);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2349,12 +2404,29 @@ pub fn measure(
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
-/// Desc.
+/// Measures a single qubit, collapsing it randomly to 0 or 1, and
+/// additionally gives the probability of that outcome.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // Prepare a triplet state `|00> + |11>`
+/// init_zero_state(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+///
+/// // Qubits are entangled now
+/// let prob = &mut -1.;
+/// let outcome1 = measure_with_stats(qureg, 0, prob).unwrap();
+/// assert!((*prob - 0.5).abs() < EPSILON);
+///
+/// let outcome2 = measure_with_stats(qureg, 1, prob).unwrap();
+/// assert!((*prob - 1.).abs() < EPSILON);
+///
+/// assert_eq!(outcome1, outcome2);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

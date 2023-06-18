@@ -821,6 +821,68 @@ fn calc_prob_of_outcome_01() {
 }
 
 #[test]
+fn calc_prob_of_all_outcomes_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let outcome_probs = &mut vec![0.; 4];
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2]).unwrap();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 1]).unwrap();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 2]).unwrap();
+
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2, 3]).unwrap_err();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 0]).unwrap_err();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[4, 0]).unwrap_err();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, -1]).unwrap_err();
+}
+
+#[test]
+fn collapse_to_outcome_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+    collapse_to_outcome(qureg, 0, 0).unwrap();
+
+    init_zero_state(qureg);
+    collapse_to_outcome(qureg, 0, 1).unwrap_err();
+
+    init_zero_state(qureg);
+    collapse_to_outcome(qureg, -1, 0).unwrap_err();
+    collapse_to_outcome(qureg, 3, 0).unwrap_err();
+    collapse_to_outcome(qureg, 1, 3).unwrap_err();
+    collapse_to_outcome(qureg, 4, 3).unwrap_err();
+}
+
+#[test]
+fn measure_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+
+    let _ = measure(qureg, 0).unwrap();
+    let _ = measure(qureg, 1).unwrap();
+    let _ = measure(qureg, -1).unwrap_err();
+    let _ = measure(qureg, 3).unwrap_err();
+}
+
+#[test]
+fn measure_with_stats_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    // Prepare a triplet state `|00> + |11>`
+    init_zero_state(qureg);
+
+    let prob = &mut -1.;
+    let _ = measure_with_stats(qureg, 0, prob).unwrap();
+    let _ = measure_with_stats(qureg, 1, prob).unwrap();
+    let _ = measure_with_stats(qureg, -1, prob).unwrap_err();
+    let _ = measure_with_stats(qureg, 3, prob).unwrap_err();
+}
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
