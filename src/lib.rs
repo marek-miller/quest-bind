@@ -2500,12 +2500,16 @@ pub fn calc_density_inner_product(
     })
 }
 
-/// Desc.
+/// Seeds the random number generator with the (master node) current time and
+/// process ID.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &mut QuestEnv::new();
+///
+/// seed_quest_default(env);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2516,7 +2520,7 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
         ffi::seedQuESTDefault(env_ptr);
     })
-    .expect(" should always succeed");
+    .expect("seed_quest_default should always succeed");
 }
 
 /// Desc.
