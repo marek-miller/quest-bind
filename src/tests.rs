@@ -882,6 +882,7 @@ fn measure_with_stats_01() {
     let _ = measure_with_stats(qureg, -1, prob).unwrap_err();
     let _ = measure_with_stats(qureg, 3, prob).unwrap_err();
 }
+
 #[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();

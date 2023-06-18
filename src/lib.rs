@@ -204,7 +204,8 @@ impl PauliHamil {
 
 impl Drop for PauliHamil {
     fn drop(&mut self) {
-        unsafe { ffi::destroyPauliHamil(self.0) }
+        catch_quest_exception(|| unsafe { ffi::destroyPauliHamil(self.0) })
+            .expect("dropping PauliHamil should always succeed");
     }
 }
 
@@ -247,9 +248,10 @@ impl<'a> DiagonalOp<'a> {
 
 impl<'a> Drop for DiagonalOp<'a> {
     fn drop(&mut self) {
-        unsafe {
+        catch_quest_exception(|| unsafe {
             ffi::destroyDiagonalOp(self.op, self.env.0);
-        }
+        })
+        .expect("dropping DiagonalOp should always succeed");
     }
 }
 
@@ -333,7 +335,10 @@ impl<'a> Qureg<'a> {
 
 impl<'a> Drop for Qureg<'a> {
     fn drop(&mut self) {
-        unsafe { ffi::destroyQureg(self.reg, self.env.0) };
+        catch_quest_exception(|| {
+            unsafe { ffi::destroyQureg(self.reg, self.env.0) };
+        })
+        .expect("dropping Qureg should always succeed");
     }
 }
 
@@ -361,7 +366,8 @@ impl Default for QuestEnv {
 
 impl Drop for QuestEnv {
     fn drop(&mut self) {
-        unsafe { ffi::destroyQuESTEnv(self.0) }
+        catch_quest_exception(|| unsafe { ffi::destroyQuESTEnv(self.0) })
+            .expect("dropping QuestEnv should always succeed")
     }
 }
 
@@ -737,9 +743,10 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_blank_state(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::initBlankState(qureg.reg);
-    }
+    })
+    .expect("init_blank_state should always succeed");
 }
 
 /// Initialize `qureg` into the zero state.
@@ -760,9 +767,10 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_zero_state(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::initZeroState(qureg.reg);
-    }
+    })
+    .expect("init_zero_state should always succeed");
 }
 
 /// Initialize `qureg` into the plus state.
@@ -784,9 +792,10 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_plus_state(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::initPlusState(qureg.reg);
-    }
+    })
+    .expect("init_plus_state should always succeed");
 }
 
 /// Initialize `qureg` into a classical state.
@@ -850,9 +859,10 @@ pub fn init_pure_state(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_debug_state(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
-    }
+    })
+    .expect("init_debug_state should always succeed");
 }
 
 /// Initialize `qureg` by specifying all amplitudes.
@@ -1224,7 +1234,8 @@ pub fn t_gate(
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
-    unsafe { ffi::syncQuESTSuccess(success_code) }
+    catch_quest_exception(|| unsafe { ffi::syncQuESTSuccess(success_code) })
+        .expect("sync_quest_success should always succeed")
 }
 
 /// Report information about the `QuEST` environment
@@ -1233,9 +1244,10 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_quest_env(env: &QuestEnv) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::reportQuESTEnv(env.0);
-    }
+    })
+    .expect("report_quest_env should always succeed");
 }
 
 /// Get a string containing information about the runtime environment,
@@ -1261,12 +1273,16 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
             .map_err(QuestError::NulError)?;
-    unsafe {
-        let cstr_ptr = cstr.into_raw();
-        ffi::getEnvironmentString(env.0, cstr_ptr);
-        cstr = CString::from_raw(cstr_ptr);
-    }
-    cstr.into_string().map_err(QuestError::IntoStringError)
+    catch_quest_exception(|| {
+        unsafe {
+            let cstr_ptr = cstr.into_raw();
+            ffi::getEnvironmentString(env.0, cstr_ptr);
+            cstr = CString::from_raw(cstr_ptr);
+        }
+
+        cstr.into_string().map_err(QuestError::IntoStringError)
+    })
+    .expect("get_environment_string should always succeed")
 }
 
 /// >>>Desc.
@@ -1281,9 +1297,10 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
-    }
+    })
+    .expect("copy_state_to_gpu should always succeed");
 }
 
 /// In GPU mode, this copies the state-vector (or density matrix) from RAM.
@@ -1292,9 +1309,8 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_from_gpu(qureg: &mut Qureg) {
-    unsafe {
-        ffi::copyStateFromGPU(qureg.reg);
-    }
+    catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
+        .expect("copy_state_from_gpu should always succeed");
 }
 
 /// In GPU mode, this copies the state-vector (or density matrix) from GPU
@@ -1477,7 +1493,8 @@ pub fn get_density_amp(
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
-    unsafe { ffi::calcTotalProb(qureg.reg) }
+    catch_quest_exception(|| unsafe { ffi::calcTotalProb(qureg.reg) })
+        .expect("calc_total_prop should always succeed")
 }
 
 /// Apply a single-qubit unitary parameterized by two given complex scalars.
@@ -2358,22 +2375,6 @@ pub fn collapse_to_outcome(
     })
 }
 
-#[test]
-fn measure_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(2, env).unwrap();
-
-    // Prepare a triplet state `|00> + |11>`
-    init_zero_state(qureg);
-    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-
-    // Qubits are entangled now
-    let outcome1 = measure(qureg, 0).unwrap();
-    let outcome2 = measure(qureg, 1).unwrap();
-
-    assert_eq!(outcome1, outcome2);
-}
-
 /// Measures a single qubit, collapsing it randomly to 0 or 1.
 ///
 /// # Examples
@@ -2383,7 +2384,7 @@ fn measure_01() {
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
-/// // Prepare a triplet state `|00> + |11>`
+/// // Prepare an entangled state `|00> + |11>`
 /// init_zero_state(qureg);
 /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
 ///
@@ -2414,7 +2415,7 @@ pub fn measure(
 /// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
-/// // Prepare a triplet state `|00> + |11>`
+/// // Prepare an entangled state `|00> + |11>`
 /// init_zero_state(qureg);
 /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
 ///
@@ -2494,10 +2495,11 @@ pub fn calc_density_inner_product(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest_default(env: &mut QuestEnv) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
         ffi::seedQuESTDefault(env_ptr);
-    }
+    })
+    .expect(" should always succeed");
 }
 
 /// Desc.
@@ -2517,11 +2519,12 @@ pub fn seed_quest(
     num_seeds: i32,
 ) {
     // QuEST's function signature is `c_ulong`. Let's use u64 for now...
-    unsafe {
+    catch_quest_exception(|| unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
         let seed_array_ptr = seed_array.as_ptr();
         ffi::seedQuEST(env_ptr, seed_array_ptr, num_seeds);
-    }
+    })
+    .expect("seed_quest should always succeed");
 }
 
 /// Desc.
@@ -2538,7 +2541,7 @@ pub fn seed_quest(
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
 pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
         let mut num_seeds = 0_i32;
         ffi::getQuESTSeeds(env.0, seeds_ptr, &mut num_seeds);
@@ -2546,7 +2549,8 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
         let seeds =
             std::slice::from_raw_parts_mut(*seeds_ptr, num_seeds as usize);
         (seeds, num_seeds)
-    }
+    })
+    .expect("get_quest_seeds should always succeed")
 }
 
 /// Desc.
@@ -2561,9 +2565,10 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn start_recording_qasm(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::startRecordingQASM(qureg.reg);
-    }
+    })
+    .expect("start_recording_qasm should always succeed");
 }
 
 /// Desc.
@@ -2578,9 +2583,10 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn stop_recording_qasm(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::stopRecordingQASM(qureg.reg);
-    }
+    })
+    .expect("stop_recording_qasm should always succeed");
 }
 
 /// Desc.
@@ -2595,9 +2601,10 @@ pub fn stop_recording_qasm(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clear_recorded_qasm(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::clearRecordedQASM(qureg.reg);
-    }
+    })
+    .expect("clear_recorded_qasm should always succeed");
 }
 
 /// Desc.
@@ -2612,9 +2619,10 @@ pub fn clear_recorded_qasm(qureg: &mut Qureg) {
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn print_recorded_qasm(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::printRecordedQASM(qureg.reg);
-    }
+    })
+    .expect("print_recorded_qasm should always succeed");
 }
 
 /// Desc.
@@ -3276,9 +3284,10 @@ pub fn mix_kraus_map(
     num_ops: i32,
 ) {
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::mixKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
-    }
+    })
+    .expect("mix_kraus_map should always succeed");
 }
 
 /// Desc.
@@ -3359,9 +3368,10 @@ pub fn mix_nontp_kraus_map(
     num_ops: i32,
 ) {
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::mixNonTPKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
-    }
+    })
+    .expect("mix_nontp_kraus_map should always succeed");
 }
 
 /// Desc.
@@ -3814,7 +3824,7 @@ pub fn apply_named_phase_func(
     encoding: BitEncoding,
     function_name_code: PhaseFunc,
 ) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFunc(
             qureg.reg,
             qubits.as_ptr(),
@@ -3823,7 +3833,8 @@ pub fn apply_named_phase_func(
             encoding,
             function_name_code,
         );
-    }
+    })
+    .expect("apply_named_phase_func should always succeed");
 }
 
 /// Desc.
@@ -3954,9 +3965,10 @@ pub fn apply_param_named_phase_func_overrides(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_full_qft(qureg: &mut Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::applyFullQFT(qureg.reg);
-    }
+    })
+    .expect("apply_full_qft should always succeed");
 }
 
 /// Desc.
