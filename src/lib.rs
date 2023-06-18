@@ -2450,6 +2450,15 @@ pub fn measure_with_stats(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(other_qureg);
+///
+/// let prod = calc_inner_product(qureg, other_qureg).unwrap();
+/// assert!((prod.re - 0.5).abs() < EPSILON);
+/// assert!((prod.im).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

@@ -884,6 +884,39 @@ fn measure_with_stats_01() {
 }
 
 #[test]
+fn calc_inner_product_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(other_qureg);
+
+    let _ = calc_inner_product(qureg, other_qureg).unwrap();
+}
+
+#[test]
+fn calc_inner_product_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let other_qureg = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(other_qureg);
+
+    let _ = calc_inner_product(qureg, other_qureg).unwrap_err();
+}
+
+#[test]
+fn calc_inner_product_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(other_qureg);
+
+    let _ = calc_inner_product(qureg, other_qureg).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
