@@ -2523,12 +2523,15 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
     .expect("seed_quest_default should always succeed");
 }
 
-/// Desc.
+/// Seeds the random number generator with a custom array of key(s).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &mut QuestEnv::new();
+///
+/// seed_quest(env, &[1, 2, 3]);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2537,8 +2540,8 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 pub fn seed_quest(
     env: &mut QuestEnv,
     seed_array: &[u64],
-    num_seeds: i32,
 ) {
+    let num_seeds = seed_array.len() as i32;
     // QuEST's function signature is `c_ulong`. Let's use u64 for now...
     catch_quest_exception(|| unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
@@ -2548,12 +2551,16 @@ pub fn seed_quest(
     .expect("seed_quest should always succeed");
 }
 
-/// Desc.
+/// Obtain the seeds presently used in random number generation.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let seeds = get_quest_seeds(env);
+///
+/// assert!(seeds.len() > 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2561,25 +2568,35 @@ pub fn seed_quest(
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
-pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> (&'b mut [u64], i32) {
+pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
     catch_quest_exception(|| unsafe {
         let seeds_ptr = &mut std::ptr::null_mut();
-        let mut num_seeds = 0_i32;
-        ffi::getQuESTSeeds(env.0, seeds_ptr, &mut num_seeds);
-
-        let seeds =
-            std::slice::from_raw_parts_mut(*seeds_ptr, num_seeds as usize);
-        (seeds, num_seeds)
+        let num_seeds = &mut 0_i32;
+        ffi::getQuESTSeeds(env.0, seeds_ptr, num_seeds);
+        std::slice::from_raw_parts(*seeds_ptr, *num_seeds as usize)
     })
     .expect("get_quest_seeds should always succeed")
 }
 
-/// Desc.
+/// Enable QASM recording.
+///
+/// Gates applied to qureg will here-after be added to a growing log of QASM
+/// instructions, progressively consuming more memory until disabled with
+/// `stop_recording_qasm()`. The QASM log is bound to this qureg instance.
+///
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// start_recording_qasm(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+/// stop_recording_qasm(qureg);
+///
+/// print_recorded_qasm(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2592,12 +2609,23 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
     .expect("start_recording_qasm should always succeed");
 }
 
-/// Desc.
+/// Disable QASM recording.
+///
+/// The recorded QASM will be maintained in qureg and continue to be appended to
+/// if startRecordingQASM is recalled.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// start_recording_qasm(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+/// stop_recording_qasm(qureg);
+///
+/// print_recorded_qasm(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2610,12 +2638,24 @@ pub fn stop_recording_qasm(qureg: &mut Qureg) {
     .expect("stop_recording_qasm should always succeed");
 }
 
-/// Desc.
+/// Clear all QASM so far recorded.
+///
+/// This does not start or stop recording.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// start_recording_qasm(qureg);
+/// hadamard(qureg, 0).unwrap();
+///
+/// clear_recorded_qasm(qureg);
+///
+/// controlled_not(qureg, 0, 1).unwrap();
+/// stop_recording_qasm(qureg);
+/// print_recorded_qasm(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2628,12 +2668,22 @@ pub fn clear_recorded_qasm(qureg: &mut Qureg) {
     .expect("clear_recorded_qasm should always succeed");
 }
 
-/// Desc.
+/// Print recorded QASM to stdout.
+///
+/// This does not clear the QASM log, nor does it start or stop QASM recording.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// start_recording_qasm(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+/// stop_recording_qasm(qureg);
+///
+/// print_recorded_qasm(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2646,12 +2696,20 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
     .expect("print_recorded_qasm should always succeed");
 }
 
-/// Desc.
+/// Writes recorded QASM to a file, throwing an error if inaccessible.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// start_recording_qasm(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+/// stop_recording_qasm(qureg);
+///
+/// write_recorded_qasm_to_file(qureg, "/dev/null").unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

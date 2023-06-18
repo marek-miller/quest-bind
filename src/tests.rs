@@ -952,8 +952,30 @@ fn calc_density_inner_product_03() {
 #[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
-    let (seeds, num_seeds) = get_quest_seeds(env);
+    let seeds = get_quest_seeds(env);
 
-    assert!(num_seeds > 0);
-    assert_eq!(seeds.len(), num_seeds as usize);
+    assert!(!seeds.is_empty());
+}
+
+#[test]
+fn get_quest_seeds_02() {
+    let env = &mut QuestEnv::new();
+    let seed_array = &[0, 1, 2, 3];
+    seed_quest(env, seed_array);
+    let seeds = get_quest_seeds(env);
+
+    assert!(!seeds.is_empty());
+    assert_eq!(seed_array, seeds);
+}
+
+#[test]
+fn start_recording_qasm_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    start_recording_qasm(qureg);
+    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+    stop_recording_qasm(qureg);
+
+    print_recorded_qasm(qureg);
 }
