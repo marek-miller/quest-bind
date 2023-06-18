@@ -2246,12 +2246,21 @@ pub fn controlled_pauli_y(
     })
 }
 
-/// Desc.
+/// Gives the probability of a specified qubit being measured in the given
+/// outcome (0 or 1).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let prob = calc_prob_of_outcome(qureg, 0, 0).unwrap();
+/// assert!((prob - 1.).abs() < EPSILON);
+/// let prob = calc_prob_of_outcome(qureg, 0, 1).unwrap();
+/// assert!(prob.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

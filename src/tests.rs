@@ -804,6 +804,23 @@ fn controlled_pauli_y_01() {
 }
 
 #[test]
+fn calc_prob_of_outcome_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let _ = calc_prob_of_outcome(qureg, 0, 0).unwrap();
+    let _ = calc_prob_of_outcome(qureg, 0, 1).unwrap();
+    let _ = calc_prob_of_outcome(qureg, 1, 0).unwrap();
+    let _ = calc_prob_of_outcome(qureg, 1, 1).unwrap();
+
+    let _ = calc_prob_of_outcome(qureg, 0, 2).unwrap_err();
+    let _ = calc_prob_of_outcome(qureg, 0, -2).unwrap_err();
+    let _ = calc_prob_of_outcome(qureg, 1, 3).unwrap_err();
+    let _ = calc_prob_of_outcome(qureg, 4, 0).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);
