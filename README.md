@@ -1,5 +1,7 @@
 # quest-bind
 
+[![Test](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml)
+
 A safe wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0. As
 thin as possible: the API stays nearly identical to the original.
 
