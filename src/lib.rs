@@ -2444,7 +2444,7 @@ pub fn measure_with_stats(
     })
 }
 
-/// Desc.
+/// Computes the inner product of two equal-size state vectors.
 ///
 /// # Examples
 ///
@@ -2472,12 +2472,20 @@ pub fn calc_inner_product(
         .map(Into::into)
 }
 
-/// Desc.
+/// Computes the Hilbert-Schmidt scalar product.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_plus_state(other_qureg);
+///
+/// let prod = calc_density_inner_product(qureg, other_qureg).unwrap();
+/// assert!((prod - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
