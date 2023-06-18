@@ -770,6 +770,40 @@ fn multi_qubit_not_01() {
 }
 
 #[test]
+fn multi_controlled_multi_qubit_not_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+
+    multi_controlled_multi_qubit_not(qureg, &[0, 1], &[2, 3]).unwrap();
+    multi_controlled_multi_qubit_not(qureg, &[1, 0], &[3, 2]).unwrap();
+    multi_controlled_multi_qubit_not(qureg, &[1, 0], &[3]).unwrap();
+    multi_controlled_multi_qubit_not(qureg, &[1], &[3, 0]).unwrap();
+
+    multi_controlled_multi_qubit_not(qureg, &[1, 0], &[0]).unwrap_err();
+    multi_controlled_multi_qubit_not(qureg, &[0, 0], &[1]).unwrap_err();
+    multi_controlled_multi_qubit_not(qureg, &[0, 0], &[-1]).unwrap_err();
+    multi_controlled_multi_qubit_not(qureg, &[4, 1], &[0]).unwrap_err();
+    multi_controlled_multi_qubit_not(qureg, &[0, 1], &[4]).unwrap_err();
+}
+
+#[test]
+fn controlled_pauli_y_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    controlled_pauli_y(qureg, 1, 0).unwrap();
+    controlled_pauli_y(qureg, 0, 1).unwrap();
+
+    controlled_pauli_y(qureg, 0, 0).unwrap_err();
+    controlled_pauli_y(qureg, 1, 1).unwrap_err();
+    controlled_pauli_y(qureg, 1, 2).unwrap_err();
+    controlled_pauli_y(qureg, 2, 4).unwrap_err();
+    controlled_pauli_y(qureg, 2, -1).unwrap_err();
+}
+
+#[test]
 fn get_quest_seeds_01() {
     let env = &QuestEnv::new();
     let (seeds, num_seeds) = get_quest_seeds(env);

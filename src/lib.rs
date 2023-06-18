@@ -2122,12 +2122,24 @@ pub fn controlled_not(
     })
 }
 
-/// Desc.
+/// Apply a NOT (or Pauli X) gate with multiple control and target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let ctrls = &[0, 1];
+/// let targs = &[2, 3];
+/// multi_controlled_multi_qubit_not(qureg, ctrls, targs).unwrap();
+///
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2136,10 +2148,21 @@ pub fn controlled_not(
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg,
     ctrls: &[i32],
-    num_ctrls: i32,
     targs: &[i32],
-    num_targs: i32,
 ) -> Result<(), QuestError> {
+    let num_ctrls = ctrls.len() as i32;
+    let num_targs = targs.len() as i32;
+    if num_ctrls > qureg.num_qubits_represented()
+        || num_targs > qureg.num_qubits_represented()
+    {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for idx in ctrls.iter().chain(targs) {
+        if *idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiQubitNot(
             qureg.reg,
@@ -2193,12 +2216,21 @@ pub fn multi_qubit_not(
     })
 }
 
-/// Desc.
+/// Apply the controlled pauliY (single control, single target) gate.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// controlled_pauli_y(qureg, 1, 0).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
