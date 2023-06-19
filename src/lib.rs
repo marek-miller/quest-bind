@@ -3007,12 +3007,18 @@ pub fn mix_density_matrix(
     })
 }
 
-/// Desc.
+/// Calculates the purity of a density matrix.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let purity = calc_purity(qureg).unwrap();
+/// assert!((purity - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3028,6 +3034,15 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let pure_state = &mut Qureg::try_new(2, env).unwrap();
+///
+/// init_zero_state(qureg);
+/// init_plus_state(pure_state);
+///
+/// let fidelity = calc_fidelity(qureg, pure_state).unwrap();
+/// assert!((fidelity - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.

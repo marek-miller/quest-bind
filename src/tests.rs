@@ -1214,3 +1214,52 @@ fn mix_density_matrix_04() {
 
     mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
 }
+
+#[test]
+fn calc_purity_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let _ = calc_purity(qureg).unwrap();
+
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let _ = calc_purity(qureg).unwrap_err();
+}
+
+#[test]
+fn calc_fidelity_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap();
+}
+
+#[test]
+fn calc_fidelity_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    let pure_state = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap_err();
+}
+
+#[test]
+fn calc_fidelity_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap_err();
+}
