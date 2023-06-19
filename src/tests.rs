@@ -1120,3 +1120,41 @@ fn mix_two_qubit_depolarising_02() {
     mix_two_qubit_depolarising(qureg, 0, 1, 0.75).unwrap_err();
     mix_two_qubit_depolarising(qureg, 0, 2, 0.75).unwrap_err();
 }
+
+#[test]
+fn mix_pauli_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap();
+
+    mix_pauli(qureg, 2, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, -2, prob_x, prob_y, prob_z).unwrap_err();
+}
+
+#[test]
+fn mix_pauli_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // this is not a prob distribution
+    let (prob_x, prob_y, prob_z) = (0.5, 0.5, 0.5);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap_err();
+}
+
+#[test]
+fn mix_pauli_03() {
+    let env = &QuestEnv::new();
+    // not a density matrix
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap_err();
+}

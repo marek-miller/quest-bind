@@ -2936,12 +2936,23 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
-/// Desc.
+/// Mixes a density matrix `qureg` to induce general single-qubit Pauli noise.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+/// mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+///
+/// let mut outcome_prob = -1.;
+/// let _ = measure_with_stats(qureg, 0, &mut outcome_prob).unwrap();
+///
+/// assert!((outcome_prob - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2954,6 +2965,12 @@ pub fn mix_pauli(
     prob_y: Qreal,
     prob_z: Qreal,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.reg, target_qubit, prob_x, prob_y, prob_z);
     })
