@@ -49,6 +49,7 @@ pub enum QuestError {
     IntoStringError(std::ffi::IntoStringError),
     ArrayLengthError,
     QubitIndexError,
+    NotDensityMatrix,
 }
 
 pub type Qcomplex = num::Complex<Qreal>;
@@ -2754,6 +2755,9 @@ pub fn mix_dephasing(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixDephasing(qureg.reg, target_qubit, prob);
     })
@@ -2785,6 +2789,9 @@ pub fn mix_two_qubit_dephasing(
     qubit2: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDephasing(qureg.reg, qubit1, qubit2, prob);
     })
@@ -2814,17 +2821,29 @@ pub fn mix_depolarising(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixDepolarising(qureg.reg, target_qubit, prob);
     })
 }
 
-/// Desc.
+///  Mixes a density matrix `qureg` to induce single-qubit amplitude damping
+/// (decay to 0 state).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// mix_damping(qureg, 0, 1.).unwrap();
+///
+/// let amp = get_density_amp(qureg, 0, 0).unwrap();
+/// assert!((amp.re - 1.) < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2835,6 +2854,9 @@ pub fn mix_damping(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixDamping(qureg.reg, target_qubit, prob);
     })
