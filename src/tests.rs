@@ -979,3 +979,79 @@ fn start_recording_qasm_01() {
 
     print_recorded_qasm(qureg);
 }
+
+#[test]
+fn mix_dephasing_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_plus_state(qureg);
+
+    mix_dephasing(qureg, 0, 0.5).unwrap();
+    mix_dephasing(qureg, 1, 0.0).unwrap();
+
+    mix_dephasing(qureg, 0, 0.75).unwrap_err();
+    mix_dephasing(qureg, 2, 0.25).unwrap_err();
+    mix_dephasing(qureg, 0, -0.25).unwrap_err();
+    mix_dephasing(qureg, -10, 0.25).unwrap_err();
+}
+
+#[test]
+fn mix_dephasing_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_plus_state(qureg);
+
+    // qureg is not a density matrix
+    mix_dephasing(qureg, 0, 0.5).unwrap_err();
+    mix_dephasing(qureg, 1, 0.0).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_dephasing_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_plus_state(qureg);
+
+    mix_two_qubit_dephasing(qureg, 0, 1, 0.75).unwrap();
+    mix_two_qubit_dephasing(qureg, 0, 2, 0.75).unwrap();
+    mix_two_qubit_dephasing(qureg, 1, 2, 0.75).unwrap();
+    mix_two_qubit_dephasing(qureg, 1, 0, 0.75).unwrap();
+    mix_two_qubit_dephasing(qureg, 2, 1, 0.75).unwrap();
+
+    mix_two_qubit_dephasing(qureg, 0, 1, 0.99).unwrap_err();
+    mix_two_qubit_dephasing(qureg, 2, 1, 0.99).unwrap_err();
+
+    mix_two_qubit_dephasing(qureg, 4, 0, 0.1).unwrap_err();
+    mix_two_qubit_dephasing(qureg, 0, 4, 0.1).unwrap_err();
+
+    mix_two_qubit_dephasing(qureg, -1, 0, 0.1).unwrap_err();
+    mix_two_qubit_dephasing(qureg, 0, -1, 0.1).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_dephasing_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_plus_state(qureg);
+
+    // qureg is not a density matrix
+    mix_two_qubit_dephasing(qureg, 0, 1, 0.75).unwrap_err();
+    mix_two_qubit_dephasing(qureg, 0, 2, 0.75).unwrap_err();
+}
+
+#[test]
+fn mix_depolarising_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    mix_depolarising(qureg, 0, 0.00).unwrap();
+    mix_depolarising(qureg, 0, 0.75).unwrap();
+    mix_depolarising(qureg, 1, 0.75).unwrap();
+
+    mix_depolarising(qureg, 0, 0.99).unwrap_err();
+    mix_depolarising(qureg, 1, 0.99).unwrap_err();
+    mix_depolarising(qureg, 0, -0.99).unwrap_err();
+    mix_depolarising(qureg, -1, 0.99).unwrap_err();
+    mix_depolarising(qureg, -1, -0.99).unwrap_err();
+}

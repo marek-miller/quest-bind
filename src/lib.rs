@@ -2728,12 +2728,22 @@ pub fn write_recorded_qasm_to_file(
     }
 }
 
-/// Desc.
+///  Mixes a density matrix `qureg` to induce single-qubit dephasing noise.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// mix_dephasing(qureg, 0, 0.5).unwrap();
+///
+/// let amp = get_density_amp(qureg, 0, 0).unwrap();
+/// assert!((amp.re - 0.25).abs() < EPSILON);
+/// let amp = get_density_amp(qureg, 0, 1).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2749,12 +2759,21 @@ pub fn mix_dephasing(
     })
 }
 
-/// Desc.
+///  Mixes a density matrix `qureg` to induce two-qubit dephasing noise.
 ///
 /// # Examples
 ///
 /// ```rust
-/// # use quest_bind::*;
+/// # use quest_bind::*; let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// mix_two_qubit_dephasing(qureg, 0, 1, 0.75).unwrap();
+///
+/// let amp = get_density_amp(qureg, 0, 0).unwrap();
+/// assert!((amp.re - 0.125).abs() < EPSILON);
+/// let amp = get_density_amp(qureg, 0, 1).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2771,12 +2790,20 @@ pub fn mix_two_qubit_dephasing(
     })
 }
 
-/// Desc.
+///  Mixes a density matrix `qureg` to induce single-qubit homogeneous
+/// depolarising noise.
 ///
 /// # Examples
 ///
 /// ```rust
-/// # use quest_bind::*;
+/// # use quest_bind::*; let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// mix_depolarising(qureg, 0, 0.75).unwrap();
+/// let amp = get_density_amp(qureg, 0, 0).unwrap();
+///
+/// assert!((amp.re - 0.5) < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
