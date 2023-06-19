@@ -80,11 +80,14 @@ OpenMP enabled
 Number of threads available is 8
 Precision: size of qreal is 8 bytes
 QUBITS:
-Number of qubits is 16.
-Number of amps is 65536.
-Number of amps per rank is 65536.
-Measure first qubit.
-Outcome: 0 with prob: 0.50
+Number of qubits is 2.
+Number of amps is 4.
+Number of amps per rank is 4.
+---
+Prepare Bell state: |00> + |11>
+Qubit "0" measured in state: |0>
+Qubit "1" measured in state: |0>
+They match!
 ```
 
 ## Distributed and GPU-accelerated mode
