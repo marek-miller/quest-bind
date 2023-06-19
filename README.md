@@ -29,20 +29,29 @@ Now write some code and put it in `./src/main.rs`:
 ```rust
 use quest_bind::*;
 
-
 fn main() -> Result<(), QuestError> {
+    // Initialize QuEST environment
     let env = &QuestEnv::new();
     report_quest_env(env);
 
-    let qureg = &mut Qureg::try_new(0x10, env)?;
+    // Initialize 2-qubit register in |00> state
+    let qureg = &mut Qureg::try_new(2, env)?;
     report_qureg_params(qureg);
-    init_plus_state(qureg);
+    init_zero_state(qureg);
 
-    let outcome_prob = &mut -1.;
-    let outcome = measure_with_stats(qureg, 0, outcome_prob)?;
-    println!("Measure first qubit.");
-    println!("Outcome: {outcome} with prob.: {outcome_prob:.2}");
+    println!("---\nPrepare Bell state: |00> + |11>");
+    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
 
+    // Measure each qubit
+    let outcome0 = measure(qureg, 0)?;
+    let outcome1 = measure(qureg, 1)?;
+
+    println!("Qubit \"0\" measured in state: |{}>", outcome0);
+    println!("Qubit \"1\" measured in state: |{}>", outcome1);
+    assert_eq!(outcome0, outcome1);
+    println!("They match!");
+
+    // Both `env` and `qureg` are safely discarded here
     Ok(())
 }
 ```
@@ -171,11 +180,11 @@ On failure, QuEST throws exceptions via user-configurable global
 By default, this function prints an error message and aborts, which is
 problematic in a large distributed setup.
 
-We opt for catching all exceptions early. The exception handler is locked during
-an API call. This means that calling QuEST functions is synchronous and should
-be thread-safe, but comes at the expense of being able to run only one QuEST API
-call at the time. Bear in mind, though, that each QuEST function retains access
-to all parallel computation resources available in the system.
+We opt for catching all exceptions early. The exception handler is locked
+during an API call. This means that calling QuEST functions is synchronous and
+should be thread-safe, but comes at the expense of being able to run only one
+QuEST API call at the time. Bear in mind, though, that each QuEST function
+retains access to all parallel computation resources available in the system.
 
 Current implementation returns inside `Result<_, QuestError>` only the first
 exception caught. All subsequent messages reported by QuEST, together with that
@@ -209,9 +218,9 @@ The type `QuestError` doesn't contain (possibly malformed) data returned by the
 API call on failure. Only successful calls can reach the library user. This is
 intentional, following guidelines in QuEST documentation. Upon failure...
 
-> Users must ensure that the triggered API call does not continue (e.g. the user
-> exits or throws an exception), else QuEST will continue with the valid [sic!]
-> input and likely trigger a seg-fault.
+> Users must ensure that the triggered API call does not continue (e.g. the
+> user exits or throws an exception), else QuEST will continue with the valid
+> [sic!] input and likely trigger a seg-fault.
 
 See
 [Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
