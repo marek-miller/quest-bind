@@ -2614,7 +2614,7 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 /// Disable QASM recording.
 ///
 /// The recorded QASM will be maintained in qureg and continue to be appended to
-/// if startRecordingQASM is recalled.
+/// if `startRecordingQASM` is recalled.
 ///
 /// # Examples
 ///
@@ -2936,12 +2936,23 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
-/// Desc.
+/// Mixes a density matrix `qureg` to induce general single-qubit Pauli noise.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+/// mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+///
+/// let mut outcome_prob = -1.;
+/// let _ = measure_with_stats(qureg, 0, &mut outcome_prob).unwrap();
+///
+/// assert!((outcome_prob - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2954,17 +2965,33 @@ pub fn mix_pauli(
     prob_y: Qreal,
     prob_z: Qreal,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.reg, target_qubit, prob_x, prob_y, prob_z);
     })
 }
 
-/// Desc.
+/// Modifies `combine_qureg` with `other_qureg`
+///
+/// to become `(1-prob) combine_qureg +  prob other_qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+///
+/// init_zero_state(combine_qureg);
+/// init_classical_state(other_qureg, 3).unwrap();
+///
+/// mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2980,12 +3007,18 @@ pub fn mix_density_matrix(
     })
 }
 
-/// Desc.
+/// Calculates the purity of a density matrix.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let purity = calc_purity(qureg).unwrap();
+/// assert!((purity - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3001,6 +3034,15 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let pure_state = &mut Qureg::try_new(2, env).unwrap();
+///
+/// init_zero_state(qureg);
+/// init_plus_state(pure_state);
+///
+/// let fidelity = calc_fidelity(qureg, pure_state).unwrap();
+/// assert!((fidelity - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3021,6 +3063,16 @@ pub fn calc_fidelity(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // init state |10>
+/// init_classical_state(qureg, 1).unwrap();
+/// // swap to |01>
+/// swap_gate(qureg, 0, 1).unwrap();
+///
+/// let outcome = measure(qureg, 0).unwrap();
+/// assert_eq!(outcome, 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3031,6 +3083,12 @@ pub fn swap_gate(
     qubit1: i32,
     qubit2: i32,
 ) -> Result<(), QuestError> {
+    if qubit1 >= qureg.num_qubits_represented() || qubit1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qubit2 >= qureg.num_qubits_represented() || qubit2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.reg, qubit1, qubit2);
     })
