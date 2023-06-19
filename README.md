@@ -264,14 +264,14 @@ rustup doc
 
 New features/improvements:
 
-- Catch exceptions thrown by QuEST
 - Improve documentation
 - Add build script
 - Constructors/destructors for QuEST structs
-- Add Github workflows CT
-- Add example: grovers_search.rs
-- Use `Complex<f64>` type from `num` crate (as `QComplex`)
-- Use compile flag `"f32"` to set floating point precision
+- Catch exceptions thrown by QuEST
+- Add GHA for continuous testing
+- Add examples: `entanglemetn.rs` and `grovers_search.rs`
+- Use `Complex<T>` type from `num` crate (as `Qcomplex`)
+- Add feature `"f32"` for floating-point precision
 
 ### v0.1.0 (11/06/2023)
 
