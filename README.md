@@ -46,8 +46,8 @@ fn main() -> Result<(), QuestError> {
     let outcome0 = measure(qureg, 0)?;
     let outcome1 = measure(qureg, 1)?;
 
-    println!("Qubit \"0\" measured in state: |{}>", outcome0);
-    println!("Qubit \"1\" measured in state: |{}>", outcome1);
+    println!("Qubit \"0\" measured in state: |{outcome0}>");
+    println!("Qubit \"1\" measured in state: |{outcome1}>");
     assert_eq!(outcome0, outcome1);
     println!("They match!");
 
