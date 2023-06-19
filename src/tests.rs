@@ -1263,3 +1263,45 @@ fn calc_fidelity_03() {
 
     let _ = calc_fidelity(qureg, pure_state).unwrap_err();
 }
+
+#[test]
+fn swap_gate_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    swap_gate(qureg, 0, 1).unwrap();
+    swap_gate(qureg, 1, 0).unwrap();
+
+    swap_gate(qureg, 0, 0).unwrap_err();
+    swap_gate(qureg, 1, 1).unwrap_err();
+}
+
+#[test]
+fn swap_gate_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    swap_gate(qureg, 0, 2).unwrap_err();
+    swap_gate(qureg, 2, 0).unwrap_err();
+
+    swap_gate(qureg, -1, 0).unwrap_err();
+    swap_gate(qureg, 0, -1).unwrap_err();
+
+    swap_gate(qureg, 4, 0).unwrap_err();
+    swap_gate(qureg, 0, 4).unwrap_err();
+    swap_gate(qureg, 4, 4).unwrap_err();
+}
+
+#[test]
+fn swap_gate_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // QuEST seg faults here
+    swap_gate(qureg, 4, -4).unwrap_err();
+    swap_gate(qureg, -4, 4).unwrap_err();
+    swap_gate(qureg, -4, -4).unwrap_err();
+}

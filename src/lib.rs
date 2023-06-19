@@ -3063,6 +3063,16 @@ pub fn calc_fidelity(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // init state |10>
+/// init_classical_state(qureg, 1).unwrap();
+/// // swap to |01>
+/// swap_gate(qureg, 0, 1).unwrap();
+///
+/// let outcome = measure(qureg, 0).unwrap();
+/// assert_eq!(outcome, 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3073,6 +3083,12 @@ pub fn swap_gate(
     qubit1: i32,
     qubit2: i32,
 ) -> Result<(), QuestError> {
+    if qubit1 >= qureg.num_qubits_represented() || qubit1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qubit2 >= qureg.num_qubits_represented() || qubit2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.reg, qubit1, qubit2);
     })
