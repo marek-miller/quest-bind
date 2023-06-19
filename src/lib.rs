@@ -2614,7 +2614,7 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 /// Disable QASM recording.
 ///
 /// The recorded QASM will be maintained in qureg and continue to be appended to
-/// if startRecordingQASM is recalled.
+/// if `startRecordingQASM` is recalled.
 ///
 /// # Examples
 ///
@@ -2976,12 +2976,22 @@ pub fn mix_pauli(
     })
 }
 
-/// Desc.
+/// Modifies `combine_qureg` with `other_qureg`
+///
+/// to become `(1-prob) combine_qureg +  prob other_qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+///
+/// init_zero_state(combine_qureg);
+/// init_classical_state(other_qureg, 3).unwrap();
+///
+/// mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

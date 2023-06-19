@@ -1158,3 +1158,59 @@ fn mix_pauli_03() {
     mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap_err();
     mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap_err();
 }
+
+#[test]
+fn mix_density_matrix_01() {
+    let env = &QuestEnv::new();
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap();
+    mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
+    mix_density_matrix(combine_qureg, 0.99, other_qureg).unwrap();
+
+    mix_density_matrix(combine_qureg, 1.01, other_qureg).unwrap_err();
+    mix_density_matrix(combine_qureg, -1.01, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_02() {
+    let env = &QuestEnv::new();
+    // this is not a density matrix
+    let combine_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_03() {
+    let env = &QuestEnv::new();
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    // this is not a density matrix
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_04() {
+    let env = &QuestEnv::new();
+    // dimensions don't match
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(3, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
