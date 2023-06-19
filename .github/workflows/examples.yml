@@ -22,8 +22,8 @@ jobs:
           - nightly
         precision: ["", "f32"]
         example:
+          - entanglement
           - grovers_search
-          - measure_first
 
     steps:
       - uses: actions/checkout@v3
