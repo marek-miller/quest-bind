@@ -1087,3 +1087,36 @@ fn mix_damping_02() {
     // QuEST seg faults here:
     mix_damping(qureg, 0, 0.5).unwrap_err();
 }
+
+#[test]
+fn mix_two_qubit_depolarising_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_plus_state(qureg);
+
+    mix_two_qubit_depolarising(qureg, 0, 1, 15. / 16.).unwrap();
+    mix_two_qubit_depolarising(qureg, 0, 2, 15. / 16.).unwrap();
+    mix_two_qubit_depolarising(qureg, 1, 2, 15. / 16.).unwrap();
+    mix_two_qubit_depolarising(qureg, 1, 0, 15. / 16.).unwrap();
+    mix_two_qubit_depolarising(qureg, 2, 1, 15. / 16.).unwrap();
+
+    mix_two_qubit_depolarising(qureg, 0, 1, 0.99).unwrap_err();
+    mix_two_qubit_depolarising(qureg, 2, 1, 0.99).unwrap_err();
+
+    mix_two_qubit_depolarising(qureg, 4, 0, 0.1).unwrap_err();
+    mix_two_qubit_depolarising(qureg, 0, 4, 0.1).unwrap_err();
+
+    mix_two_qubit_depolarising(qureg, -1, 0, 0.1).unwrap_err();
+    mix_two_qubit_depolarising(qureg, 0, -1, 0.1).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_depolarising_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_plus_state(qureg);
+
+    // qureg is not a density matrix
+    mix_two_qubit_depolarising(qureg, 0, 1, 0.75).unwrap_err();
+    mix_two_qubit_depolarising(qureg, 0, 2, 0.75).unwrap_err();
+}

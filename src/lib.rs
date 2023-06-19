@@ -50,6 +50,7 @@ pub enum QuestError {
     ArrayLengthError,
     QubitIndexError,
     NotDensityMatrix,
+    NegativeProbability,
 }
 
 pub type Qcomplex = num::Complex<Qreal>;
@@ -2758,6 +2759,12 @@ pub fn mix_dephasing(
     if !qureg.is_density_matrix() {
         return Err(QuestError::NotDensityMatrix);
     }
+    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if prob < 0. {
+        return Err(QuestError::NegativeProbability);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixDephasing(qureg.reg, target_qubit, prob);
     })
@@ -2768,7 +2775,8 @@ pub fn mix_dephasing(
 /// # Examples
 ///
 /// ```rust
-/// # use quest_bind::*; let env = &QuestEnv::new();
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
 /// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 /// init_plus_state(qureg);
 ///
@@ -2791,6 +2799,15 @@ pub fn mix_two_qubit_dephasing(
 ) -> Result<(), QuestError> {
     if !qureg.is_density_matrix() {
         return Err(QuestError::NotDensityMatrix);
+    }
+    if qubit1 < 0 || qubit1 > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qubit2 < 0 || qubit2 > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if prob < 0. {
+        return Err(QuestError::NegativeProbability);
     }
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDephasing(qureg.reg, qubit1, qubit2, prob);
@@ -2823,6 +2840,12 @@ pub fn mix_depolarising(
 ) -> Result<(), QuestError> {
     if !qureg.is_density_matrix() {
         return Err(QuestError::NotDensityMatrix);
+    }
+    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if prob < 0. {
+        return Err(QuestError::NegativeProbability);
     }
     catch_quest_exception(|| unsafe {
         ffi::mixDepolarising(qureg.reg, target_qubit, prob);
@@ -2857,17 +2880,34 @@ pub fn mix_damping(
     if !qureg.is_density_matrix() {
         return Err(QuestError::NotDensityMatrix);
     }
+    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if prob < 0. {
+        return Err(QuestError::NegativeProbability);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixDamping(qureg.reg, target_qubit, prob);
     })
 }
 
-/// Desc.
+/// Mixes a density matrix `qureg` to induce two-qubit homogeneous depolarising
+/// noise.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// mix_two_qubit_depolarising(qureg, 0, 1, 15. / 16.).unwrap();
+///
+/// let amp = get_density_amp(qureg, 0, 0).unwrap();
+/// assert!((amp.re - 0.125).abs() < EPSILON);
+/// let amp = get_density_amp(qureg, 0, 1).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2879,6 +2919,18 @@ pub fn mix_two_qubit_depolarising(
     qubit2: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
+    if qubit1 < 0 || qubit1 > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qubit2 < 0 || qubit2 > qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    if prob < 0. {
+        return Err(QuestError::NegativeProbability);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDepolarising(qureg.reg, qubit1, qubit2, prob);
     })
