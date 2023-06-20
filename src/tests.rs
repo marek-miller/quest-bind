@@ -1305,3 +1305,57 @@ fn swap_gate_03() {
     swap_gate(qureg, -4, 4).unwrap_err();
     swap_gate(qureg, -4, -4).unwrap_err();
 }
+
+#[test]
+fn sqrt_swap_gate_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    sqrt_swap_gate(qureg, 0, 1).unwrap();
+    sqrt_swap_gate(qureg, 1, 0).unwrap();
+
+    sqrt_swap_gate(qureg, 0, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 1, 1).unwrap_err();
+}
+
+#[test]
+fn sqrt_swap_gate_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    sqrt_swap_gate(qureg, 0, 2).unwrap_err();
+    sqrt_swap_gate(qureg, 2, 0).unwrap_err();
+
+    sqrt_swap_gate(qureg, -1, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 0, -1).unwrap_err();
+
+    sqrt_swap_gate(qureg, 4, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 0, 4).unwrap_err();
+    sqrt_swap_gate(qureg, 4, 4).unwrap_err();
+}
+
+#[test]
+fn sqrt_swap_gate_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // QuEST seg faults here
+    sqrt_swap_gate(qureg, 4, -4).unwrap_err();
+    sqrt_swap_gate(qureg, -4, 4).unwrap_err();
+    sqrt_swap_gate(qureg, -4, -4).unwrap_err();
+}
+
+#[test]
+fn multi_rotate_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    multi_rotate_z(qureg, &[0, 1], PI).unwrap();
+    multi_rotate_z(qureg, &[0, 1, 2], PI).unwrap_err();
+    multi_rotate_z(qureg, &[0, 2], PI).unwrap_err();
+    multi_rotate_z(qureg, &[0, 0], PI).unwrap_err();
+}

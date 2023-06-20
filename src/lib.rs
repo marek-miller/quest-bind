@@ -3028,7 +3028,7 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
-/// Desc.
+/// Calculates the fidelity of `qureg` (a state-vector or density matrix).
 ///
 /// # Examples
 ///
@@ -3057,7 +3057,7 @@ pub fn calc_fidelity(
     })
 }
 
-/// Desc.
+/// Performs a SWAP gate between `qubit1` and `qubit2`.
 ///
 /// # Examples
 ///
@@ -3094,12 +3094,20 @@ pub fn swap_gate(
     })
 }
 
-/// Desc.
+/// Performs a sqrt SWAP gate between `qubit1` and `qubit2`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// // init state |10>
+/// init_classical_state(qureg, 1).unwrap();
+/// sqrt_swap_gate(qureg, 0, 1).unwrap();
+/// sqrt_swap_gate(qureg, 0, 1).unwrap();
+/// let outcome = measure(qureg, 0).unwrap();
+/// assert_eq!(outcome, 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3110,12 +3118,19 @@ pub fn sqrt_swap_gate(
     qb1: i32,
     qb2: i32,
 ) -> Result<(), QuestError> {
+    if qb1 >= qureg.num_qubits_represented() || qb1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qb2 >= qureg.num_qubits_represented() || qb2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
-        ffi::swapGate(qureg.reg, qb1, qb2);
+        ffi::sqrtSwapGate(qureg.reg, qb1, qb2);
     })
 }
 
-/// Desc.
+/// Apply a general single-qubit unitary with multiple control qubits,
+/// conditioned upon a specific bit sequence.
 ///
 /// # Examples
 ///
@@ -3130,10 +3145,10 @@ pub fn multi_state_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
     control_state: &[i32],
-    num_control_qubits: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.reg,
@@ -3146,12 +3161,25 @@ pub fn multi_state_controlled_unitary(
     })
 }
 
-/// Desc.
+/// Apply a multi-qubit Z rotation, also known as a phase gadget, on a selected
+/// number of qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let angle = PI;
+/// multi_rotate_z(qureg, qubits, angle).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 0).unwrap();
+/// assert!((amp + 0.5).abs() < EPSILON);
+/// let amp = get_imag_amp(qureg, 1).unwrap();
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3160,9 +3188,12 @@ pub fn multi_state_controlled_unitary(
 pub fn multi_rotate_z(
     qureg: &mut Qureg,
     qubits: &[i32],
-    num_qubits: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_qubits = qubits.len() as i32;
+    if num_qubits > qureg.num_qubits_represented() {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
     })
