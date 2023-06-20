@@ -1359,3 +1359,24 @@ fn multi_rotate_z_01() {
     multi_rotate_z(qureg, &[0, 2], PI).unwrap_err();
     multi_rotate_z(qureg, &[0, 0], PI).unwrap_err();
 }
+
+#[test]
+fn multi_state_controlled_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+    multi_state_controlled_unitary(qureg, &[1, 2], &[0, 0], 0, u).unwrap();
+    multi_state_controlled_unitary(qureg, &[0, 2], &[0, 0], 1, u).unwrap();
+    multi_state_controlled_unitary(qureg, &[0, 1], &[0, 0], 2, u).unwrap();
+
+    multi_state_controlled_unitary(qureg, &[0, 1], &[0, 0], 0, u).unwrap_err();
+    multi_state_controlled_unitary(qureg, &[0, 1], &[0, 0], 1, u).unwrap_err();
+    multi_state_controlled_unitary(qureg, &[0, 0], &[0, 0], 1, u).unwrap_err();
+
+    multi_state_controlled_unitary(qureg, &[0, 0], &[0, 0], 3, u).unwrap_err();
+    multi_state_controlled_unitary(qureg, &[0, 0], &[0, 0], -1, u).unwrap_err();
+    multi_state_controlled_unitary(qureg, &[4, 0], &[0, 0], 1, u).unwrap_err();
+    multi_state_controlled_unitary(qureg, &[4, -1], &[0, 0], 1, u).unwrap_err();
+}

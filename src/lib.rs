@@ -3136,6 +3136,25 @@ pub fn sqrt_swap_gate(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let control_qubits = &[1, 2];
+/// let control_state = &[0, 0];
+/// let target_qubit = 0;
+/// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+/// multi_state_controlled_unitary(
+///     qureg,
+///     control_qubits,
+///     control_state,
+///     target_qubit,
+///     u,
+/// )
+/// .unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
