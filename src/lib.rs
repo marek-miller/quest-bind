@@ -3228,12 +3228,26 @@ pub fn multi_rotate_z(
     })
 }
 
-/// Desc.
+/// Apply a multi-qubit multi-Pauli rotation, also known as a Pauli gadget.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_X;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubits = &[1, 2];
+/// let target_paulis = &[PAULI_X, PAULI_X];
+/// let angle = PI;
+///
+/// multi_rotate_pauli(qureg, target_qubits, target_paulis, angle).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 6).unwrap();
+/// assert!((amp + 1.).abs() < 2. * EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3243,9 +3257,21 @@ pub fn multi_rotate_pauli(
     qureg: &mut Qureg,
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
-    num_targets: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_targets = target_qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_targets > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in target_qubits {
+        if idx >= num_qubits_rep || idx < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if target_paulis.len() < target_qubits.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiRotatePauli(
             qureg.reg,

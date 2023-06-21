@@ -1481,3 +1481,27 @@ fn apply_projector_02() {
     apply_projector(qureg, 2, 0).unwrap_err();
     apply_projector(qureg, -1, 0).unwrap_err();
 }
+
+#[test]
+fn multi_rotate_pauli_01() {
+    use PauliOpType::PAULI_X;
+
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X, PAULI_X], 0.).unwrap();
+    multi_rotate_pauli(qureg, &[1, 2], &[PAULI_X, PAULI_X], 0.).unwrap();
+    multi_rotate_pauli(qureg, &[2, 0], &[PAULI_X, PAULI_X], 0.).unwrap();
+
+    multi_rotate_pauli(qureg, &[0, 0], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+    multi_rotate_pauli(qureg, &[1, 1], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+    multi_rotate_pauli(qureg, &[2, 2], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+
+    multi_rotate_pauli(qureg, &[0, 3], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+    multi_rotate_pauli(qureg, &[-1, 0], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+    multi_rotate_pauli(qureg, &[0, 1, 2], &[PAULI_X, PAULI_X], 0.).unwrap_err();
+    multi_rotate_pauli(qureg, &[0, 1, 2, 3], &[PAULI_X, PAULI_X], 0.)
+        .unwrap_err();
+    multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
+}
