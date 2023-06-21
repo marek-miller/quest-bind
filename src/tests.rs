@@ -698,6 +698,7 @@ fn pauli_x_01() {
 
     pauli_x(qureg, 0).unwrap();
     pauli_x(qureg, 1).unwrap();
+
     pauli_x(qureg, 2).unwrap_err();
     pauli_x(qureg, -1).unwrap_err();
 }
@@ -710,6 +711,7 @@ fn pauli_y_01() {
 
     pauli_y(qureg, 0).unwrap();
     pauli_y(qureg, 1).unwrap();
+
     pauli_y(qureg, 2).unwrap_err();
     pauli_y(qureg, -1).unwrap_err();
 }
@@ -722,6 +724,7 @@ fn pauli_z_01() {
 
     pauli_z(qureg, 0).unwrap();
     pauli_z(qureg, 1).unwrap();
+
     pauli_z(qureg, 2).unwrap_err();
     pauli_z(qureg, -1).unwrap_err();
 }

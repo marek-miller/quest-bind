@@ -2005,7 +2005,7 @@ pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -2036,7 +2036,7 @@ pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -2067,7 +2067,7 @@ pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -3168,6 +3168,15 @@ pub fn multi_state_controlled_unitary(
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
     let num_control_qubits = control_qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    for &idx in control_qubits {
+        if idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.reg,
@@ -3213,6 +3222,7 @@ pub fn multi_rotate_z(
     if num_qubits > qureg.num_qubits_represented() {
         return Err(QuestError::ArrayLengthError);
     }
+
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
     })
