@@ -3827,12 +3827,23 @@ pub fn apply_trotter_circuitit(
     })
 }
 
-/// Desc.
+/// Apply a general 2-by-2 matrix, which may be non-unitary.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubit = 0;
+/// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+///
+/// apply_matrix2(qureg, target_qubit, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3843,17 +3854,45 @@ pub fn apply_matrix2(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix2(qureg.reg, target_qubit, u.0);
     })
 }
 
-/// Desc.
+/// Apply a general 4-by-4 matrix, which may be non-unitary.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubit1 = 0;
+/// let target_qubit2 = 1;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 1., 0., 0.],
+///         [1., 0., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [0., 0., 0., 1.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// apply_matrix4(qureg, target_qubit1, target_qubit2, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3865,6 +3904,12 @@ pub fn apply_matrix4(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    if target_qubit1 >= qureg.num_qubits_represented() || target_qubit1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if target_qubit2 >= qureg.num_qubits_represented() || target_qubit2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix4(qureg.reg, target_qubit1, target_qubit2, u.0);
     })

@@ -1361,6 +1361,55 @@ fn multi_rotate_z_01() {
 }
 
 #[test]
+fn apply_matrix2_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+
+    apply_matrix2(qureg, 0, u).unwrap();
+    apply_matrix2(qureg, 1, u).unwrap();
+
+    apply_matrix2(qureg, -1, u).unwrap_err();
+    apply_matrix2(qureg, 2, u).unwrap_err();
+}
+
+#[test]
+fn apply_matrix4_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 1.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    apply_matrix4(qureg, 0, 1, u).unwrap();
+    apply_matrix4(qureg, 1, 0, u).unwrap();
+
+    apply_matrix4(qureg, 0, 0, u).unwrap_err();
+    apply_matrix4(qureg, 1, 1, u).unwrap_err();
+
+    apply_matrix4(qureg, -1, 1, u).unwrap_err();
+    apply_matrix4(qureg, 3, 1, u).unwrap_err();
+    apply_matrix4(qureg, 0, 3, u).unwrap_err();
+    apply_matrix4(qureg, 0, -3, u).unwrap_err();
+
+    apply_matrix4(qureg, 3, -3, u).unwrap_err();
+}
+
+#[test]
 fn apply_qft_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(3, env).unwrap();
