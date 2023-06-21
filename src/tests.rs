@@ -1380,3 +1380,101 @@ fn multi_state_controlled_unitary_01() {
     multi_state_controlled_unitary(qureg, &[4, 0], &[0, 0], 1, u).unwrap_err();
     multi_state_controlled_unitary(qureg, &[4, -1], &[0, 0], 1, u).unwrap_err();
 }
+
+#[test]
+fn apply_matrix2_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+
+    apply_matrix2(qureg, 0, u).unwrap();
+    apply_matrix2(qureg, 1, u).unwrap();
+
+    apply_matrix2(qureg, -1, u).unwrap_err();
+    apply_matrix2(qureg, 2, u).unwrap_err();
+}
+
+#[test]
+fn apply_matrix4_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 1.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    apply_matrix4(qureg, 0, 1, u).unwrap();
+    apply_matrix4(qureg, 1, 0, u).unwrap();
+
+    apply_matrix4(qureg, 0, 0, u).unwrap_err();
+    apply_matrix4(qureg, 1, 1, u).unwrap_err();
+
+    apply_matrix4(qureg, -1, 1, u).unwrap_err();
+    apply_matrix4(qureg, 3, 1, u).unwrap_err();
+    apply_matrix4(qureg, 0, 3, u).unwrap_err();
+    apply_matrix4(qureg, 0, -3, u).unwrap_err();
+
+    apply_matrix4(qureg, 3, -3, u).unwrap_err();
+}
+
+#[test]
+fn apply_qft_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 1]).unwrap();
+    apply_qft(qureg, &[1, 0]).unwrap();
+    apply_qft(qureg, &[1, 2]).unwrap();
+    apply_qft(qureg, &[0, 2]).unwrap();
+}
+
+#[test]
+fn apply_qft_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 0]).unwrap_err();
+    apply_qft(qureg, &[1, 1]).unwrap_err();
+    apply_qft(qureg, &[-1, 0]).unwrap_err();
+    apply_qft(qureg, &[4, 0]).unwrap_err();
+}
+
+#[test]
+fn apply_projector_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 1).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 1).unwrap();
+}
+
+#[test]
+fn apply_projector_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, -1).unwrap_err();
+    apply_projector(qureg, 0, 3).unwrap_err();
+    apply_projector(qureg, 2, 0).unwrap_err();
+    apply_projector(qureg, -1, 0).unwrap_err();
+}
