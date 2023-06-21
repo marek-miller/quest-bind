@@ -1120,3 +1120,340 @@ fn mix_two_qubit_depolarising_02() {
     mix_two_qubit_depolarising(qureg, 0, 1, 0.75).unwrap_err();
     mix_two_qubit_depolarising(qureg, 0, 2, 0.75).unwrap_err();
 }
+
+#[test]
+fn mix_pauli_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap();
+
+    mix_pauli(qureg, 2, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, -2, prob_x, prob_y, prob_z).unwrap_err();
+}
+
+#[test]
+fn mix_pauli_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // this is not a prob distribution
+    let (prob_x, prob_y, prob_z) = (0.5, 0.5, 0.5);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap_err();
+}
+
+#[test]
+fn mix_pauli_03() {
+    let env = &QuestEnv::new();
+    // not a density matrix
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+    mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap_err();
+    mix_pauli(qureg, 1, prob_x, prob_y, prob_z).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_01() {
+    let env = &QuestEnv::new();
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap();
+    mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
+    mix_density_matrix(combine_qureg, 0.99, other_qureg).unwrap();
+
+    mix_density_matrix(combine_qureg, 1.01, other_qureg).unwrap_err();
+    mix_density_matrix(combine_qureg, -1.01, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_02() {
+    let env = &QuestEnv::new();
+    // this is not a density matrix
+    let combine_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_03() {
+    let env = &QuestEnv::new();
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    // this is not a density matrix
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
+
+#[test]
+fn mix_density_matrix_04() {
+    let env = &QuestEnv::new();
+    // dimensions don't match
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(3, env).unwrap();
+
+    init_zero_state(combine_qureg);
+    init_zero_state(other_qureg);
+
+    mix_density_matrix(combine_qureg, 0.0, other_qureg).unwrap_err();
+}
+
+#[test]
+fn calc_purity_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let _ = calc_purity(qureg).unwrap();
+
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let _ = calc_purity(qureg).unwrap_err();
+}
+
+#[test]
+fn calc_fidelity_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap();
+}
+
+#[test]
+fn calc_fidelity_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    let pure_state = &mut Qureg::try_new(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap_err();
+}
+
+#[test]
+fn calc_fidelity_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new_density(2, env).unwrap();
+
+    init_zero_state(qureg);
+    init_zero_state(pure_state);
+
+    let _ = calc_fidelity(qureg, pure_state).unwrap_err();
+}
+
+#[test]
+fn swap_gate_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    swap_gate(qureg, 0, 1).unwrap();
+    swap_gate(qureg, 1, 0).unwrap();
+
+    swap_gate(qureg, 0, 0).unwrap_err();
+    swap_gate(qureg, 1, 1).unwrap_err();
+}
+
+#[test]
+fn swap_gate_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    swap_gate(qureg, 0, 2).unwrap_err();
+    swap_gate(qureg, 2, 0).unwrap_err();
+
+    swap_gate(qureg, -1, 0).unwrap_err();
+    swap_gate(qureg, 0, -1).unwrap_err();
+
+    swap_gate(qureg, 4, 0).unwrap_err();
+    swap_gate(qureg, 0, 4).unwrap_err();
+    swap_gate(qureg, 4, 4).unwrap_err();
+}
+
+#[test]
+fn swap_gate_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // QuEST seg faults here
+    swap_gate(qureg, 4, -4).unwrap_err();
+    swap_gate(qureg, -4, 4).unwrap_err();
+    swap_gate(qureg, -4, -4).unwrap_err();
+}
+
+#[test]
+fn sqrt_swap_gate_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    sqrt_swap_gate(qureg, 0, 1).unwrap();
+    sqrt_swap_gate(qureg, 1, 0).unwrap();
+
+    sqrt_swap_gate(qureg, 0, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 1, 1).unwrap_err();
+}
+
+#[test]
+fn sqrt_swap_gate_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    sqrt_swap_gate(qureg, 0, 2).unwrap_err();
+    sqrt_swap_gate(qureg, 2, 0).unwrap_err();
+
+    sqrt_swap_gate(qureg, -1, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 0, -1).unwrap_err();
+
+    sqrt_swap_gate(qureg, 4, 0).unwrap_err();
+    sqrt_swap_gate(qureg, 0, 4).unwrap_err();
+    sqrt_swap_gate(qureg, 4, 4).unwrap_err();
+}
+
+#[test]
+fn sqrt_swap_gate_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // QuEST seg faults here
+    sqrt_swap_gate(qureg, 4, -4).unwrap_err();
+    sqrt_swap_gate(qureg, -4, 4).unwrap_err();
+    sqrt_swap_gate(qureg, -4, -4).unwrap_err();
+}
+
+#[test]
+fn multi_rotate_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    multi_rotate_z(qureg, &[0, 1], PI).unwrap();
+    multi_rotate_z(qureg, &[0, 1, 2], PI).unwrap_err();
+    multi_rotate_z(qureg, &[0, 2], PI).unwrap_err();
+    multi_rotate_z(qureg, &[0, 0], PI).unwrap_err();
+}
+
+#[test]
+fn apply_matrix2_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+
+    apply_matrix2(qureg, 0, u).unwrap();
+    apply_matrix2(qureg, 1, u).unwrap();
+
+    apply_matrix2(qureg, -1, u).unwrap_err();
+    apply_matrix2(qureg, 2, u).unwrap_err();
+}
+
+#[test]
+fn apply_matrix4_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 1.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    apply_matrix4(qureg, 0, 1, u).unwrap();
+    apply_matrix4(qureg, 1, 0, u).unwrap();
+
+    apply_matrix4(qureg, 0, 0, u).unwrap_err();
+    apply_matrix4(qureg, 1, 1, u).unwrap_err();
+
+    apply_matrix4(qureg, -1, 1, u).unwrap_err();
+    apply_matrix4(qureg, 3, 1, u).unwrap_err();
+    apply_matrix4(qureg, 0, 3, u).unwrap_err();
+    apply_matrix4(qureg, 0, -3, u).unwrap_err();
+
+    apply_matrix4(qureg, 3, -3, u).unwrap_err();
+}
+
+#[test]
+fn apply_qft_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 1]).unwrap();
+    apply_qft(qureg, &[1, 0]).unwrap();
+    apply_qft(qureg, &[1, 2]).unwrap();
+    apply_qft(qureg, &[0, 2]).unwrap();
+}
+
+#[test]
+fn apply_qft_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 0]).unwrap_err();
+    apply_qft(qureg, &[1, 1]).unwrap_err();
+    apply_qft(qureg, &[-1, 0]).unwrap_err();
+    apply_qft(qureg, &[4, 0]).unwrap_err();
+}
+
+#[test]
+fn apply_projector_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 1).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 1).unwrap();
+}
+
+#[test]
+fn apply_projector_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, -1).unwrap_err();
+    apply_projector(qureg, 0, 3).unwrap_err();
+    apply_projector(qureg, 2, 0).unwrap_err();
+    apply_projector(qureg, -1, 0).unwrap_err();
+}

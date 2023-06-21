@@ -2614,7 +2614,7 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 /// Disable QASM recording.
 ///
 /// The recorded QASM will be maintained in qureg and continue to be appended to
-/// if startRecordingQASM is recalled.
+/// if `startRecordingQASM` is recalled.
 ///
 /// # Examples
 ///
@@ -2936,12 +2936,23 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
-/// Desc.
+/// Mixes a density matrix `qureg` to induce general single-qubit Pauli noise.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
+/// mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+///
+/// let mut outcome_prob = -1.;
+/// let _ = measure_with_stats(qureg, 0, &mut outcome_prob).unwrap();
+///
+/// assert!((outcome_prob - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2954,17 +2965,33 @@ pub fn mix_pauli(
     prob_y: Qreal,
     prob_z: Qreal,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if !qureg.is_density_matrix() {
+        return Err(QuestError::NotDensityMatrix);
+    }
     catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.reg, target_qubit, prob_x, prob_y, prob_z);
     })
 }
 
-/// Desc.
+/// Modifies `combine_qureg` with `other_qureg`
+///
+/// to become `(1-prob) combine_qureg +  prob other_qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+///
+/// init_zero_state(combine_qureg);
+/// init_classical_state(other_qureg, 3).unwrap();
+///
+/// mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2980,12 +3007,18 @@ pub fn mix_density_matrix(
     })
 }
 
-/// Desc.
+/// Calculates the purity of a density matrix.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let purity = calc_purity(qureg).unwrap();
+/// assert!((purity - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -2995,12 +3028,21 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
-/// Desc.
+/// Calculates the fidelity of `qureg` (a state-vector or density matrix).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// let pure_state = &mut Qureg::try_new(2, env).unwrap();
+///
+/// init_zero_state(qureg);
+/// init_plus_state(pure_state);
+///
+/// let fidelity = calc_fidelity(qureg, pure_state).unwrap();
+/// assert!((fidelity - 0.25).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3015,12 +3057,22 @@ pub fn calc_fidelity(
     })
 }
 
-/// Desc.
+/// Performs a SWAP gate between `qubit1` and `qubit2`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // init state |10>
+/// init_classical_state(qureg, 1).unwrap();
+/// // swap to |01>
+/// swap_gate(qureg, 0, 1).unwrap();
+///
+/// let outcome = measure(qureg, 0).unwrap();
+/// assert_eq!(outcome, 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3031,17 +3083,31 @@ pub fn swap_gate(
     qubit1: i32,
     qubit2: i32,
 ) -> Result<(), QuestError> {
+    if qubit1 >= qureg.num_qubits_represented() || qubit1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qubit2 >= qureg.num_qubits_represented() || qubit2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.reg, qubit1, qubit2);
     })
 }
 
-/// Desc.
+/// Performs a sqrt SWAP gate between `qubit1` and `qubit2`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// // init state |10>
+/// init_classical_state(qureg, 1).unwrap();
+/// sqrt_swap_gate(qureg, 0, 1).unwrap();
+/// sqrt_swap_gate(qureg, 0, 1).unwrap();
+/// let outcome = measure(qureg, 0).unwrap();
+/// assert_eq!(outcome, 0);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3052,12 +3118,19 @@ pub fn sqrt_swap_gate(
     qb1: i32,
     qb2: i32,
 ) -> Result<(), QuestError> {
+    if qb1 >= qureg.num_qubits_represented() || qb1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if qb2 >= qureg.num_qubits_represented() || qb2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
-        ffi::swapGate(qureg.reg, qb1, qb2);
+        ffi::sqrtSwapGate(qureg.reg, qb1, qb2);
     })
 }
 
-/// Desc.
+/// Apply a general single-qubit unitary with multiple control qubits,
+/// conditioned upon a specific bit sequence.
 ///
 /// # Examples
 ///
@@ -3072,10 +3145,10 @@ pub fn multi_state_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
     control_state: &[i32],
-    num_control_qubits: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.reg,
@@ -3088,12 +3161,25 @@ pub fn multi_state_controlled_unitary(
     })
 }
 
-/// Desc.
+/// Apply a multi-qubit Z rotation, also known as a phase gadget, on a selected
+/// number of qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let angle = PI;
+/// multi_rotate_z(qureg, qubits, angle).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 0).unwrap();
+/// assert!((amp + 0.5).abs() < EPSILON);
+/// let amp = get_imag_amp(qureg, 1).unwrap();
+/// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3102,9 +3188,12 @@ pub fn multi_state_controlled_unitary(
 pub fn multi_rotate_z(
     qureg: &mut Qureg,
     qubits: &[i32],
-    num_qubits: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_qubits = qubits.len() as i32;
+    if num_qubits > qureg.num_qubits_represented() {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
     })
@@ -3738,12 +3827,23 @@ pub fn apply_trotter_circuitit(
     })
 }
 
-/// Desc.
+/// Apply a general 2-by-2 matrix, which may be non-unitary.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubit = 0;
+/// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+///
+/// apply_matrix2(qureg, target_qubit, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3754,17 +3854,45 @@ pub fn apply_matrix2(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix2(qureg.reg, target_qubit, u.0);
     })
 }
 
-/// Desc.
+/// Apply a general 4-by-4 matrix, which may be non-unitary.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubit1 = 0;
+/// let target_qubit2 = 1;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 1., 0., 0.],
+///         [1., 0., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [0., 0., 0., 1.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// apply_matrix4(qureg, target_qubit1, target_qubit2, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3776,6 +3904,12 @@ pub fn apply_matrix4(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    if target_qubit1 >= qureg.num_qubits_represented() || target_qubit1 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
+    if target_qubit2 >= qureg.num_qubits_represented() || target_qubit2 < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix4(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
@@ -4133,12 +4267,17 @@ pub fn apply_param_named_phase_func_overrides(
     })
 }
 
-/// Desc.
+/// Applies the quantum Fourier transform (QFT) to the entirety `qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// apply_full_qft(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4151,12 +4290,17 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
     .expect("apply_full_qft should always succeed");
 }
 
-/// Desc.
+/// Applies the quantum Fourier transform (QFT) to a specific subset of qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// apply_qft(qureg, &[0, 1]).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4165,19 +4309,36 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 pub fn apply_qft(
     qureg: &mut Qureg,
     qubits: &[i32],
-    num_qubits: i32,
 ) -> Result<(), QuestError> {
+    let num_qubits = qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_qubits > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in qubits {
+        if idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyQFT(qureg.reg, qubits.as_ptr(), num_qubits);
     })
 }
 
-/// Desc.
+/// Force the target \p qubit of \p qureg into the given classical `outcome`
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// apply_projector(qureg, 0, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!(amp.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4188,6 +4349,9 @@ pub fn apply_projector(
     qubit: i32,
     outcome: i32,
 ) -> Result<(), QuestError> {
+    if qubit >= qureg.num_qubits_represented() || qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyProjector(qureg.reg, qubit, outcome);
     })
