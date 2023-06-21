@@ -1359,3 +1359,52 @@ fn multi_rotate_z_01() {
     multi_rotate_z(qureg, &[0, 2], PI).unwrap_err();
     multi_rotate_z(qureg, &[0, 0], PI).unwrap_err();
 }
+
+#[test]
+fn apply_qft_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 1]).unwrap();
+    apply_qft(qureg, &[1, 0]).unwrap();
+    apply_qft(qureg, &[1, 2]).unwrap();
+    apply_qft(qureg, &[0, 2]).unwrap();
+}
+
+#[test]
+fn apply_qft_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_qft(qureg, &[0, 0]).unwrap_err();
+    apply_qft(qureg, &[1, 1]).unwrap_err();
+    apply_qft(qureg, &[-1, 0]).unwrap_err();
+    apply_qft(qureg, &[4, 0]).unwrap_err();
+}
+
+#[test]
+fn apply_projector_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 0).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, 1).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 1, 1).unwrap();
+}
+
+#[test]
+fn apply_projector_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    apply_projector(qureg, 0, -1).unwrap_err();
+    apply_projector(qureg, 0, 3).unwrap_err();
+    apply_projector(qureg, 2, 0).unwrap_err();
+    apply_projector(qureg, -1, 0).unwrap_err();
+}

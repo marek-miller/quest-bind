@@ -4222,12 +4222,17 @@ pub fn apply_param_named_phase_func_overrides(
     })
 }
 
-/// Desc.
+/// Applies the quantum Fourier transform (QFT) to the entirety `qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// apply_full_qft(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4240,12 +4245,17 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
     .expect("apply_full_qft should always succeed");
 }
 
-/// Desc.
+/// Applies the quantum Fourier transform (QFT) to a specific subset of qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// apply_qft(qureg, &[0, 1]).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4254,19 +4264,36 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 pub fn apply_qft(
     qureg: &mut Qureg,
     qubits: &[i32],
-    num_qubits: i32,
 ) -> Result<(), QuestError> {
+    let num_qubits = qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_qubits > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in qubits {
+        if idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyQFT(qureg.reg, qubits.as_ptr(), num_qubits);
     })
 }
 
-/// Desc.
+/// Force the target \p qubit of \p qureg into the given classical `outcome`
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_plus_state(qureg);
+///
+/// apply_projector(qureg, 0, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!(amp.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4277,6 +4304,9 @@ pub fn apply_projector(
     qubit: i32,
     outcome: i32,
 ) -> Result<(), QuestError> {
+    if qubit >= qureg.num_qubits_represented() || qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyProjector(qureg.reg, qubit, outcome);
     })
