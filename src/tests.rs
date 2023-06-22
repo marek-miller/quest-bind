@@ -26,7 +26,7 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 
 #[test]
 fn init_complex_matrix_n_02() -> Result<(), QuestError> {
-    let mut m = ComplexMatrixN::try_new(2)?;
+    let mut m = ComplexMatrixN::try_new(1)?;
     init_complex_matrix_n(
         &mut m,
         &[&[1., 2.], &[3., 4.]],
@@ -46,25 +46,73 @@ fn init_complex_matrix_n_02() -> Result<(), QuestError> {
 
 #[test]
 fn init_complex_matrix_n_03() -> Result<(), QuestError> {
-    let mut m = ComplexMatrixN::try_new(3)?;
+    let mut m = ComplexMatrixN::try_new(2)?;
     init_complex_matrix_n(
         &mut m,
-        &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]],
-        &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]],
+        &[
+            &[111., 112., 113., 114.],
+            &[115., 116., 117., 118.],
+            &[119., 120., 121., 122.],
+            &[123., 124., 125., 126.],
+        ],
+        &[
+            &[211., 212., 213., 214.],
+            &[215., 216., 217., 218.],
+            &[219., 220., 221., 222.],
+            &[223., 224., 225., 226.],
+        ],
     )?;
 
     unsafe {
-        let row = &*(*m.0.real).cast::<[&[Qreal; 3]; 3]>();
-        assert_eq!(row, &[&[1., 2., 3.], &[4., 5., 6.], &[7., 8., 9.]]);
+        let rows = &*(*m.0.real).cast::<[&[Qreal; 4]; 4]>();
+        assert_eq!(
+            rows,
+            &[
+                &[111., 112., 113., 114.],
+                &[115., 116., 117., 118.],
+                &[119., 120., 121., 122.],
+                &[123., 124., 125., 126.],
+            ],
+        );
     }
     unsafe {
-        let row = &*(*m.0.imag).cast::<[&[Qreal; 3]; 3]>();
+        let row = &*(*m.0.imag).cast::<[&[Qreal; 4]; 4]>();
         assert_eq!(
             row,
-            &[&[11., 12., 13.], &[14., 15., 16.], &[17., 18., 19.]]
+            &[
+                &[211., 212., 213., 214.],
+                &[215., 216., 217., 218.],
+                &[219., 220., 221., 222.],
+                &[223., 224., 225., 226.],
+            ],
         );
     }
     Ok(())
+}
+
+#[test]
+fn complex_matrix_n_row_slice_02() {
+    let mtr = &mut ComplexMatrixN::try_new(2).unwrap();
+
+    let row = mtr.row_real_as_mut_slice(0);
+    row[0] = 1.;
+    row[1] = 2.;
+    assert_eq!(row.len(), 4);
+
+    let row = mtr.row_real_as_slice(0);
+    assert_eq!(row.len(), 4);
+    assert_eq!(row[0], 1.);
+    assert_eq!(row[1], 2.);
+
+    let row = mtr.row_imag_as_mut_slice(0);
+    row[0] = 3.;
+    row[1] = 4.;
+    assert_eq!(row.len(), 4);
+
+    let row = mtr.row_imag_as_slice(0);
+    assert_eq!(row.len(), 4);
+    assert_eq!(row[0], 3.);
+    assert_eq!(row[1], 4.);
 }
 
 #[test]

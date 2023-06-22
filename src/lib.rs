@@ -128,6 +128,92 @@ impl ComplexMatrixN {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
         })
     }
+
+    /// Get the real part of the `i`th row of the matrix as shared slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[1., 2., 3., 4.],
+    ///         &[5., 6., 7., 8.],
+    ///         &[1., 2., 3., 4.],
+    ///         &[5., 6., 7., 8.],
+    ///     ],
+    ///     &[
+    ///         &[11., 12., 13., 14.],
+    ///         &[15., 16., 17., 18.],
+    ///         &[11., 12., 13., 14.],
+    ///         &[15., 16., 17., 18.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 0;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_real_as_slice(i);
+    /// assert_eq!(row, &[5., 6., 7., 8.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
+    pub fn row_real_as_slice(
+        &self,
+        i: usize,
+    ) -> &[Qreal] {
+        assert!(i < 1 << self.0.numQubits);
+
+        unsafe {
+            std::slice::from_raw_parts(
+                (*(self.0.real)).offset(i as isize),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    pub fn row_real_as_mut_slice(
+        &mut self,
+        i: usize,
+    ) -> &mut [Qreal] {
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                (*(self.0.real)).offset(i as isize),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    pub fn row_imag_as_slice(
+        &self,
+        i: usize,
+    ) -> &[Qreal] {
+        unsafe {
+            std::slice::from_raw_parts(
+                (*(self.0.real)).offset(i as isize),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    pub fn row_imag_as_mut_slice(
+        &mut self,
+        i: usize,
+    ) -> &mut [Qreal] {
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                (*(self.0.real)).offset(i as isize),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
 }
 
 impl Drop for ComplexMatrixN {
@@ -380,7 +466,7 @@ impl Drop for QuestEnv {
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let mtr = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let mtr = &mut ComplexMatrixN::try_new(1).unwrap();
 /// init_complex_matrix_n(
 ///     mtr,
 ///     &[&[1., 2.], &[3., 4.]],
@@ -406,21 +492,21 @@ pub fn init_complex_matrix_n(
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
 ) -> Result<(), QuestError> {
-    let n = m.0.numQubits as usize;
+    let num_elems = 1 << m.0.numQubits;
 
-    if real.len() < n || imag.len() < n {
+    if real.len() < num_elems || imag.len() < num_elems {
         return Err(QuestError::ArrayLengthError);
     }
-    for i in 0..n {
-        if real[i].len() < n || imag[i].len() < n {
+    for i in 0..num_elems {
+        if real[i].len() < num_elems || imag[i].len() < num_elems {
             return Err(QuestError::ArrayLengthError);
         }
     }
 
-    let mut real_ptrs = Vec::with_capacity(n);
-    let mut imag_ptrs = Vec::with_capacity(n);
+    let mut real_ptrs = Vec::with_capacity(num_elems);
+    let mut imag_ptrs = Vec::with_capacity(num_elems);
     catch_quest_exception(|| unsafe {
-        for i in 0..n {
+        for i in 0..num_elems {
             real_ptrs.push(real[i].as_ptr());
             imag_ptrs.push(imag[i].as_ptr());
         }
