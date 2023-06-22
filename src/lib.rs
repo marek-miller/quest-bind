@@ -623,8 +623,8 @@ pub fn init_complex_matrix_n(
 
         ffi::initComplexMatrixN(
             m.0,
-            real_ptrs[0].cast::<*const f64>(),
-            imag_ptrs[0].cast::<*const f64>(),
+            real_ptrs[0].cast::<*const Qreal>(),
+            imag_ptrs[0].cast::<*const Qreal>(),
         );
     })
 }
