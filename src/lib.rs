@@ -1279,16 +1279,8 @@ pub fn controlled_phase_shift(
 /// let qureg = &mut Qureg::try_new(4, env).unwrap();
 ///
 /// let control_qubits = &[0, 1, 3];
-/// let num_control_qubits = control_qubits.len() as i32;
 /// let angle = 0.5;
-///
-/// multi_controlled_phase_shift(
-///     qureg,
-///     control_qubits,
-///     num_control_qubits,
-///     angle,
-/// )
-/// .unwrap();
+/// multi_controlled_phase_shift(qureg, control_qubits, angle).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1297,9 +1289,17 @@ pub fn controlled_phase_shift(
 pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg,
     control_qubits: &[i32],
-    num_control_qubits: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_control_qubits = control_qubits.len() as i32;
+    if num_control_qubits > qureg.num_qubits_represented() {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in control_qubits {
+        if idx >= qureg.num_qubits_represented() || idx < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledPhaseShift(
             qureg.reg,
@@ -3759,12 +3759,39 @@ pub fn multi_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general controlled multi-qubit unitary (including a global phase
+/// factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// let ctrl = 0;
+/// let targs = &[1, 2];
+/// controlled_multi_qubit_unitary(qureg, ctrl, targs, u).unwrap();
+///
+/// // Check if the register is now in the state `|111>`
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3774,9 +3801,17 @@ pub fn controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrl: i32,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    if ctrl < 0 || ctrl >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledMultiQubitUnitary(
             qureg.reg,
@@ -3788,12 +3823,71 @@ pub fn controlled_multi_qubit_unitary(
     })
 }
 
-/// Desc.
+#[test]
+fn multi_controlled_multi_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    let ctrls = &[0, 1];
+    let targs = &[2, 3];
+    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+
+    // Check if the register is now in the state `|1111>`
+    let amp = get_real_amp(qureg, 15).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
+}
+
+/// Apply a general multi-controlled multi-qubit unitary (including a global
+/// phase factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// let ctrls = &[0, 1];
+/// let targs = &[2, 3];
+/// multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+///
+/// // Check if the register is now in the state `|1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3802,11 +3896,22 @@ pub fn controlled_multi_qubit_unitary(
 pub fn multi_controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrls: &[i32],
-    num_ctrls: i32,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    let num_ctrls = ctrls.len() as i32;
+    for &idx in ctrls {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiQubitUnitary(
             qureg.reg,
