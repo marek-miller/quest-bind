@@ -572,6 +572,11 @@ impl Drop for QuestEnv {
 /// Initialises a `ComplexMatrixN` instance to have the passed
 /// `real` and `imag` values.
 ///
+/// This function reimplements the functionality of QuEST's
+/// `initComplexMatrix()`, instead of calling that function directly.  This way,
+/// we avoid transmuting the slice of slices passed as argument into a C array
+/// and simply copy the matrix elements onto the QuEST matrix type.
+///
 /// # Examples
 ///
 /// ```rust
@@ -613,20 +618,15 @@ pub fn init_complex_matrix_n(
         }
     }
 
-    let mut real_ptrs = Vec::with_capacity(num_elems);
-    let mut imag_ptrs = Vec::with_capacity(num_elems);
-    catch_quest_exception(|| unsafe {
-        for i in 0..num_elems {
-            real_ptrs.push(std::ptr::addr_of!(real[i][0]));
-            imag_ptrs.push(std::ptr::addr_of!(imag[i][0]));
+    for i in 0..num_elems {
+        for j in 0..num_elems {
+            unsafe {
+                *(*m.0.real.add(i)).add(j) = real[i][j];
+                *(*m.0.imag.add(i)).add(j) = imag[i][j];
+            }
         }
-
-        ffi::initComplexMatrixN(
-            m.0,
-            real_ptrs[0].cast::<*const Qreal>(),
-            imag_ptrs[0].cast::<*const Qreal>(),
-        );
-    })
+    }
+    Ok(())
 }
 
 /// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
