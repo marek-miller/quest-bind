@@ -3708,12 +3708,36 @@ pub fn multi_controlled_two_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general multi-qubit unitary (including a global phase factor) with
+/// any number of target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// multi_qubit_unitary(qureg, &[0, 1], u).unwrap();
+///
+/// // Check if the register is now in the state `|11>`
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3722,9 +3746,14 @@ pub fn multi_controlled_two_qubit_unitary(
 pub fn multi_qubit_unitary(
     qureg: &mut Qureg,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiQubitUnitary(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })

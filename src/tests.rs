@@ -1436,6 +1436,63 @@ fn multi_state_controlled_unitary_01() {
 }
 
 #[test]
+fn multi_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    multi_qubit_unitary(qureg, &[0, 1], u).unwrap();
+    multi_qubit_unitary(qureg, &[1, 0], u).unwrap();
+
+    multi_qubit_unitary(qureg, &[0, 0], u).unwrap_err();
+    multi_qubit_unitary(qureg, &[1, 1], u).unwrap_err();
+
+    multi_qubit_unitary(qureg, &[0, 2], u).unwrap_err();
+    multi_qubit_unitary(qureg, &[1, -1], u).unwrap_err();
+}
+
+#[test]
+fn multi_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+
+    // This is not a unitary matrix
+    init_complex_matrix_n(
+        u,
+        &[zero_row, zero_row, zero_row, zero_row],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    multi_qubit_unitary(qureg, &[0, 1], u).unwrap_err();
+    multi_qubit_unitary(qureg, &[1, 0], u).unwrap_err();
+
+    multi_qubit_unitary(qureg, &[0, 0], u).unwrap_err();
+    multi_qubit_unitary(qureg, &[1, 1], u).unwrap_err();
+
+    multi_qubit_unitary(qureg, &[0, 2], u).unwrap_err();
+    multi_qubit_unitary(qureg, &[1, -1], u).unwrap_err();
+}
+
+#[test]
 fn apply_matrix2_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();
