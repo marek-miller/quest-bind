@@ -180,6 +180,42 @@ impl ComplexMatrixN {
         }
     }
 
+    /// Get the real part of the `i`th row of the matrix as mutable slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_real_as_mut_slice(i);
+    /// assert_eq!(row, &[123., 124., 125., 126.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
     pub fn row_real_as_mut_slice(
         &mut self,
         i: usize,
@@ -192,6 +228,42 @@ impl ComplexMatrixN {
         }
     }
 
+    /// Get the imaginary part of the `i`th row of the matrix as shared slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_imag_as_slice(i);
+    /// assert_eq!(row, &[223., 224., 225., 226.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
     #[must_use]
     pub fn row_imag_as_slice(
         &self,
@@ -199,19 +271,55 @@ impl ComplexMatrixN {
     ) -> &[Qreal] {
         unsafe {
             std::slice::from_raw_parts(
-                *(self.0.real).add(i),
+                *(self.0.imag).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
     }
 
+    /// Get the imaginary part of the `i`th row of the matrix as mutable slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_imag_as_mut_slice(i);
+    /// assert_eq!(row, &[223., 224., 225., 226.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
     pub fn row_imag_as_mut_slice(
         &mut self,
         i: usize,
     ) -> &mut [Qreal] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                *(self.0.real).add(i),
+                *(self.0.imag).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
