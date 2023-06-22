@@ -55,27 +55,11 @@ fn init_complex_matrix_n_02() {
     )
     .unwrap();
 
-    unsafe {
-        let elem_ptr = (*(m.0.real.add(0))).add(0);
-        assert_eq!(*elem_ptr, 1.);
-        let elem_ptr = (*(m.0.real.add(0))).add(1);
-        assert_eq!(*elem_ptr, 2.);
-        let elem_ptr = (*(m.0.real.add(1))).add(0);
-        assert_eq!(*elem_ptr, 3.);
-        let elem_ptr = (*(m.0.real.add(1))).add(1);
-        assert_eq!(*elem_ptr, 4.);
-    }
+    assert_eq!(m.row_real_as_slice(0), &[1., 2.]);
+    assert_eq!(m.row_real_as_slice(1), &[3., 4.]);
 
-    unsafe {
-        let elem_ptr = (*(m.0.imag.add(0))).add(0);
-        assert_eq!(*elem_ptr, 11.);
-        let elem_ptr = (*(m.0.imag.add(0))).add(1);
-        assert_eq!(*elem_ptr, 12.);
-        let elem_ptr = (*(m.0.imag.add(1))).add(0);
-        assert_eq!(*elem_ptr, 13.);
-        let elem_ptr = (*(m.0.imag.add(1))).add(1);
-        assert_eq!(*elem_ptr, 14.);
-    }
+    assert_eq!(m.row_imag_as_slice(0), &[11., 12.]);
+    assert_eq!(m.row_imag_as_slice(1), &[13., 14.]);
 }
 
 #[test]
@@ -98,47 +82,15 @@ fn init_complex_matrix_n_03() {
     )
     .unwrap();
 
-    unsafe {
-        let elem_ptr = (*(m.0.real.add(0))).add(0);
-        assert_eq!(*elem_ptr, 111.);
-        let elem_ptr = (*(m.0.real.add(0))).add(1);
-        assert_eq!(*elem_ptr, 112.);
-        let elem_ptr = (*(m.0.real.add(0))).add(2);
-        assert_eq!(*elem_ptr, 113.);
-        let elem_ptr = (*(m.0.real.add(0))).add(3);
-        assert_eq!(*elem_ptr, 114.);
-    }
-    unsafe {
-        let elem_ptr = (*(m.0.real.add(1))).add(0);
-        assert_eq!(*elem_ptr, 115.);
-        let elem_ptr = (*(m.0.real.add(1))).add(1);
-        assert_eq!(*elem_ptr, 116.);
-        let elem_ptr = (*(m.0.real.add(1))).add(2);
-        assert_eq!(*elem_ptr, 117.);
-        let elem_ptr = (*(m.0.real.add(1))).add(3);
-        assert_eq!(*elem_ptr, 118.);
-    }
+    assert_eq!(m.row_real_as_slice(0), &[111., 112., 113., 114.]);
+    assert_eq!(m.row_real_as_slice(1), &[115., 116., 117., 118.]);
+    assert_eq!(m.row_real_as_slice(2), &[119., 120., 121., 122.]);
+    assert_eq!(m.row_real_as_slice(3), &[123., 124., 125., 126.]);
 
-    unsafe {
-        let elem_ptr = (*(m.0.imag.add(0))).add(0);
-        assert_eq!(*elem_ptr, 211.);
-        let elem_ptr = (*(m.0.imag.add(0))).add(1);
-        assert_eq!(*elem_ptr, 212.);
-        let elem_ptr = (*(m.0.imag.add(0))).add(2);
-        assert_eq!(*elem_ptr, 213.);
-        let elem_ptr = (*(m.0.imag.add(0))).add(3);
-        assert_eq!(*elem_ptr, 214.);
-    }
-    unsafe {
-        let elem_ptr = (*(m.0.imag.add(1))).add(0);
-        assert_eq!(*elem_ptr, 215.);
-        let elem_ptr = (*(m.0.imag.add(1))).add(1);
-        assert_eq!(*elem_ptr, 216.);
-        let elem_ptr = (*(m.0.imag.add(1))).add(2);
-        assert_eq!(*elem_ptr, 217.);
-        let elem_ptr = (*(m.0.imag.add(1))).add(3);
-        assert_eq!(*elem_ptr, 218.);
-    }
+    assert_eq!(m.row_imag_as_slice(0), &[211., 212., 213., 214.]);
+    assert_eq!(m.row_imag_as_slice(1), &[215., 216., 217., 218.]);
+    assert_eq!(m.row_imag_as_slice(2), &[219., 220., 221., 222.]);
+    assert_eq!(m.row_imag_as_slice(3), &[223., 224., 225., 226.]);
 }
 
 #[test]
