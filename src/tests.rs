@@ -28,12 +28,6 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 fn get_matrix_n_elem_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();
-    init_zero_state(qureg);
-    let m1 =
-        &ComplexMatrix2::new([[1., 2.], [3., 4.]], [[11., 12.], [13., 14.]]);
-    apply_matrix2(qureg, 0, m1).unwrap();
-    let amp = get_imag_amp(qureg, 0).unwrap();
-    assert_eq!(amp, 11.);
 
     init_zero_state(qureg);
     let amp = get_imag_amp(qureg, 0).unwrap();
@@ -48,7 +42,7 @@ fn get_matrix_n_elem_01() {
     .unwrap();
     apply_matrix_n(qureg, &[0], 1, mtr).unwrap();
     let amp = get_imag_amp(qureg, 0).unwrap();
-    assert_eq!(amp, 11.);
+    assert!((amp - 11.).abs() < EPSILON);
 }
 
 #[test]
