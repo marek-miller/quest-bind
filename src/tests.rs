@@ -40,7 +40,7 @@ fn get_matrix_n_elem_01() {
         &[&[11., 12.], &[13., 14.]],
     )
     .unwrap();
-    apply_matrix_n(qureg, &[0], 1, mtr).unwrap();
+    apply_matrix_n(qureg, &[0], mtr).unwrap();
     let amp = get_imag_amp(qureg, 0).unwrap();
     assert!((amp - 11.).abs() < EPSILON);
 }
@@ -1539,6 +1539,45 @@ fn apply_matrix4_01() {
     apply_matrix4(qureg, 0, -3, u).unwrap_err();
 
     apply_matrix4(qureg, 3, -3, u).unwrap_err();
+}
+
+#[test]
+fn apply_matrix_n_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let mtr = &mut ComplexMatrixN::try_new(3).unwrap();
+    let empty = &[0., 0., 0., 0., 0., 0., 0., 0.];
+    init_complex_matrix_n(
+        mtr,
+        &[
+            &[0., 0., 0., 0., 0., 0., 0., 1.],
+            &[0., 1., 0., 0., 0., 0., 0., 0.],
+            &[0., 0., 1., 0., 0., 0., 0., 0.],
+            &[0., 0., 0., 1., 0., 0., 0., 0.],
+            &[0., 0., 0., 0., 1., 0., 0., 0.],
+            &[0., 0., 0., 0., 0., 1., 0., 0.],
+            &[0., 0., 0., 0., 0., 0., 1., 0.],
+            &[1., 0., 0., 0., 0., 0., 0., 0.],
+        ],
+        &[empty, empty, empty, empty, empty, empty, empty, empty],
+    )
+    .unwrap();
+
+    apply_matrix_n(qureg, &[0, 1, 2], mtr).unwrap();
+    apply_matrix_n(qureg, &[1, 0, 2], mtr).unwrap();
+    apply_matrix_n(qureg, &[2, 1, 0], mtr).unwrap();
+
+    apply_matrix_n(qureg, &[0, 1, 0], mtr).unwrap_err();
+    apply_matrix_n(qureg, &[0, 1, 1], mtr).unwrap_err();
+    apply_matrix_n(qureg, &[2, 3, 1], mtr).unwrap_err();
+
+    apply_matrix_n(qureg, &[-2, 0, 1], mtr).unwrap_err();
+    apply_matrix_n(qureg, &[1, 0, 4], mtr).unwrap_err();
+
+    apply_matrix_n(qureg, &[1, 0], mtr).unwrap_err();
+    apply_matrix_n(qureg, &[1, 0, 2, 3], mtr).unwrap_err();
 }
 
 #[test]

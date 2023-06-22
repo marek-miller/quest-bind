@@ -572,10 +572,10 @@ impl Drop for QuestEnv {
 /// Initialises a `ComplexMatrixN` instance to have the passed
 /// `real` and `imag` values.
 ///
-/// This function reimplements the functionality of QuEST's
+/// This function reimplements the functionality of `QuEST`'s
 /// `initComplexMatrix()`, instead of calling that function directly.  This way,
 /// we avoid transmuting the slice of slices passed as argument into a C array
-/// and simply copy the matrix elements onto the QuEST matrix type.
+/// and simply copy the matrix elements onto the `QuEST` matrix type.
 ///
 /// # Examples
 ///
@@ -4199,12 +4199,41 @@ pub fn apply_matrix4(
     })
 }
 
-/// Desc.
+/// Apply a general N-by-N matrix, which may be non-unitary, on any number of
+/// target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let mtr = &mut ComplexMatrixN::try_new(3).unwrap();
+/// let empty = &[0., 0., 0., 0., 0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     mtr,
+///     &[
+///         &[0., 0., 0., 0., 0., 0., 0., 1.],
+///         &[0., 1., 0., 0., 0., 0., 0., 0.],
+///         &[0., 0., 1., 0., 0., 0., 0., 0.],
+///         &[0., 0., 0., 1., 0., 0., 0., 0.],
+///         &[0., 0., 0., 0., 1., 0., 0., 0.],
+///         &[0., 0., 0., 0., 0., 1., 0., 0.],
+///         &[0., 0., 0., 0., 0., 0., 1., 0.],
+///         &[1., 0., 0., 0., 0., 0., 0., 0.],
+///     ],
+///     &[empty, empty, empty, empty, empty, empty, empty, empty],
+/// )
+/// .unwrap();
+///
+/// let targets = &[0, 1, 2];
+/// apply_matrix_n(qureg, targets, mtr).unwrap();
+///
+/// // Check if the state is now `|111>`
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4213,9 +4242,18 @@ pub fn apply_matrix4(
 pub fn apply_matrix_n(
     qureg: &mut Qureg,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_targs = targs.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_targs > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in targs {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrixN(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })
