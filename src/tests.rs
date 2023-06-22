@@ -56,24 +56,24 @@ fn init_complex_matrix_n_02() {
     .unwrap();
 
     unsafe {
-        let elem_ptr = (*m.0.real.add(0)).add(0);
+        let elem_ptr = (*(m.0.real.add(0))).add(0);
         assert_eq!(*elem_ptr, 1.);
-        let elem_ptr = (*m.0.real.add(0)).add(1);
+        let elem_ptr = (*(m.0.real.add(0))).add(1);
         assert_eq!(*elem_ptr, 2.);
-        let elem_ptr = (*m.0.real.add(1)).add(0);
+        let elem_ptr = (*(m.0.real.add(1))).add(0);
         assert_eq!(*elem_ptr, 3.);
-        let elem_ptr = (*m.0.real.add(1)).add(1);
+        let elem_ptr = (*(m.0.real.add(1))).add(1);
         assert_eq!(*elem_ptr, 4.);
     }
 
     unsafe {
-        let elem_ptr = (*m.0.imag.add(0)).add(0);
+        let elem_ptr = (*(m.0.imag.add(0))).add(0);
         assert_eq!(*elem_ptr, 11.);
-        let elem_ptr = (*m.0.imag.add(0)).add(1);
+        let elem_ptr = (*(m.0.imag.add(0))).add(1);
         assert_eq!(*elem_ptr, 12.);
-        let elem_ptr = (*m.0.imag.add(1)).add(0);
+        let elem_ptr = (*(m.0.imag.add(1))).add(0);
         assert_eq!(*elem_ptr, 13.);
-        let elem_ptr = (*m.0.imag.add(1)).add(1);
+        let elem_ptr = (*(m.0.imag.add(1))).add(1);
         assert_eq!(*elem_ptr, 14.);
     }
 }
@@ -99,46 +99,44 @@ fn init_complex_matrix_n_03() {
     .unwrap();
 
     unsafe {
-        let elem_ptr = (*m.0.real.add(0)).add(0);
+        let elem_ptr = (*(m.0.real.add(0))).add(0);
         assert_eq!(*elem_ptr, 111.);
-        let elem_ptr = (*m.0.real.add(0)).add(1);
+        let elem_ptr = (*(m.0.real.add(0))).add(1);
         assert_eq!(*elem_ptr, 112.);
-        let elem_ptr = (*m.0.real.add(0)).add(2);
+        let elem_ptr = (*(m.0.real.add(0))).add(2);
         assert_eq!(*elem_ptr, 113.);
-        let elem_ptr = (*m.0.real.add(0)).add(3);
+        let elem_ptr = (*(m.0.real.add(0))).add(3);
         assert_eq!(*elem_ptr, 114.);
     }
-
     unsafe {
-        let elem_ptr = (*m.0.real.add(1)).add(0);
+        let elem_ptr = (*(m.0.real.add(1))).add(0);
         assert_eq!(*elem_ptr, 115.);
-        let elem_ptr = (*m.0.real.add(1)).add(1);
+        let elem_ptr = (*(m.0.real.add(1))).add(1);
         assert_eq!(*elem_ptr, 116.);
-        let elem_ptr = (*m.0.real.add(1)).add(2);
+        let elem_ptr = (*(m.0.real.add(1))).add(2);
         assert_eq!(*elem_ptr, 117.);
-        let elem_ptr = (*m.0.real.add(1)).add(3);
+        let elem_ptr = (*(m.0.real.add(1))).add(3);
         assert_eq!(*elem_ptr, 118.);
     }
 
     unsafe {
-        let elem_ptr = (*m.0.imag.add(0)).add(0);
+        let elem_ptr = (*(m.0.imag.add(0))).add(0);
         assert_eq!(*elem_ptr, 211.);
-        let elem_ptr = (*m.0.imag.add(0)).add(1);
+        let elem_ptr = (*(m.0.imag.add(0))).add(1);
         assert_eq!(*elem_ptr, 212.);
-        let elem_ptr = (*m.0.imag.add(0)).add(2);
+        let elem_ptr = (*(m.0.imag.add(0))).add(2);
         assert_eq!(*elem_ptr, 213.);
-        let elem_ptr = (*m.0.imag.add(0)).add(3);
+        let elem_ptr = (*(m.0.imag.add(0))).add(3);
         assert_eq!(*elem_ptr, 214.);
     }
-
     unsafe {
-        let elem_ptr = (*m.0.imag.add(1)).add(0);
+        let elem_ptr = (*(m.0.imag.add(1))).add(0);
         assert_eq!(*elem_ptr, 215.);
-        let elem_ptr = (*m.0.imag.add(1)).add(1);
+        let elem_ptr = (*(m.0.imag.add(1))).add(1);
         assert_eq!(*elem_ptr, 216.);
-        let elem_ptr = (*m.0.imag.add(1)).add(2);
+        let elem_ptr = (*(m.0.imag.add(1))).add(2);
         assert_eq!(*elem_ptr, 217.);
-        let elem_ptr = (*m.0.imag.add(1)).add(3);
+        let elem_ptr = (*(m.0.imag.add(1))).add(3);
         assert_eq!(*elem_ptr, 218.);
     }
 }
