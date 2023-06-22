@@ -140,31 +140,32 @@ impl ComplexMatrixN {
     /// init_complex_matrix_n(
     ///     mtr,
     ///     &[
-    ///         &[1., 2., 3., 4.],
-    ///         &[5., 6., 7., 8.],
-    ///         &[1., 2., 3., 4.],
-    ///         &[5., 6., 7., 8.],
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
     ///     ],
     ///     &[
-    ///         &[11., 12., 13., 14.],
-    ///         &[15., 16., 17., 18.],
-    ///         &[11., 12., 13., 14.],
-    ///         &[15., 16., 17., 18.],
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
     ///     ],
     /// )
     /// .unwrap();
     ///
-    /// let i = 0;
+    /// let i = 3;
     /// assert!(i < 1 << num_qubits);
     ///
     /// let row = mtr.row_real_as_slice(i);
-    /// assert_eq!(row, &[5., 6., 7., 8.]);
+    /// assert_eq!(row, &[123., 124., 125., 126.]);
     /// ```
     /// # Panics
     ///
     /// This function will panic if `i>= 2.pow(1<< num_qubits),
     /// where `num_qubits` is the number of qubits the matrix was initialized
     /// with.
+    #[must_use]
     pub fn row_real_as_slice(
         &self,
         i: usize,
@@ -173,7 +174,7 @@ impl ComplexMatrixN {
 
         unsafe {
             std::slice::from_raw_parts(
-                (*(self.0.real)).offset(i as isize),
+                *(self.0.real).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
@@ -185,19 +186,20 @@ impl ComplexMatrixN {
     ) -> &mut [Qreal] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                (*(self.0.real)).offset(i as isize),
+                *(self.0.real).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
     }
 
+    #[must_use]
     pub fn row_imag_as_slice(
         &self,
         i: usize,
     ) -> &[Qreal] {
         unsafe {
             std::slice::from_raw_parts(
-                (*(self.0.real)).offset(i as isize),
+                *(self.0.real).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
@@ -209,7 +211,7 @@ impl ComplexMatrixN {
     ) -> &mut [Qreal] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                (*(self.0.real)).offset(i as isize),
+                *(self.0.real).add(i),
                 (1 << self.0.numQubits) as usize,
             )
         }
@@ -507,11 +509,15 @@ pub fn init_complex_matrix_n(
     let mut imag_ptrs = Vec::with_capacity(num_elems);
     catch_quest_exception(|| unsafe {
         for i in 0..num_elems {
-            real_ptrs.push(real[i].as_ptr());
-            imag_ptrs.push(imag[i].as_ptr());
+            real_ptrs.push(std::ptr::addr_of!(real[i][0]));
+            imag_ptrs.push(std::ptr::addr_of!(imag[i][0]));
         }
 
-        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr());
+        ffi::initComplexMatrixN(
+            m.0,
+            real_ptrs[0].cast::<*const f64>(),
+            imag_ptrs[0].cast::<*const f64>(),
+        );
     })
 }
 
