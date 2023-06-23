@@ -3,11 +3,10 @@
 [![Test](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml)
 [![Docs](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml)
 
-A safe wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0. As
-thin as possible: the API stays nearly identical to the original.
+A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0.
 
-QuEST (Quantum Exact Simulation Toolkit) is a no-fluff, bent-on-speed quantum
-circuit simulator. It is distributed under MIT License.
+Quantum Exact Simulation Toolkit (QuEST) is a no-fluff, bent-on-speed quantum
+circuit simulator [[1]](https://doi.org/10.1038/s41598-019-47174-9). It is distributed under MIT License.
 
 ## How to use it
 
@@ -18,7 +17,7 @@ cargo new testme
 cd testme/
 ```
 
-Add `quest-bind` to your project's dependencies
+Add `quest-bind` to your project's dependencies:
 
 ```sh
 cargo add quest_bind --git https://github.com/marek-miller/quest-bind.git
@@ -56,21 +55,21 @@ fn main() -> Result<(), QuestError> {
 }
 ```
 
-You can read the available documentation locally (refer to
+You can read the available documentation locally or refer to
 [QuEST headers](https://github.com/QuEST-Kit/QuEST/blob/v3.5.0/QuEST/include/QuEST.h)
-for the full description of the C API):
+for the full description of the C API:
 
 ```sh
 cargo doc --open
 ```
 
-Lastly, compile the source code and run:
+Lastly, compile and run the program:
 
 ```sh
 cargo run
 ```
 
-You should be able to see something like this:
+You should be able to see something like:
 
 ```text
 EXECUTION ENVIRONMENT:
@@ -92,8 +91,8 @@ They match!
 
 ## Distributed and GPU-accelerated mode
 
-QuEST support for MPI and GPU accelerated computation is enabled by setting
-appropriate feature flags. To use QuEST's MPI mode, enable `mpi` feature for
+QuEST support for MPI and GPU-accelerated computation ca be enabled in `quest-bind` by setting
+appropriate feature flags. To enable QuEST's MPI mode, set the `mpi` feature for
 `quest_bind`. Simply edit `Cargo.toml` of your binary crate:
 
 ```toml
@@ -115,7 +114,7 @@ Number of ranks is 1
 ...
 ```
 
-The feature `"gpu"` enables the GPU accelerated mode. These features are
+The feature `"gpu"` enables the GPU-accelerated mode. These two features are
 mutually exclusive and in case both flags are set, the feature `"mpi"` takes
 precedence.
 
@@ -135,10 +134,10 @@ Then run:
 cargo test
 ```
 
-Please note that `quest-bind` will not run `QuEST`'s test suite, not will it
-check `QuEST`'s correctness. These tests are intended to check if the C API is
-invoked correctly, and Rust's types are passed safely back and forth across FFI
-boundaries.
+Note that `quest-bind  will not run `QuEST`'s test suite, nor will it
+check `QuEST`'s correctness. The tests here are intended to check if the C API is
+invoked correctly, and if Rust's types are passed safely back and forth across the
+FFI boundary.
 
 If you want to run the test suite in the single-precision floating point mode,
 make sure the build script recompiles `libQuEST.so` with the right type
@@ -149,16 +148,16 @@ cargo clean
 cargo test --features=f32
 ```
 
-By defualt, `quest-bind` uses double precision floating-point types: `f64`. See
+By defualt, `quest-bind` uses Rust's double precision floating-point type: `f64`. See
 [Numercal types](#numerical-types) section below.
 
-You can also check available examples by running, e.g.:
+You can also try the available examples by running, e.g.:
 
 ```sh
  cargo run --release --example grovers_search
 ```
 
-To see all available examples, try:
+To see the list of all available examples, try:
 
 ```sh
 cargo run --example
@@ -169,8 +168,9 @@ cargo run --example
 In the typical case when it's the numerical computation that dominates the CPU
 usage, and not API calls, there should be no discernible difference in
 performance between programs calling QuEST routines directly and analogous
-applications using `quest_bind`. Remember, however, to enable compiler
-optimizations by running your code using the `--release` profile:
+applications using `quest_bind`. Remember, however, to enable
+optimizations for both `quest-bind` and `QuEST` by compiling your code 
+using the "release" profile:
 
 ```sh
 cargo run --release
@@ -191,8 +191,8 @@ retains access to all parallel computation resources available in the system.
 
 Current implementation returns inside `Result<_, QuestError>` only the first
 exception caught. All subsequent messages reported by QuEST, together with that
-first one, are nevertheless logged as errors. To review them, add a logger as a
-dependency to your crate, e.g.:
+first one, are nevertheless logged as errors. To be able to see them, add a logger
+as a dependency to your crate, e.g.:
 
 ```sh
 cargo add env_logger
@@ -203,9 +203,7 @@ Then enable logging in your application:
 ```rust
 fn main()  {
     env_logger::init();
-
     // (...)
-
 }
 ```
 
@@ -219,11 +217,11 @@ See [`log` crate](https://docs.rs/log/latest/log/) for more on logging in Rust.
 
 The type `QuestError` doesn't contain (possibly malformed) data returned by the
 API call on failure. Only successful calls can reach the library user. This is
-intentional, following guidelines in QuEST documentation. Upon failure...
+intentional, following guidelines from the QuEST documentation:
 
-> Users must ensure that the triggered API call does not continue (e.g. the
+> [*Upon failure*] Users must ensure that the triggered API call does not continue (e.g. the
 > user exits or throws an exception), else QuEST will continue with the valid
-> [sic!] input and likely trigger a seg-fault.
+> [*sic!*] input and likely trigger a seg-fault.
 
 See
 [Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
@@ -231,7 +229,7 @@ for more information.
 
 ## Numerical types
 
-For now, numerical types used by `quest-bind` are chosen to match exactly the C
+For now, numerical types used by `quest-bind` match exactly the C
 types that QuEST uses on `x86_64`. This is a safe, but not very portable
 strategy. We pass Rust types directly to QuEST without casting, assuming the
 following type definitions:
@@ -245,13 +243,10 @@ pub type c_ulong = u64;
 ```
 
 This should work for many different architectures. If your system uses slightly
-different numerical types, `quest-bind` simply won't compile and there isn't
-much you can do besides manually altering the source code. In the future,
-`quest-bind` will use numerical abstractions from
-[`num_traits`](https://docs.rs/num-traits/latest/num_traits/) for greater
-portability.
+different numerical types, `quest-bind` simply won't compile and there is not
+much you can do besides manually altering the source code.
 
-To check what C types are defined by your Rust installation, see local
+To check what C types are defined by your Rust installation, see the local
 documentation for the module `std::ffi` in Rust's Standard Library:
 
 ```sh
@@ -265,6 +260,7 @@ rustup doc
 - Design test for MPI and GPU modes
 - Add non-blocking API: `*_nonblk()` functions.
 - Publish to `crates.io`
+- Generic nummerical traits from `num_traits`
 
 ## Releases
 
