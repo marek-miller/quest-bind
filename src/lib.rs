@@ -4033,12 +4033,39 @@ pub fn mix_two_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Apply a general N-qubit Kraus map to a density matrix, as specified by at
+/// most `(2N)^2` Kraus operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_zero_state(qureg);
+/// let m = &mut ComplexMatrixN::try_new(2).unwrap();
+/// init_complex_matrix_n(
+///     m,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///     ],
+/// )
+/// .unwrap();
+/// let targets = &[1, 2];
+/// mix_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
+///
+/// // Check is the register is now in the state |011>
+/// let amp = get_density_amp(qureg, 6, 6).unwrap();
+/// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4047,10 +4074,19 @@ pub fn mix_two_qubit_kraus_map(
 pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
-    num_targets: i32,
-    ops: &[ComplexMatrixN],
-    num_ops: i32,
+    ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    let num_targets = targets.len() as i32;
+    for &target in targets {
+        if target < 0 || target >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    let num_ops = ops.len() as i32;
+    if !(1..=1 << (2 * num_qubits_rep)).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixMultiQubitKrausMap(
