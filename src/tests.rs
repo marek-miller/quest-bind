@@ -1686,6 +1686,132 @@ fn apply_matrix2_01() {
 }
 
 #[test]
+fn mix_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+
+    mix_kraus_map(qureg, 0, &[m]).unwrap();
+    mix_kraus_map(qureg, 1, &[m]).unwrap();
+
+    mix_kraus_map(qureg, -1, &[m]).unwrap_err();
+    mix_kraus_map(qureg, 2, &[m]).unwrap_err();
+}
+
+#[test]
+fn mix_kraus_map_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // This is not a CPTP map
+    let m1 = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+    let m2 = &ComplexMatrix2::new([[0., 1.], [1., 1.]], [[0., 0.], [0., 0.]]);
+
+    mix_kraus_map(qureg, 0, &[m1, m2]).unwrap_err();
+    mix_kraus_map(qureg, 1, &[m1, m2]).unwrap_err();
+}
+
+#[test]
+fn mix_kraus_map_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let m1 = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+
+    mix_kraus_map(qureg, 0, &[]).unwrap_err();
+    mix_kraus_map(qureg, 0, &[m1, m1]).unwrap_err();
+    mix_kraus_map(qureg, 0, &[m1, m1, m1]).unwrap_err();
+    mix_kraus_map(qureg, 0, &[m1, m1, m1, m1]).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    mix_two_qubit_kraus_map(qureg, 0, 1, &[m]).unwrap();
+    mix_two_qubit_kraus_map(qureg, 1, 2, &[m]).unwrap();
+    mix_two_qubit_kraus_map(qureg, 0, 2, &[m]).unwrap();
+
+    mix_two_qubit_kraus_map(qureg, 0, 0, &[m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 1, 1, &[m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 2, 2, &[m]).unwrap_err();
+
+    mix_two_qubit_kraus_map(qureg, -1, 0, &[m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 0, 4, &[m]).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_kraus_map_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+
+    // This is not a TP map
+    let m = &ComplexMatrix4::new(
+        [
+            [99., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    mix_two_qubit_kraus_map(qureg, 0, 1, &[m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 1, 2, &[m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 0, 2, &[m]).unwrap_err();
+}
+
+#[test]
+fn mix_two_qubit_kraus_map_03() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    mix_two_qubit_kraus_map(qureg, 0, 1, &[]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 1, 2, &[m, m]).unwrap_err();
+    mix_two_qubit_kraus_map(qureg, 0, 2, &[m, m, m]).unwrap_err();
+}
+
+#[test]
 fn apply_matrix4_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();
