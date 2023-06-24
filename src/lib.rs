@@ -128,6 +128,202 @@ impl ComplexMatrixN {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
         })
     }
+
+    /// Get the real part of the `i`th row of the matrix as shared slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_real_as_slice(i);
+    /// assert_eq!(row, &[123., 124., 125., 126.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
+    #[must_use]
+    pub fn row_real_as_slice(
+        &self,
+        i: usize,
+    ) -> &[Qreal] {
+        assert!(i < 1 << self.0.numQubits);
+
+        unsafe {
+            std::slice::from_raw_parts(
+                *(self.0.real).add(i),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    /// Get the real part of the `i`th row of the matrix as mutable slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_real_as_mut_slice(i);
+    /// assert_eq!(row, &[123., 124., 125., 126.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
+    pub fn row_real_as_mut_slice(
+        &mut self,
+        i: usize,
+    ) -> &mut [Qreal] {
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                *(self.0.real).add(i),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    /// Get the imaginary part of the `i`th row of the matrix as shared slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_imag_as_slice(i);
+    /// assert_eq!(row, &[223., 224., 225., 226.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
+    #[must_use]
+    pub fn row_imag_as_slice(
+        &self,
+        i: usize,
+    ) -> &[Qreal] {
+        unsafe {
+            std::slice::from_raw_parts(
+                *(self.0.imag).add(i),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
+
+    /// Get the imaginary part of the `i`th row of the matrix as mutable slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use quest_bind::*;
+    /// let num_qubits = 2;
+    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
+    /// init_complex_matrix_n(
+    ///     mtr,
+    ///     &[
+    ///         &[111., 112., 113., 114.],
+    ///         &[115., 116., 117., 118.],
+    ///         &[119., 120., 121., 122.],
+    ///         &[123., 124., 125., 126.],
+    ///     ],
+    ///     &[
+    ///         &[211., 212., 213., 214.],
+    ///         &[215., 216., 217., 218.],
+    ///         &[219., 220., 221., 222.],
+    ///         &[223., 224., 225., 226.],
+    ///     ],
+    /// )
+    /// .unwrap();
+    ///
+    /// let i = 3;
+    /// assert!(i < 1 << num_qubits);
+    ///
+    /// let row = mtr.row_imag_as_mut_slice(i);
+    /// assert_eq!(row, &[223., 224., 225., 226.]);
+    /// ```
+    /// # Panics
+    ///
+    /// This function will panic if `i>= 2.pow(1<< num_qubits),
+    /// where `num_qubits` is the number of qubits the matrix was initialized
+    /// with.
+    pub fn row_imag_as_mut_slice(
+        &mut self,
+        i: usize,
+    ) -> &mut [Qreal] {
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                *(self.0.imag).add(i),
+                (1 << self.0.numQubits) as usize,
+            )
+        }
+    }
 }
 
 impl Drop for ComplexMatrixN {
@@ -376,11 +572,16 @@ impl Drop for QuestEnv {
 /// Initialises a `ComplexMatrixN` instance to have the passed
 /// `real` and `imag` values.
 ///
+/// This function reimplements the functionality of `QuEST`'s
+/// `initComplexMatrix()`, instead of calling that function directly.  This way,
+/// we avoid transmuting the slice of slices passed as argument into a C array
+/// and simply copy the matrix elements onto the `QuEST` matrix type.
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let mtr = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let mtr = &mut ComplexMatrixN::try_new(1).unwrap();
 /// init_complex_matrix_n(
 ///     mtr,
 ///     &[&[1., 2.], &[3., 4.]],
@@ -406,27 +607,26 @@ pub fn init_complex_matrix_n(
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
 ) -> Result<(), QuestError> {
-    let n = m.0.numQubits as usize;
+    let num_elems = 1 << m.0.numQubits;
 
-    if real.len() < n || imag.len() < n {
+    if real.len() < num_elems || imag.len() < num_elems {
         return Err(QuestError::ArrayLengthError);
     }
-    for i in 0..n {
-        if real[i].len() < n || imag[i].len() < n {
+    for i in 0..num_elems {
+        if real[i].len() < num_elems || imag[i].len() < num_elems {
             return Err(QuestError::ArrayLengthError);
         }
     }
 
-    let mut real_ptrs = Vec::with_capacity(n);
-    let mut imag_ptrs = Vec::with_capacity(n);
-    catch_quest_exception(|| unsafe {
-        for i in 0..n {
-            real_ptrs.push(real[i].as_ptr());
-            imag_ptrs.push(imag[i].as_ptr());
+    for i in 0..num_elems {
+        for j in 0..num_elems {
+            unsafe {
+                *(*m.0.real.add(i)).add(j) = real[i][j];
+                *(*m.0.imag.add(i)).add(j) = imag[i][j];
+            }
         }
-
-        ffi::initComplexMatrixN(m.0, real_ptrs.as_ptr(), imag_ptrs.as_ptr());
-    })
+    }
+    Ok(())
 }
 
 /// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
@@ -1079,16 +1279,8 @@ pub fn controlled_phase_shift(
 /// let qureg = &mut Qureg::try_new(4, env).unwrap();
 ///
 /// let control_qubits = &[0, 1, 3];
-/// let num_control_qubits = control_qubits.len() as i32;
 /// let angle = 0.5;
-///
-/// multi_controlled_phase_shift(
-///     qureg,
-///     control_qubits,
-///     num_control_qubits,
-///     angle,
-/// )
-/// .unwrap();
+/// multi_controlled_phase_shift(qureg, control_qubits, angle).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1097,9 +1289,17 @@ pub fn controlled_phase_shift(
 pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg,
     control_qubits: &[i32],
-    num_control_qubits: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_control_qubits = control_qubits.len() as i32;
+    if num_control_qubits > qureg.num_qubits_represented() {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in control_qubits {
+        if idx >= qureg.num_qubits_represented() || idx < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledPhaseShift(
             qureg.reg,
@@ -2005,7 +2205,7 @@ pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -2036,7 +2236,7 @@ pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -2067,7 +2267,7 @@ pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -3136,6 +3336,25 @@ pub fn sqrt_swap_gate(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let control_qubits = &[1, 2];
+/// let control_state = &[0, 0];
+/// let target_qubit = 0;
+/// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+/// multi_state_controlled_unitary(
+///     qureg,
+///     control_qubits,
+///     control_state,
+///     target_qubit,
+///     u,
+/// )
+/// .unwrap();
+///
+/// let amp = get_real_amp(qureg, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3149,6 +3368,15 @@ pub fn multi_state_controlled_unitary(
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
     let num_control_qubits = control_qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    for &idx in control_qubits {
+        if idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.reg,
@@ -3194,17 +3422,32 @@ pub fn multi_rotate_z(
     if num_qubits > qureg.num_qubits_represented() {
         return Err(QuestError::ArrayLengthError);
     }
+
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
     })
 }
 
-/// Desc.
+/// Apply a multi-qubit multi-Pauli rotation, also known as a Pauli gadget.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_X;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let target_qubits = &[1, 2];
+/// let target_paulis = &[PAULI_X, PAULI_X];
+/// let angle = PI;
+///
+/// multi_rotate_pauli(qureg, target_qubits, target_paulis, angle).unwrap();
+///
+/// let amp = get_imag_amp(qureg, 6).unwrap();
+/// assert!((amp + 1.).abs() < 2. * EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3214,9 +3457,21 @@ pub fn multi_rotate_pauli(
     qureg: &mut Qureg,
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
-    num_targets: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_targets = target_qubits.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_targets > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in target_qubits {
+        if idx >= num_qubits_rep || idx < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if target_paulis.len() < target_qubits.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiRotatePauli(
             qureg.reg,
@@ -3453,12 +3708,36 @@ pub fn multi_controlled_two_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general multi-qubit unitary (including a global phase factor) with
+/// any number of target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// multi_qubit_unitary(qureg, &[0, 1], u).unwrap();
+///
+/// // Check if the register is now in the state `|11>`
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3467,20 +3746,52 @@ pub fn multi_controlled_two_qubit_unitary(
 pub fn multi_qubit_unitary(
     qureg: &mut Qureg,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiQubitUnitary(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })
 }
 
-/// Desc.
+/// Apply a general controlled multi-qubit unitary (including a global phase
+/// factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// let ctrl = 0;
+/// let targs = &[1, 2];
+/// controlled_multi_qubit_unitary(qureg, ctrl, targs, u).unwrap();
+///
+/// // Check if the register is now in the state `|111>`
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3490,9 +3801,17 @@ pub fn controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrl: i32,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    if ctrl < 0 || ctrl >= qureg.num_qubits_represented() {
+        return Err(QuestError::QubitIndexError);
+    }
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledMultiQubitUnitary(
             qureg.reg,
@@ -3504,12 +3823,71 @@ pub fn controlled_multi_qubit_unitary(
     })
 }
 
-/// Desc.
+#[test]
+fn multi_controlled_multi_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    let ctrls = &[0, 1];
+    let targs = &[2, 3];
+    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+
+    // Check if the register is now in the state `|1111>`
+    let amp = get_real_amp(qureg, 15).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
+}
+
+/// Apply a general multi-controlled multi-qubit unitary (including a global
+/// phase factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+///
+/// let ctrls = &[0, 1];
+/// let targs = &[2, 3];
+/// multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+///
+/// // Check if the register is now in the state `|1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3518,11 +3896,22 @@ pub fn controlled_multi_qubit_unitary(
 pub fn multi_controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrls: &[i32],
-    num_ctrls: i32,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    let num_ctrls = ctrls.len() as i32;
+    for &idx in ctrls {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    let num_targs = targs.len() as i32;
+    for &idx in targs {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiQubitUnitary(
             qureg.reg,
@@ -3535,12 +3924,24 @@ pub fn multi_controlled_multi_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general single-qubit Kraus map to a density matrix, as specified by
+/// at most four Kraus operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+/// let target = 1;
+/// mix_kraus_map(qureg, target, &[m]).unwrap();
+///
+/// // Check is the register is now in the state |01>
+/// let amp = get_density_amp(qureg, 2, 2).unwrap();
+/// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3549,22 +3950,55 @@ pub fn multi_controlled_multi_qubit_unitary(
 pub fn mix_kraus_map(
     qureg: &mut Qureg,
     target: i32,
-    ops: &[ComplexMatrix2],
-    num_ops: i32,
-) {
+    ops: &[&ComplexMatrix2],
+) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if target < 0 || target >= num_qubits_rep {
+        return Err(QuestError::QubitIndexError);
+    }
+
+    let num_ops = ops.len() as i32;
+    if !(1..=4).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
     })
-    .expect("mix_kraus_map should always succeed");
 }
 
-/// Desc.
+/// Apply a general two-qubit Kraus map to a density matrix, as specified by at
+/// most sixteen Kraus operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let m = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+/// let target1 = 1;
+/// let target2 = 2;
+/// mix_two_qubit_kraus_map(qureg, target1, target2, &[m]).unwrap();
+///
+/// // Check is the register is now in the state |011>
+/// let amp = get_density_amp(qureg, 6, 6).unwrap();
+/// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3574,9 +4008,19 @@ pub fn mix_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
     target2: i32,
-    ops: &[ComplexMatrix4],
-    num_ops: i32,
+    ops: &[&ComplexMatrix4],
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if target1 < 0 || target1 >= num_qubits_rep {
+        return Err(QuestError::QubitIndexError);
+    }
+    if target2 < 0 || target2 >= num_qubits_rep {
+        return Err(QuestError::QubitIndexError);
+    }
+    let num_ops = ops.len() as i32;
+    if !(1..=16).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitKrausMap(
@@ -3589,12 +4033,39 @@ pub fn mix_two_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Apply a general N-qubit Kraus map to a density matrix, as specified by at
+/// most `(2N)^2` Kraus operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_zero_state(qureg);
+/// let m = &mut ComplexMatrixN::try_new(2).unwrap();
+/// init_complex_matrix_n(
+///     m,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///     ],
+/// )
+/// .unwrap();
+/// let targets = &[1, 2];
+/// mix_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
+///
+/// // Check if the register is now in the state |011>
+/// let amp = get_density_amp(qureg, 6, 6).unwrap();
+/// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3603,10 +4074,19 @@ pub fn mix_two_qubit_kraus_map(
 pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
-    num_targets: i32,
-    ops: &[ComplexMatrixN],
-    num_ops: i32,
+    ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    let num_targets = targets.len() as i32;
+    for &target in targets {
+        if target < 0 || target >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    let num_ops = ops.len() as i32;
+    if !(1..=1 << (2 * num_qubits_rep)).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixMultiQubitKrausMap(
@@ -3915,12 +4395,41 @@ pub fn apply_matrix4(
     })
 }
 
-/// Desc.
+/// Apply a general N-by-N matrix, which may be non-unitary, on any number of
+/// target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let mtr = &mut ComplexMatrixN::try_new(3).unwrap();
+/// let empty = &[0., 0., 0., 0., 0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     mtr,
+///     &[
+///         &[0., 0., 0., 0., 0., 0., 0., 1.],
+///         &[0., 1., 0., 0., 0., 0., 0., 0.],
+///         &[0., 0., 1., 0., 0., 0., 0., 0.],
+///         &[0., 0., 0., 1., 0., 0., 0., 0.],
+///         &[0., 0., 0., 0., 1., 0., 0., 0.],
+///         &[0., 0., 0., 0., 0., 1., 0., 0.],
+///         &[0., 0., 0., 0., 0., 0., 1., 0.],
+///         &[1., 0., 0., 0., 0., 0., 0., 0.],
+///     ],
+///     &[empty, empty, empty, empty, empty, empty, empty, empty],
+/// )
+/// .unwrap();
+///
+/// let targets = &[0, 1, 2];
+/// apply_matrix_n(qureg, targets, mtr).unwrap();
+///
+/// // Check if the state is now `|111>`
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3929,9 +4438,18 @@ pub fn apply_matrix4(
 pub fn apply_matrix_n(
     qureg: &mut Qureg,
     targs: &[i32],
-    num_targs: i32,
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
+    let num_targs = targs.len() as i32;
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if num_targs > num_qubits_rep {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in targs {
+        if idx < 0 || idx >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrixN(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })
