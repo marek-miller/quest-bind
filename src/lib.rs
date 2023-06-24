@@ -4063,7 +4063,7 @@ pub fn mix_two_qubit_kraus_map(
 /// let targets = &[1, 2];
 /// mix_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
 ///
-/// // Check is the register is now in the state |011>
+/// // Check if the register is now in the state |011>
 /// let amp = get_density_amp(qureg, 6, 6).unwrap();
 /// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
