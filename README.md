@@ -267,6 +267,10 @@ rustup doc
 
 ## Releases
 
+### v0.3.0 (??/??/????)
+
+New features/improvements:
+
 ### v0.2.0 (24/06/2023)
 
 New features/improvements:
