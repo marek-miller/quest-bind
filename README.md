@@ -273,13 +273,13 @@ New features/improvements:
 
 API breaking changes:
 
-- Change singnature of the following functions:
+- Change signature of the following functions:
 
   - `mix_nontp_kraus_map()`
   - `mix_nontp_two_qubit_kraus_map()`
   - `mix_nontp_multi_qubit_kraus_map()`
 
-  These functions should take the list of Kraus operators by reference.
+  These functions now take the list of Kraus operators by reference.
 
 ### v0.2.0 (24/06/2023)
 
