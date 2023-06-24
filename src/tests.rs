@@ -1914,6 +1914,25 @@ fn mix_multi_qubit_kraus_map_03() {
 }
 
 #[test]
+fn mix_nontp_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
+
+    mix_nontp_kraus_map(qureg, 0, &[m]).unwrap();
+    mix_nontp_kraus_map(qureg, 1, &[m]).unwrap();
+
+    mix_nontp_kraus_map(qureg, -1, &[m]).unwrap_err();
+    mix_nontp_kraus_map(qureg, 4, &[m]).unwrap_err();
+
+    mix_nontp_kraus_map(qureg, 0, &[]).unwrap_err();
+    // The maps must consists of not more then 4 Kraus operators
+    mix_nontp_kraus_map(qureg, 0, &[m, m, m, m, m]).unwrap_err();
+}
+
+#[test]
 fn apply_matrix4_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();

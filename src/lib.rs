@@ -4099,12 +4099,24 @@ pub fn mix_multi_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Apply a general non-trace-preserving single-qubit Kraus map to a density
+/// matrix,  as specified by at most four operators,
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
+/// let target = 1;
+/// mix_nontp_kraus_map(qureg, target, &[m]).unwrap();
+///
+/// // The register is not in an unphysical null state
+/// let amp = get_density_amp(qureg, 2, 2).unwrap();
+/// assert!((amp.re - 0.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4113,14 +4125,16 @@ pub fn mix_multi_qubit_kraus_map(
 pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg,
     target: i32,
-    ops: &[ComplexMatrix2],
-) {
+    ops: &[&ComplexMatrix2],
+) -> Result<(), QuestError> {
     let num_ops = ops.len() as i32;
+    if !(0..qureg.num_qubits_represented()).contains(&target) {
+        return Err(QuestError::QubitIndexError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
     })
-    .expect("mix_nontp_kraus_map should always succeed");
 }
 
 /// Desc.
