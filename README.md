@@ -6,7 +6,8 @@
 A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0.
 
 Quantum Exact Simulation Toolkit (QuEST) is a no-fluff, bent-on-speed quantum
-circuit simulator [[1]](https://doi.org/10.1038/s41598-019-47174-9). It is distributed under MIT License.
+circuit simulator [[1]](https://doi.org/10.1038/s41598-019-47174-9). It is
+distributed under MIT License.
 
 ## How to use it
 
@@ -91,9 +92,10 @@ They match!
 
 ## Distributed and GPU-accelerated mode
 
-QuEST support for MPI and GPU-accelerated computation ca be enabled in `quest-bind` by setting
-appropriate feature flags. To enable QuEST's MPI mode, set the `mpi` feature for
-`quest_bind`. Simply edit `Cargo.toml` of your binary crate:
+QuEST support for MPI and GPU-accelerated computation ca be enabled in
+`quest-bind` by setting appropriate feature flags. To enable QuEST's MPI mode,
+set the `mpi` feature for `quest_bind`. Simply edit `Cargo.toml` of your binary
+crate:
 
 ```toml
 [package]
@@ -134,10 +136,11 @@ Then run:
 cargo test
 ```
 
-Note that `quest-bind  will not run `QuEST`'s test suite, nor will it
-check `QuEST`'s correctness. The tests here are intended to check if the C API is
-invoked correctly, and if Rust's types are passed safely back and forth across the
-FFI boundary.
+Note that
+`quest-bind will not run `QuEST`'s test suite, nor will it check `QuEST`'s
+correctness. The tests here are intended to check if the C API is invoked
+correctly, and if Rust's types are passed safely back and forth across the FFI
+boundary.
 
 If you want to run the test suite in the single-precision floating point mode,
 make sure the build script recompiles `libQuEST.so` with the right type
@@ -148,8 +151,8 @@ cargo clean
 cargo test --features=f32
 ```
 
-By defualt, `quest-bind` uses Rust's double precision floating-point type: `f64`. See
-[Numercal types](#numerical-types) section below.
+By defualt, `quest-bind` uses Rust's double precision floating-point type:
+`f64`. See [Numercal types](#numerical-types) section below.
 
 You can also try the available examples by running, e.g.:
 
@@ -168,9 +171,9 @@ cargo run --example
 In the typical case when it's the numerical computation that dominates the CPU
 usage, and not API calls, there should be no discernible difference in
 performance between programs calling QuEST routines directly and analogous
-applications using `quest_bind`. Remember, however, to enable
-optimizations for both `quest-bind` and `QuEST` by compiling your code 
-using the "release" profile:
+applications using `quest_bind`. Remember, however, to enable optimizations for
+both `quest-bind` and `QuEST` by compiling your code using the "release"
+profile:
 
 ```sh
 cargo run --release
@@ -191,8 +194,8 @@ to all parallel computation resources available in the system.
 
 Current implementation returns inside `Result<_, QuestError>` only the first
 exception caught. All subsequent messages reported by QuEST, together with that
-first one, are nevertheless logged as errors. To be able to see them, add a logger
-as a dependency to your crate, e.g.:
+first one, are nevertheless logged as errors. To be able to see them, add a
+logger as a dependency to your crate, e.g.:
 
 ```sh
 cargo add env_logger
@@ -219,9 +222,9 @@ The type `QuestError` doesn't contain (possibly malformed) data returned by the
 API call on failure. Only successful calls can reach the library user. This is
 intentional, following guidelines from the QuEST documentation:
 
-> [*Upon failure*] Users must ensure that the triggered API call does not continue (e.g. the
-> user exits or throws an exception), else QuEST will continue with the valid
-> [*sic!*] input and likely trigger a seg-fault.
+> [*Upon failure*] Users must ensure that the triggered API call does not
+> continue (e.g. the user exits or throws an exception), else QuEST will
+> continue with the valid [*sic!*] input and likely trigger a seg-fault.
 
 See
 [Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
@@ -229,10 +232,10 @@ for more information.
 
 ## Numerical types
 
-For now, numerical types used by `quest-bind` match exactly the C
-types that QuEST uses on `x86_64`. This is a safe, but not very portable
-strategy. We pass Rust types directly to QuEST without casting, assuming the
-following type definitions:
+For now, numerical types used by `quest-bind` match exactly the C types that
+QuEST uses on `x86_64`. This is a safe, but not very portable strategy. We pass
+Rust types directly to QuEST without casting, assuming the following type
+definitions:
 
 ```rust
 pub type c_float = f32;
@@ -263,6 +266,10 @@ rustup doc
 - Generic nummerical traits from `num_traits`
 
 ## Releases
+
+### v0.2.1 (??/07/2023)
+
+New features/improvements:
 
 ### v0.2.0 (24/06/2023)
 
