@@ -12,7 +12,7 @@ proptest! {
     }
 
     #[test]
-    fn create_diagonal_op_02(n in any::<u32>().prop_map(|x| x as i32 * -1)) {
+    fn create_diagonal_op_02(n in any::<u32>().prop_map(|x| -(x as i32))) {
         let env = &QuestEnv::new();
         let _ = DiagonalOp::try_new(n, env).unwrap_err();
     }
