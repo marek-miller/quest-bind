@@ -183,11 +183,11 @@ On failure, QuEST throws exceptions via user-configurable global
 By default, this function prints an error message and aborts, which is
 problematic in a large distributed setup.
 
-We opt for catching all exceptions early. The exception handler is locked
-during an API call. This means that calling QuEST functions is synchronous and
-should be thread-safe, but comes at the expense of being able to run only one
-QuEST API call at the time. Bear in mind, though, that each QuEST function
-retains access to all parallel computation resources available in the system.
+We opt for catching all exceptions early. The exception handler is locked during
+an API call. This means that calling QuEST functions is synchronous and should
+be thread-safe, but comes at the expense of being able to run only one QuEST API
+call at the time. Bear in mind, though, that each QuEST function retains access
+to all parallel computation resources available in the system.
 
 Current implementation returns inside `Result<_, QuestError>` only the first
 exception caught. All subsequent messages reported by QuEST, together with that
@@ -264,18 +264,18 @@ rustup doc
 
 ## Releases
 
-### v0.2.0 (??/07/2023)
+### v0.2.0 (24/06/2023)
 
 New features/improvements:
 
 - Improve documentation
+- Catch exceptions thrown by QuEST
 - Add build script
 - Constructors/destructors for QuEST structs
-- Catch exceptions thrown by QuEST
-- Add GHA for continuous testing
-- Add examples: `entanglemetn.rs` and `grovers_search.rs`
-- Use `Complex<T>` type from `num` crate (as `Qcomplex`)
-- Add feature `"f32"` for floating-point precision
+- Add example: `grovers_search.rs`
+- Use `Complex<f64>` type from `num` crate (as `QComplex`)
+- Use compile flag `"f32"` to set floating point precision
+- Add Github workflows CT
 
 ### v0.1.0 (11/06/2023)
 
