@@ -183,11 +183,11 @@ On failure, QuEST throws exceptions via user-configurable global
 By default, this function prints an error message and aborts, which is
 problematic in a large distributed setup.
 
-We opt for catching all exceptions early. The exception handler is locked
-during an API call. This means that calling QuEST functions is synchronous and
-should be thread-safe, but comes at the expense of being able to run only one
-QuEST API call at the time. Bear in mind, though, that each QuEST function
-retains access to all parallel computation resources available in the system.
+We opt for catching all exceptions early. The exception handler is locked during
+an API call. This means that calling QuEST functions is synchronous and should
+be thread-safe, but comes at the expense of being able to run only one QuEST API
+call at the time. Bear in mind, though, that each QuEST function retains access
+to all parallel computation resources available in the system.
 
 Current implementation returns inside `Result<_, QuestError>` only the first
 exception caught. All subsequent messages reported by QuEST, together with that
@@ -221,9 +221,9 @@ The type `QuestError` doesn't contain (possibly malformed) data returned by the
 API call on failure. Only successful calls can reach the library user. This is
 intentional, following guidelines in QuEST documentation. Upon failure...
 
-> Users must ensure that the triggered API call does not continue (e.g. the
-> user exits or throws an exception), else QuEST will continue with the valid
-> [sic!] input and likely trigger a seg-fault.
+> Users must ensure that the triggered API call does not continue (e.g. the user
+> exits or throws an exception), else QuEST will continue with the valid [sic!]
+> input and likely trigger a seg-fault.
 
 See
 [Quest API](https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db)
@@ -260,18 +260,18 @@ rustup doc
 
 ## Releases
 
-### v0.2.0 (??/07/2023)
+### v0.2.0 (24/06/2023)
 
 New features/improvements:
 
-- Catch exceptions thrown by QuEST
 - Improve documentation
+- Catch exceptions thrown by QuEST
 - Add build script
 - Constructors/destructors for QuEST structs
-- Add Github workflows CT
-- Add example: grovers_search.rs
+- Add example: `grovers_search.rs`
 - Use `Complex<f64>` type from `num` crate (as `QComplex`)
 - Use compile flag `"f32"` to set floating point precision
+- Add Github workflows CT
 
 ### v0.1.0 (11/06/2023)
 
