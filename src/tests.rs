@@ -1914,6 +1914,39 @@ fn mix_multi_qubit_kraus_map_03() {
 }
 
 #[test]
+fn calc_hilbert_schmidt_distance_01() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap();
+}
+
+#[test]
+fn calc_hilbert_schmidt_distance_02() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(1, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
+}
+
+#[test]
+fn calc_hilbert_schmidt_distance_03() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
+}
+
+#[test]
 fn apply_matrix4_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();
