@@ -14,6 +14,7 @@ pub use ffi::{
 };
 
 mod precision;
+use num::complex::ComplexFloat;
 pub use precision::{
     Qreal,
     EPSILON,
@@ -4183,12 +4184,21 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Computes the Hilbert Schmidt distance between two density matrices `a` and
+/// `b`, defined as the Frobenius norm of the difference between them.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let a = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(a);
+/// let b = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_classical_state(b, 1).unwrap();
+///
+/// let dist = calc_hilbert_schmidt_distance(a, b).unwrap();
+/// assert!((dist - SQRT_2).abs() < EPSILON, "{:?}", dist);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
