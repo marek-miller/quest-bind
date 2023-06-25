@@ -14,7 +14,6 @@ pub use ffi::{
 };
 
 mod precision;
-use num::complex::ComplexFloat;
 pub use precision::{
     Qreal,
     EPSILON,
