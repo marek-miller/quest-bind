@@ -2247,7 +2247,7 @@ fn multi_rotate_pauli_01() {
     multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
 }
 
-// #[test]
+#[test]
 fn calc_expec_pauli_prod_01() {
     use PauliOpType::PAULI_X;
     let env = &QuestEnv::new();
