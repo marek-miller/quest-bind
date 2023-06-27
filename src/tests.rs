@@ -2058,3 +2058,30 @@ fn multi_rotate_pauli_01() {
         .unwrap_err();
     multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
 }
+
+#[test]
+fn calc_expec_pauli_prod_01() {
+    use PauliOpType::PAULI_X;
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+    calc_expec_pauli_prod(qureg, &[1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X], workspace).unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+
+    calc_expec_pauli_prod(qureg, &[-1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[4, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, -1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 4], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+}

@@ -3547,12 +3547,26 @@ pub fn multi_controlled_multi_rotate_pauli(
     })
 }
 
-/// Desc.
+/// Computes the expected value of a product of Pauli operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_X;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let workspace = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let target_qubits = &[0, 1];
+/// let pauli_codes = &[PAULI_X, PAULI_X];
+///
+/// calc_expec_pauli_prod(qureg, target_qubits, pauli_codes, workspace)
+///     .unwrap();
+/// let amp = get_real_amp(workspace, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3565,6 +3579,9 @@ pub fn calc_expec_pauli_prod(
     workspace: &mut Qureg,
 ) -> Result<Qreal, QuestError> {
     let num_targets = target_qubits.len() as i32;
+    if pauli_codes.len() as i32 != num_targets {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliProd(
             qureg.reg,
