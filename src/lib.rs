@@ -4455,12 +4455,38 @@ pub fn apply_matrix_n(
     })
 }
 
-/// Desc.
+/// Apply a general N-by-N matrix with additional controlled qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let ctrls = &[0, 1];
+/// let targs = &[2, 3];
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+/// apply_multi_controlled_matrix_n(qureg, ctrls, targs, u).unwrap();
+///
+/// // Assert `qureg` is now in the state `|1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4486,7 +4512,8 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by the
+/// passed exponential polynomial "phase function".
 ///
 /// # Examples
 ///
@@ -4505,7 +4532,11 @@ pub fn apply_phase_func(
     exponents: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len() as i32;
+    let num_terms = coeffs.len();
+    if exponents.len() != num_terms {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_terms = num_terms as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFunc(
             qureg.reg,
@@ -4519,7 +4550,8 @@ pub fn apply_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by the
+/// passed exponential polynomial "phase function".
 ///
 /// # Examples
 ///
@@ -4541,8 +4573,16 @@ pub fn apply_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_terms = coeffs.len();
+    if exponents.len() != num_terms {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_terms = num_terms as i32;
+    let num_overrides = override_inds.len();
+    if override_phases.len() != num_overrides {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_overrides = num_overrides as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFuncOverrides(
             qureg.reg,
