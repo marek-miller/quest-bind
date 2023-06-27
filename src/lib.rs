@@ -3547,12 +3547,26 @@ pub fn multi_controlled_multi_rotate_pauli(
     })
 }
 
-/// Desc.
+/// Computes the expected value of a product of Pauli operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_X;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let workspace = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let target_qubits = &[0, 1];
+/// let pauli_codes = &[PAULI_X, PAULI_X];
+///
+/// calc_expec_pauli_prod(qureg, target_qubits, pauli_codes, workspace)
+///     .unwrap();
+/// let amp = get_real_amp(workspace, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3565,6 +3579,14 @@ pub fn calc_expec_pauli_prod(
     workspace: &mut Qureg,
 ) -> Result<Qreal, QuestError> {
     let num_targets = target_qubits.len() as i32;
+    if pauli_codes.len() as i32 != num_targets {
+        return Err(QuestError::ArrayLengthError);
+    }
+    for &idx in target_qubits {
+        if idx < 0 || idx > qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliProd(
             qureg.reg,
@@ -3576,12 +3598,30 @@ pub fn calc_expec_pauli_prod(
     })
 }
 
-/// Desc.
+/// Computes the expected value of a sum of products of Pauli operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::{
+///     PAULI_X,
+///     PAULI_Z,
+/// };
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let workspace = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+/// let term_coeffs = &[0.5, 0.5];
+///
+/// calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+///     .unwrap();
+///
+/// let amp = get_real_amp(workspace, 2).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3605,12 +3645,33 @@ pub fn calc_expec_pauli_sum(
     })
 }
 
-/// Desc.
+/// Computes the expected value of `qureg` under Hermitian operator `hamil`.
+///
+/// This function is merely an encapsulation of `calc_expec_pauli_sum()` - refer
+/// to the doc there for an elaboration.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::{
+///     PAULI_X,
+///     PAULI_Z,
+/// };
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let workspace = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+/// init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
+///     .unwrap();
+///
+/// calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap();
+///
+/// let amp = get_real_amp(workspace, 1).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4099,12 +4160,24 @@ pub fn mix_multi_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Apply a general non-trace-preserving single-qubit Kraus map to a density
+/// matrix,  as specified by at most four operators,
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
+/// let target = 1;
+/// mix_nontp_kraus_map(qureg, target, &[m]).unwrap();
+///
+/// // The register is in an unphysical null state
+/// let amp = get_density_amp(qureg, 2, 2).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4113,22 +4186,50 @@ pub fn mix_multi_qubit_kraus_map(
 pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg,
     target: i32,
-    ops: &[ComplexMatrix2],
-) {
+    ops: &[&ComplexMatrix2],
+) -> Result<(), QuestError> {
     let num_ops = ops.len() as i32;
+    if !(0..qureg.num_qubits_represented()).contains(&target) {
+        return Err(QuestError::QubitIndexError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
     })
-    .expect("mix_nontp_kraus_map should always succeed");
 }
 
-/// Desc.
+/// Apply a general non-trace-preserving two-qubit Kraus map to a density
+/// matrix, as specified by at most sixteen operators,
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let m = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+/// let target1 = 1;
+/// let target2 = 2;
+/// mix_nontp_two_qubit_kraus_map(qureg, target1, target2, &[m]).unwrap();
+///
+/// // The register is in an unphysical null state
+/// let amp = get_density_amp(qureg, 6, 6).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4138,9 +4239,19 @@ pub fn mix_nontp_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
     target2: i32,
-    ops: &[ComplexMatrix4],
+    ops: &[&ComplexMatrix4],
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if target1 < 0 || target1 >= num_qubits_rep {
+        return Err(QuestError::QubitIndexError);
+    }
+    if target2 < 0 || target2 >= num_qubits_rep {
+        return Err(QuestError::QubitIndexError);
+    }
     let num_ops = ops.len() as i32;
+    if !(1..=16).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPTwoQubitKrausMap(
@@ -4153,12 +4264,39 @@ pub fn mix_nontp_two_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Apply a general N-qubit non-trace-preserving Kraus map to a density matrix,
+/// as specified by at most `(2N)^2` operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// init_zero_state(qureg);
+/// let m = &mut ComplexMatrixN::try_new(2).unwrap();
+/// init_complex_matrix_n(
+///     m,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[0., 0., 0., 0.],
+///     ],
+///     &[
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///         &[0., 0., 0., 0.],
+///     ],
+/// )
+/// .unwrap();
+/// let targets = &[1, 2];
+/// mix_nontp_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
+///
+/// // The register is in an unphysical null state
+/// let amp = get_density_amp(qureg, 6, 6).unwrap();
+/// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4167,10 +4305,19 @@ pub fn mix_nontp_two_qubit_kraus_map(
 pub fn mix_nontp_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
-    ops: &[ComplexMatrixN],
+    ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
     let num_targets = targets.len() as i32;
+    for &target in targets {
+        if target < 0 || target >= num_qubits_rep {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     let num_ops = ops.len() as i32;
+    if !(1..=1 << (2 * num_qubits_rep)).contains(&num_ops) {
+        return Err(QuestError::ArrayLengthError);
+    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPMultiQubitKrausMap(
@@ -4183,12 +4330,21 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     })
 }
 
-/// Desc.
+/// Computes the Hilbert Schmidt distance between two density matrices `a` and
+/// `b`, defined as the Frobenius norm of the difference between them.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let a = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_zero_state(a);
+/// let b = &mut Qureg::try_new_density(2, env).unwrap();
+/// init_classical_state(b, 1).unwrap();
+///
+/// let dist = calc_hilbert_schmidt_distance(a, b).unwrap();
+/// assert!((dist - SQRT_2).abs() < EPSILON, "{:?}", dist);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4455,12 +4611,38 @@ pub fn apply_matrix_n(
     })
 }
 
-/// Desc.
+/// Apply a general N-by-N matrix with additional controlled qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let ctrls = &[0, 1];
+/// let targs = &[2, 3];
+/// let u = &mut ComplexMatrixN::try_new(2).unwrap();
+/// let zero_row = &[0., 0., 0., 0.];
+/// init_complex_matrix_n(
+///     u,
+///     &[
+///         &[0., 0., 0., 1.],
+///         &[0., 1., 0., 0.],
+///         &[0., 0., 1., 0.],
+///         &[1., 0., 0., 0.],
+///     ],
+///     &[zero_row, zero_row, zero_row, zero_row],
+/// )
+/// .unwrap();
+/// apply_multi_controlled_matrix_n(qureg, ctrls, targs, u).unwrap();
+///
+/// // Assert `qureg` is now in the state `|1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4486,7 +4668,8 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by the
+/// passed exponential polynomial "phase function".
 ///
 /// # Examples
 ///
@@ -4505,7 +4688,11 @@ pub fn apply_phase_func(
     exponents: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len() as i32;
+    let num_terms = coeffs.len();
+    if exponents.len() != num_terms {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_terms = num_terms as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFunc(
             qureg.reg,
@@ -4519,7 +4706,8 @@ pub fn apply_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by the
+/// passed exponential polynomial "phase function".
 ///
 /// # Examples
 ///
@@ -4541,8 +4729,16 @@ pub fn apply_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_terms = coeffs.len();
+    if exponents.len() != num_terms {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_terms = num_terms as i32;
+    let num_overrides = override_inds.len();
+    if override_phases.len() != num_overrides {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_overrides = num_overrides as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFuncOverrides(
             qureg.reg,
