@@ -2126,3 +2126,114 @@ fn multi_rotate_pauli_01() {
         .unwrap_err();
     multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
 }
+
+#[test]
+fn calc_expec_pauli_prod_01() {
+    use PauliOpType::PAULI_X;
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+    calc_expec_pauli_prod(qureg, &[1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X], workspace).unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+
+    calc_expec_pauli_prod(qureg, &[-1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[4, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, -1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 4], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_prod_02() {
+    use PauliOpType::PAULI_X;
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_sum_01() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+    let term_coeffs = &[0.5, 0.5];
+
+    calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+        .unwrap();
+}
+
+#[test]
+fn calc_expec_pauli_sum_02() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+    let term_coeffs = &[0.5, 0.5];
+
+    calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_hamil_01() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
+        .unwrap();
+
+    calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap();
+}
+
+#[test]
+fn calc_expec_pauli_hamil_02() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
+        .unwrap();
+
+    calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap_err();
+}
