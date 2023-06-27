@@ -271,6 +271,16 @@ rustup doc
 
 New features/improvements:
 
+API breaking changes:
+
+- Change signature of the following functions:
+
+  - `mix_nontp_kraus_map()`
+  - `mix_nontp_two_qubit_kraus_map()`
+  - `mix_nontp_multi_qubit_kraus_map()`
+
+  These functions now take the list of Kraus operators by reference.
+
 ### v0.2.0 (24/06/2023)
 
 New features/improvements:
