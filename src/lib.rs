@@ -3593,12 +3593,50 @@ pub fn calc_expec_pauli_prod(
     })
 }
 
-/// Desc.
+#[test]
+fn calc_expec_pauli_sum_01() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+    let term_coeffs = &[0.5, 0.5];
+
+    calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+        .unwrap();
+
+    let amp = get_real_amp(workspace, 2).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
+}
+
+/// Computes the expected value of a sum of products of Pauli operators.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::{
+///     PAULI_X,
+///     PAULI_Z,
+/// };
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// let workspace = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+/// let term_coeffs = &[0.5, 0.5];
+///
+/// calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+///     .unwrap();
+///
+/// let amp = get_real_amp(workspace, 2).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
