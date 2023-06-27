@@ -3582,6 +3582,11 @@ pub fn calc_expec_pauli_prod(
     if pauli_codes.len() as i32 != num_targets {
         return Err(QuestError::ArrayLengthError);
     }
+    for &idx in target_qubits {
+        if idx < 0 || idx > qureg.num_qubits_represented() {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliProd(
             qureg.reg,
