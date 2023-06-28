@@ -2058,3 +2058,79 @@ fn multi_rotate_pauli_01() {
         .unwrap_err();
     multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
 }
+
+#[test]
+fn apply_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_phase_func(
+        qureg,
+        &[0, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap();
+    apply_phase_func(
+        qureg,
+        &[1, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap();
+
+    apply_phase_func(
+        qureg,
+        &[0, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+    apply_phase_func(
+        qureg,
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+
+    apply_phase_func(
+        qureg,
+        &[0, 2],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+    apply_phase_func(
+        qureg,
+        &[-1, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_phase_func_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // exponents contains a fractional number despite \p encoding <b>=</b>
+    // ::TWOS_COMPLEMENT
+    apply_phase_func(
+        qureg,
+        &[0, 1],
+        BitEncoding::TWOS_COMPLEMENT,
+        &[0.5, 0.5],
+        &[0., 0.5],
+    )
+    .unwrap_err();
+}
