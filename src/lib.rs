@@ -4923,6 +4923,23 @@ pub fn apply_multi_var_phase_func_overrides(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::DISTANCE;
+///
+/// apply_named_phase_func(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4946,6 +4963,27 @@ pub fn apply_named_phase_func(
             function_name_code,
         );
     })
+}
+
+#[test]
+fn apply_named_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let qubits = &[0, 1];
+    let num_qubits_per_reg = &[1, 1];
+    let encoding = BitEncoding::UNSIGNED;
+    let function_name_code = PhaseFunc::DISTANCE;
+
+    apply_named_phase_func(
+        qureg,
+        qubits,
+        num_qubits_per_reg,
+        encoding,
+        function_name_code,
+    )
+    .unwrap();
 }
 
 /// Desc.
