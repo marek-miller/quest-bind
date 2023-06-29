@@ -4965,33 +4965,35 @@ pub fn apply_named_phase_func(
     })
 }
 
-#[test]
-fn apply_named_phase_func_overrides_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(2, env).unwrap();
-    init_zero_state(qureg);
-
-    let qubits = &[0, 1];
-    let num_qubits_per_reg = &[1, 1];
-    let encoding = BitEncoding::UNSIGNED;
-    let function_name_code = PhaseFunc::DISTANCE;
-
-    apply_named_phase_func(
-        qureg,
-        qubits,
-        num_qubits_per_reg,
-        encoding,
-        function_name_code,
-    )
-    .unwrap();
-}
-
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named (and potentially multi-variable) phase function, and an explicit set
+/// of 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::DISTANCE;
+/// let override_inds = &[0, 1];
+/// let override_phases = &[0., 0.];
+///
+/// apply_named_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

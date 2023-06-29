@@ -2647,6 +2647,79 @@ fn appply_named_phase_func_01() {
 }
 
 #[test]
+fn apply_named_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 9],
+        &[0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
 fn calc_expec_pauli_prod_01() {
     use PauliOpType::PAULI_X;
     let env = &QuestEnv::new();
