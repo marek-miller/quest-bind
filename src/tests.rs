@@ -1676,13 +1676,13 @@ fn apply_matrix2_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
+    let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
 
-    apply_matrix2(qureg, 0, u).unwrap();
-    apply_matrix2(qureg, 1, u).unwrap();
+    apply_matrix2(qureg, 0, m).unwrap();
+    apply_matrix2(qureg, 1, m).unwrap();
 
-    apply_matrix2(qureg, -1, u).unwrap_err();
-    apply_matrix2(qureg, 2, u).unwrap_err();
+    apply_matrix2(qureg, -1, m).unwrap_err();
+    apply_matrix2(qureg, 2, m).unwrap_err();
 }
 
 #[test]
@@ -1914,12 +1914,165 @@ fn mix_multi_qubit_kraus_map_03() {
 }
 
 #[test]
+fn calc_hilbert_schmidt_distance_01() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap();
+}
+
+#[test]
+fn calc_hilbert_schmidt_distance_02() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(1, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
+}
+
+#[test]
+fn calc_hilbert_schmidt_distance_03() {
+    let env = &QuestEnv::new();
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
+    init_classical_state(a, 0).unwrap();
+    let b = &mut Qureg::try_new(2, env).unwrap();
+    init_classical_state(b, 1).unwrap();
+
+    let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
+}
+
+#[test]
+fn mix_nontp_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
+
+    mix_nontp_kraus_map(qureg, 0, &[m]).unwrap();
+    mix_nontp_kraus_map(qureg, 1, &[m]).unwrap();
+
+    mix_nontp_kraus_map(qureg, -1, &[m]).unwrap_err();
+    mix_nontp_kraus_map(qureg, 4, &[m]).unwrap_err();
+
+    mix_nontp_kraus_map(qureg, 0, &[]).unwrap_err();
+    // The maps must consists of not more then 4 Kraus operators
+    mix_nontp_kraus_map(qureg, 0, &[m, m, m, m, m]).unwrap_err();
+}
+
+#[test]
+fn mix_nontp_two_qubit_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let m = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+    mix_nontp_two_qubit_kraus_map(qureg, 0, 1, &[m]).unwrap();
+    mix_nontp_two_qubit_kraus_map(qureg, 1, 2, &[m]).unwrap();
+    mix_nontp_two_qubit_kraus_map(qureg, 0, 2, &[m]).unwrap();
+
+    mix_nontp_two_qubit_kraus_map(qureg, 0, 0, &[m]).unwrap_err();
+    mix_nontp_two_qubit_kraus_map(qureg, 1, 1, &[m]).unwrap_err();
+    mix_nontp_two_qubit_kraus_map(qureg, 2, 2, &[m]).unwrap_err();
+
+    mix_nontp_two_qubit_kraus_map(qureg, -1, 0, &[m]).unwrap_err();
+    mix_nontp_two_qubit_kraus_map(qureg, 0, 4, &[m]).unwrap_err();
+}
+
+#[test]
+fn mix_nontp_multi_qubit_kraus_map_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+    let m = &mut ComplexMatrixN::try_new(2).unwrap();
+    init_complex_matrix_n(
+        m,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[0., 0., 0., 0.],
+        ],
+        &[
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+        ],
+    )
+    .unwrap();
+
+    mix_nontp_multi_qubit_kraus_map(qureg, &[1, 2], &[m]).unwrap();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[0, 1], &[m]).unwrap();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[0, 2], &[m]).unwrap();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[2, 0], &[m]).unwrap();
+
+    mix_nontp_multi_qubit_kraus_map(qureg, &[0, 0], &[m]).unwrap_err();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[1, 1], &[m]).unwrap_err();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[2, 2], &[m]).unwrap_err();
+
+    mix_nontp_multi_qubit_kraus_map(qureg, &[-1, 0], &[m]).unwrap_err();
+    mix_nontp_multi_qubit_kraus_map(qureg, &[0, 4], &[m]).unwrap_err();
+}
+
+#[test]
+fn mix_nontp_multi_qubit_kraus_map_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    init_zero_state(qureg);
+    let m = &mut ComplexMatrixN::try_new(2).unwrap();
+    init_complex_matrix_n(
+        m,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[0., 0., 0., 0.],
+        ],
+        &[
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+            &[0., 0., 0., 0.],
+        ],
+    )
+    .unwrap();
+
+    mix_nontp_multi_qubit_kraus_map(qureg, &[1, 2], &[]).unwrap_err();
+    // The maps must consists of not more then (2N)^2 Kraus operators
+    mix_nontp_multi_qubit_kraus_map(
+        qureg,
+        &[0, 1],
+        &[m, m, m, m, m, m, m, m, m, m, m, m, m, m, m, m, m],
+    )
+    .unwrap_err();
+}
+
+#[test]
 fn apply_matrix4_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    let u = &ComplexMatrix4::new(
+    let m = &ComplexMatrix4::new(
         [
             [0., 1., 0., 0.],
             [1., 0., 0., 0.],
@@ -1933,18 +2086,18 @@ fn apply_matrix4_01() {
             [0., 0., 0., 0.],
         ],
     );
-    apply_matrix4(qureg, 0, 1, u).unwrap();
-    apply_matrix4(qureg, 1, 0, u).unwrap();
+    apply_matrix4(qureg, 0, 1, m).unwrap();
+    apply_matrix4(qureg, 1, 0, m).unwrap();
 
-    apply_matrix4(qureg, 0, 0, u).unwrap_err();
-    apply_matrix4(qureg, 1, 1, u).unwrap_err();
+    apply_matrix4(qureg, 0, 0, m).unwrap_err();
+    apply_matrix4(qureg, 1, 1, m).unwrap_err();
 
-    apply_matrix4(qureg, -1, 1, u).unwrap_err();
-    apply_matrix4(qureg, 3, 1, u).unwrap_err();
-    apply_matrix4(qureg, 0, 3, u).unwrap_err();
-    apply_matrix4(qureg, 0, -3, u).unwrap_err();
+    apply_matrix4(qureg, -1, 1, m).unwrap_err();
+    apply_matrix4(qureg, 3, 1, m).unwrap_err();
+    apply_matrix4(qureg, 0, 3, m).unwrap_err();
+    apply_matrix4(qureg, 0, -3, m).unwrap_err();
 
-    apply_matrix4(qureg, 3, -3, u).unwrap_err();
+    apply_matrix4(qureg, 3, -3, m).unwrap_err();
 }
 
 #[test]
@@ -1984,6 +2137,41 @@ fn apply_matrix_n_01() {
 
     apply_matrix_n(qureg, &[1, 0], mtr).unwrap_err();
     apply_matrix_n(qureg, &[1, 0, 2, 3], mtr).unwrap_err();
+}
+
+#[test]
+fn apply_multi_controlled_matrix_n_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    apply_multi_controlled_matrix_n(qureg, &[0, 1], &[2, 3], u).unwrap();
+    apply_multi_controlled_matrix_n(qureg, &[0, 1], &[3, 2], u).unwrap();
+    apply_multi_controlled_matrix_n(qureg, &[1, 0], &[2, 3], u).unwrap();
+    apply_multi_controlled_matrix_n(qureg, &[0, 2], &[1, 3], u).unwrap();
+
+    apply_multi_controlled_matrix_n(qureg, &[0, 0], &[2, 3], u).unwrap_err();
+    apply_multi_controlled_matrix_n(qureg, &[0, 1], &[2, 2], u).unwrap_err();
+
+    apply_multi_controlled_matrix_n(qureg, &[-1, 0], &[2, 3], u).unwrap_err();
+    apply_multi_controlled_matrix_n(qureg, &[0, 4], &[2, 3], u).unwrap_err();
+    apply_multi_controlled_matrix_n(qureg, &[0, 1], &[1, 4], u).unwrap_err();
+    apply_multi_controlled_matrix_n(qureg, &[99, 99], &[99, 99], u)
+        .unwrap_err();
 }
 
 #[test]
@@ -2404,4 +2592,115 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.],
     )
     .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_prod_01() {
+    use PauliOpType::PAULI_X;
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+    calc_expec_pauli_prod(qureg, &[1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X], workspace).unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+
+    calc_expec_pauli_prod(qureg, &[-1, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[4, 0], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, -1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+    calc_expec_pauli_prod(qureg, &[0, 4], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_prod_02() {
+    use PauliOpType::PAULI_X;
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    calc_expec_pauli_prod(qureg, &[0, 1], &[PAULI_X, PAULI_X], workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_sum_01() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+    let term_coeffs = &[0.5, 0.5];
+
+    calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+        .unwrap();
+}
+
+#[test]
+fn calc_expec_pauli_sum_02() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
+    let term_coeffs = &[0.5, 0.5];
+
+    calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+        .unwrap_err();
+}
+
+#[test]
+fn calc_expec_pauli_hamil_01() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
+        .unwrap();
+
+    calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap();
+}
+
+#[test]
+fn calc_expec_pauli_hamil_02() {
+    use PauliOpType::{
+        PAULI_X,
+        PAULI_Z,
+    };
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    let workspace = &mut Qureg::try_new(3, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
+        .unwrap();
+
+    calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap_err();
 }
