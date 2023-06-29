@@ -4867,7 +4867,7 @@ pub fn apply_multi_var_phase_func(
 /// let coeffs = &[0.5, 0.5];
 /// let exponents = &[2., 2.];
 /// let num_terms_per_reg = &[1, 1];
-/// let override_inds = &[0, 1];
+/// let override_inds = &[0, 1, 0, 1];
 /// let override_phases = &[0., 0.];
 ///
 /// apply_multi_var_phase_func_overrides(
@@ -4983,7 +4983,7 @@ pub fn apply_named_phase_func(
 /// let num_qubits_per_reg = &[1, 1];
 /// let encoding = BitEncoding::UNSIGNED;
 /// let function_name_code = PhaseFunc::DISTANCE;
-/// let override_inds = &[0, 1];
+/// let override_inds = &[0, 1, 0, 1];
 /// let override_phases = &[0., 0.];
 ///
 /// apply_named_phase_func_overrides(
@@ -5101,7 +5101,7 @@ pub fn apply_param_named_phase_func(
 /// let encoding = BitEncoding::UNSIGNED;
 /// let function_name_code = PhaseFunc::SCALED_INVERSE_SHIFTED_NORM;
 /// let params = &[0., 0., 0., 0.];
-/// let override_inds = &[0, 1];
+/// let override_inds = &[0, 1, 0, 1];
 /// let override_phases = &[0., 0.];
 ///
 /// apply_param_named_phase_func_overrides(
