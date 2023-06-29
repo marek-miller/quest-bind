@@ -4898,7 +4898,7 @@ pub fn apply_multi_var_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyMultiVarPhaseFuncOverrides(
             qureg.reg,
@@ -5010,7 +5010,7 @@ pub fn apply_named_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFuncOverrides(
             qureg.reg,
@@ -5082,7 +5082,9 @@ pub fn apply_param_named_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named, parameterised (and potentially multi-variable) phase function, and an
+/// explicit set of "overriding" values at specific state indices.
 ///
 /// # Examples
 ///
@@ -5129,7 +5131,7 @@ pub fn apply_param_named_phase_func_overrides(
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_params = params.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyParamNamedPhaseFuncOverrides(
             qureg.reg,
