@@ -2497,7 +2497,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap();
@@ -2510,7 +2510,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1, 0],
+        &[1, 0, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2523,7 +2523,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1, 0],
+        &[1, 0, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2536,7 +2536,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1, 0],
+        &[1, 0, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2549,7 +2549,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1, 0],
+        &[1, 0, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2562,7 +2562,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[0, 1],
-        &[1, 0],
+        &[1, 0, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2575,7 +2575,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[-2., 2.],
         &[1, 1],
-        &[1, 0],
+        &[1, 0, 1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2588,7 +2588,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[9],
+        &[0, 9, 0, 1],
         &[0.],
     )
     .unwrap_err();
@@ -2658,7 +2658,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 1],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap();
@@ -2669,7 +2669,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 1],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2680,7 +2680,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 1],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2691,7 +2691,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 1],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2702,7 +2702,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 9],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2713,7 +2713,7 @@ fn apply_named_phase_func_overrides_01() {
         &[1, 1],
         BitEncoding::UNSIGNED,
         PhaseFunc::DISTANCE,
-        &[0, 9],
+        &[0, 9, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2800,7 +2800,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap();
@@ -2812,7 +2812,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2824,7 +2824,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2836,7 +2836,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2848,7 +2848,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2861,7 +2861,7 @@ fn apply_param_named_phase_func_overrides_01() {
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         // wrong number of parameters
         &[0., 0.],
-        &[0, 1],
+        &[0, 1, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
@@ -2873,7 +2873,7 @@ fn apply_param_named_phase_func_overrides_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
-        &[0, 9],
+        &[0, 9, 0, 1],
         &[0., 0.],
     )
     .unwrap_err();
