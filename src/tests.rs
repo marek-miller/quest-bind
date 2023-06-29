@@ -2309,8 +2309,8 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1],
-        &[0.],
+        &[0, 1],
+        &[0., 0.],
     )
     .unwrap();
 
@@ -2322,7 +2322,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2335,7 +2335,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2348,7 +2348,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2361,7 +2361,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[1, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2374,7 +2374,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[2., 2.],
         &[0, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
@@ -2387,7 +2387,7 @@ fn apply_multi_var_phase_func_overrides_01() {
         &[0.5, 0.5],
         &[-2., 2.],
         &[1, 1],
-        &[1],
+        &[1, 0],
         &[0.],
     )
     .unwrap_err();
