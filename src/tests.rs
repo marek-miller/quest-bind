@@ -2772,7 +2772,7 @@ fn apply_param_named_phase_func_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         // wrong number of parameters
-        &[0., 0.,],
+        &[0., 0.],
     )
     .unwrap_err();
 
@@ -2783,6 +2783,98 @@ fn apply_param_named_phase_func_01() {
         BitEncoding::UNSIGNED,
         PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
         &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_param_named_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        // wrong number of parameters
+        &[0., 0.],
+        &[0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 9],
+        &[0., 0.],
     )
     .unwrap_err();
 }
