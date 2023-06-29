@@ -5026,12 +5026,33 @@ pub fn apply_named_phase_func_overrides(
     })
 }
 
-/// Desc.
+
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named, paramaterized (and potentially multi-variable) phase function.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::SCALED_INVERSE_SHIFTED_NORM;
+/// let params = &[0., 0., 0., 0.];
+///
+/// apply_param_named_phase_func(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+///     params,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.

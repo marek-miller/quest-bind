@@ -2720,6 +2720,74 @@ fn apply_named_phase_func_overrides_01() {
 }
 
 #[test]
+fn apply_param_named_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        // wrong number of parameters
+        &[0., 0.,],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
 fn calc_expec_pauli_prod_01() {
     use PauliOpType::PAULI_X;
     let env = &QuestEnv::new();
