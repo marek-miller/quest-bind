@@ -4595,32 +4595,6 @@ pub fn apply_phase_func_overrides(
     })
 }
 
-#[test]
-fn apply_multi_var_phase_func_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(3, env).unwrap();
-    init_zero_state(qureg);
-    pauli_x(qureg, 1).unwrap();
-
-    let qubits = &[0, 1];
-    let num_qubits_per_reg = &[1, 1];
-    let encoding = BitEncoding::UNSIGNED;
-    let coeffs = &[0.5, 0.5];
-    let exponents = &[2., 2.];
-    let num_terms_per_reg = &[1, 1];
-
-    apply_multi_var_phase_func(
-        qureg,
-        qubits,
-        num_qubits_per_reg,
-        encoding,
-        coeffs,
-        exponents,
-        num_terms_per_reg,
-    )
-    .unwrap();
-}
-
 /// Induces a phase change upon each amplitude of `qureg`, determined by a
 /// multi-variable exponential polynomial "phase function".
 ///
@@ -4686,6 +4660,32 @@ pub fn apply_multi_var_phase_func(
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[2., 2.];
+/// let num_terms_per_reg = &[1, 1];
+/// let override_inds = &[1];
+/// let override_phases = &[0.];
+///
+/// apply_multi_var_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     coeffs,
+///     exponents,
+///     num_terms_per_reg,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4720,6 +4720,36 @@ pub fn apply_multi_var_phase_func_overrides(
             num_overrides,
         );
     })
+}
+
+#[test]
+fn apply_multi_var_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    let qubits = &[0, 1];
+    let num_qubits_per_reg = &[1, 1];
+    let encoding = BitEncoding::UNSIGNED;
+    let coeffs = &[0.5, 0.5];
+    let exponents = &[2., 2.];
+    let num_terms_per_reg = &[1, 1];
+    let override_inds = &[1];
+    let override_phases = &[0.];
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        qubits,
+        num_qubits_per_reg,
+        encoding,
+        coeffs,
+        exponents,
+        num_terms_per_reg,
+        override_inds,
+        override_phases,
+    )
+    .unwrap();
 }
 
 /// Desc.

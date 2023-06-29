@@ -2293,3 +2293,115 @@ fn apply_multi_var_phase_func_01() {
     )
     .unwrap_err();
 }
+
+#[test]
+fn apply_multi_var_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[0, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[1, 1],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[9],
+        &[0.],
+    )
+    .unwrap_err();
+}
