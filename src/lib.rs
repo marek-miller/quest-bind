@@ -4486,7 +4486,6 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
-
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
 /// passed exponential polynomial *phase function*.
 ///
@@ -4532,28 +4531,36 @@ pub fn apply_phase_func(
     })
 }
 
-
-#[test]
-fn apply_phase_func_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(3, env).unwrap();
-    init_zero_state(qureg);
-    pauli_x(qureg, 1).unwrap();
-
-    let qubits = &[0, 1];
-    let encoding = BitEncoding::UNSIGNED;
-    let coeffs = &[0.5, 0.5];
-    let exponents = &[0., 2.];
-
-    apply_phase_func(qureg, qubits, encoding, coeffs, exponents).unwrap();
-}
-
-/// Desc.
+/// Induces a phase change upon each amplitude of `qureg`, determined by the
+/// passed  exponential polynomial "phase function", and an explicit set of
+/// 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[-2., 2.];
+/// let override_inds = &[0];
+/// let override_phases = &[0.];
+///
+/// apply_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     encoding,
+///     coeffs,
+///     exponents,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4586,6 +4593,32 @@ pub fn apply_phase_func_overrides(
             num_overrides,
         );
     })
+}
+
+#[test]
+fn apply_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    let qubits = &[0, 1];
+    let encoding = BitEncoding::UNSIGNED;
+    let coeffs = &[0.5, 0.5];
+    let exponents = &[-2., 2.];
+    let override_inds = &[0];
+    let override_phases = &[0.];
+
+    apply_phase_func_overrides(
+        qureg,
+        qubits,
+        encoding,
+        coeffs,
+        exponents,
+        override_inds,
+        override_phases,
+    )
+    .unwrap();
 }
 
 /// Desc.
