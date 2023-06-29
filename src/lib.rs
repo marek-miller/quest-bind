@@ -4934,7 +4934,7 @@ pub fn apply_named_phase_func(
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
     function_name_code: PhaseFunc,
-) {
+) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFunc(
@@ -4946,7 +4946,6 @@ pub fn apply_named_phase_func(
             function_name_code,
         );
     })
-    .expect("apply_named_phase_func should always succeed");
 }
 
 /// Desc.

@@ -281,6 +281,10 @@ API breaking changes:
 
   These functions now take the list of Kraus operators by reference.
 
+  - `apply_named_phase_func()`
+
+  This function returns now `Result<(), QuestError>`.
+
 ### v0.2.0 (24/06/2023)
 
 New features/improvements:
