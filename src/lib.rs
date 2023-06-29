@@ -4848,7 +4848,9 @@ pub fn apply_multi_var_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// multi-variable exponential polynomial "phase function", and an explicit set
+/// of 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
