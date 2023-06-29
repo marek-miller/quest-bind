@@ -864,10 +864,14 @@ pub fn calc_expec_diagonal_op(
     .map(Into::into)
 }
 
+/// Print the current state vector of probability amplitudes for a set of qubits
+/// to file.
 pub fn report_state(qureg: &Qureg) {
     unsafe { ffi::reportState(qureg.reg) }
 }
 
+/// Print the current state vector of probability amplitudes for a set of qubits
+/// to standard out.
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -876,12 +880,15 @@ pub fn report_state_to_screen(
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
 }
 
+/// Report metainformation about a set of qubits: number of qubits, number of
+/// probability amplitudes.
 pub fn report_qureg_params(qureg: &Qureg) {
     unsafe {
         ffi::reportQuregParams(qureg.reg);
     }
 }
 
+/// Print the `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::reportPauliHamil(hamil.0);
