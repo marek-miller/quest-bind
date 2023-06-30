@@ -2058,3 +2058,64 @@ fn multi_rotate_pauli_01() {
         .unwrap_err();
     multi_rotate_pauli(qureg, &[0, 1], &[PAULI_X], 0.).unwrap_err();
 }
+
+#[test]
+fn two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap_err();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap_err();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}

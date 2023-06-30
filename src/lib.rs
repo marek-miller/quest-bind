@@ -3626,12 +3626,38 @@ pub fn calc_expec_pauli_hamil(
     })
 }
 
-/// Desc.
+///  Apply a general two-qubit unitary (including a global phase factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let target_qubit1 = 1;
+/// let target_qubit2 = 2;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// two_qubit_unitary(qureg, target_qubit1, target_qubit2, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3643,9 +3669,45 @@ pub fn two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if !((0..num_qubits_rep).contains(&target_qubit1)
+        && (0..num_qubits_rep).contains(&target_qubit2))
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::twoQubitUnitary(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
+}
+
+#[test]
+fn two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let target_qubit1 = 1;
+    let target_qubit2 = 2;
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, target_qubit1, target_qubit2, u).unwrap();
+
+    let amp = get_real_amp(qureg, 7).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
 }
 
 /// Desc.
