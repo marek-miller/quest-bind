@@ -3751,12 +3751,48 @@ pub fn controlled_two_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general multi-qubit unitary (including a global phase factor) with
+/// any number of target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let control_qubits = &[0, 1];
+/// let target_qubit1 = 2;
+/// let target_qubit2 = 3;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// multi_controlled_two_qubit_unitary(
+///     qureg,
+///     control_qubits,
+///     target_qubit1,
+///     target_qubit2,
+///     u,
+/// )
+/// .unwrap();
+///
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3769,7 +3805,18 @@ pub fn multi_controlled_two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
     let num_control_qubits = control_qubits.len() as i32;
+    for idx in control_qubits {
+        if !(0..num_qubits_rep).contains(idx) {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if !((0..num_qubits_rep).contains(&target_qubit1)
+        && (0..num_qubits_rep).contains(&target_qubit2))
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledTwoQubitUnitary(
             qureg.reg,
@@ -3895,37 +3942,6 @@ pub fn controlled_multi_qubit_unitary(
             u.0,
         );
     })
-}
-
-#[test]
-fn multi_controlled_multi_qubit_unitary_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(4, env).unwrap();
-    init_zero_state(qureg);
-    pauli_x(qureg, 0).unwrap();
-    pauli_x(qureg, 1).unwrap();
-
-    let u = &mut ComplexMatrixN::try_new(2).unwrap();
-    let zero_row = &[0., 0., 0., 0.];
-    init_complex_matrix_n(
-        u,
-        &[
-            &[0., 0., 0., 1.],
-            &[0., 1., 0., 0.],
-            &[0., 0., 1., 0.],
-            &[1., 0., 0., 0.],
-        ],
-        &[zero_row, zero_row, zero_row, zero_row],
-    )
-    .unwrap();
-
-    let ctrls = &[0, 1];
-    let targs = &[2, 3];
-    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
-
-    // Check if the register is now in the state `|1111>`
-    let amp = get_real_amp(qureg, 15).unwrap();
-    assert!((amp - 1.).abs() < EPSILON);
 }
 
 /// Apply a general multi-controlled multi-qubit unitary (including a global
