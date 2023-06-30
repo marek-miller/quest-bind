@@ -2357,3 +2357,245 @@ fn calc_expec_pauli_hamil_02() {
 
     calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap_err();
 }
+
+#[test]
+fn two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap_err();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap_err();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn controlled_two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 2, u).unwrap();
+    controlled_two_qubit_unitary(qureg, 1, 2, 0, u).unwrap();
+    controlled_two_qubit_unitary(qureg, 2, 0, 1, u).unwrap();
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, -1, 0, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 4, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, -1, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn controlled_two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 2, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 1, 2, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 2, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, -1, 0, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 4, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, -1, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 2, 3, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 0], 3, 2, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 2], 0, 3, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[3, 0], 2, 1, u).unwrap();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 0], 1, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 1, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[-1, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[5, 1], 2, 3, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], -1, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 5, 3, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 0], 3, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 2], 0, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[3, 0], 2, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 0], 1, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 1, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[-1, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[5, 1], 2, 3, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], -1, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 5, 3, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_multi_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    let ctrls = &[0, 1];
+    let targs = &[2, 3];
+    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+
+    // Check if the register is now in the state `|1111>`
+    let amp = get_real_amp(qureg, 15).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
+}
