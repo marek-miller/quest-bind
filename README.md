@@ -136,11 +136,10 @@ Then run:
 cargo test
 ```
 
-Note that
-`quest-bind will not run `QuEST`'s test suite, nor will it check `QuEST`'s
-correctness. The tests here are intended to check if the C API is invoked
-correctly, and if Rust's types are passed safely back and forth across the FFI
-boundary.
+Note that `quest-bind will not run` QuEST's test suite, nor will it check
+`QuEST`'s correctness. The tests here are intended to check if the C API is
+invoked correctly, and if Rust's types are passed safely back and forth across
+the FFI boundary.
 
 If you want to run the test suite in the single-precision floating point mode,
 make sure the build script recompiles `libQuEST.so` with the right type
@@ -269,13 +268,8 @@ rustup doc
 
 Here's a few things to know if you'd like to contribute to `quest-bind`.
 
-- Focus on fixing bugs, writing tests and documentation. There aren't any
-  interesting features to add here.
-- If your work doesn't introduce any API breaking changes, request a merge into
-  `main` branch. On the other hand, if your changes are not backward compatible,
-  rebase your branch onto `dev` first, then request a merge into `dev`.
-- The Rust codebase is formatted with settings in the local `rustfmt.toml` file.
-  We enable unstable features of `rustfmt`. Hence, to format your patches
+- The Rust codebase is formatted according to the settings in `./rustfmt.toml`.
+  We enable some unstable features of `rustfmt`. To format your patches
   correctly, you will need the nightly version of the Rust compiler. Before
   opening a pull request, remove lint from the code by running:
 
