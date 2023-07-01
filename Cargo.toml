@@ -1,16 +1,19 @@
 [package]
-name = "quest_bind"
-version = "0.2.0"
+description = "Wrapper for QuEST quantum circuit simulator"
 edition = "2021"
+homepage = "https://github.com/marek-miller/quest-bind"
+license = "MIT"
+name = "quest_bind"
+readme = "README.md"
+repository = "https://github.com/marek-miller/quest-bind.git"
+version = "0.2.1"
 
 [features]
 f32 = []
 gpu = []
 mpi = []
 
-
 [dependencies]
-env_logger = "0.10.0"
 log = "0.4.19"
 num = "0.4.0"
 rand = "0.8.5"
