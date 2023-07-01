@@ -3504,12 +3504,33 @@ pub fn multi_rotate_pauli(
     })
 }
 
-/// Desc.
+/// Apply a multi-controlled multi-target Z rotation.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+///
+/// // Initialize `|1111>`
+/// init_zero_state(qureg);
+/// (0..4).try_for_each(|i| pauli_x(qureg, i)).unwrap();
+///
+/// let control_qubits = &[0, 1];
+/// let target_qubits = &[2, 3];
+/// let angle = 2. * PI;
+/// multi_controlled_multi_rotate_z(
+///     qureg,
+///     control_qubits,
+///     target_qubits,
+///     angle,
+/// )
+/// .unwrap();
+///
+/// // the state is now `-1. * |1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp + 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
