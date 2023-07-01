@@ -270,9 +270,11 @@ Here's a few things to know if you'd like to contribute to `quest-bind`.
 
 ## Releases
 
-### v0.3.0 (??/??/????)
+### v0.3.0 (02/07/2023)
 
 New features/improvements:
+
+- Expanded and improved documentation and test suite.
 
 API breaking changes:
 
@@ -288,17 +290,15 @@ API breaking changes:
 
   This function returns now `Result<(), QuestError>`.
 
-- Change signature of the following functions:
-
   - `apply_pauli_sum()`
   - `apply_pauli_hamil()`
 
   These functions take argument `in_qureg` as `&mut` now (instead of a shared
   reference).
 
-- Fix typo in the function name: `apply_trotter_circuit()` (was:
-  `apply_trotter_circuitit()`).
-- Function: `multi_controlled_multi_rotate_pauli()` changes signature.
+- Fix typo in the function name: `apply_trotter_circuit()`
+
+- Function: `multi_controlled_multi_rotate_pauli()` also changes signature.
 
 ### v0.2.1 (01/07/2023)
 
