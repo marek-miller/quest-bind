@@ -268,13 +268,6 @@ Here's a few things to know if you'd like to contribute to `quest-bind`.
   just lint
   ```
 
-## TODO
-
-- Expand and improve documentation.
-- Expand test suite
-- Design test for MPI and GPU modes
-- Add non-blocking API: `*_nonblk()` functions.
-
 ## Releases
 
 ### v0.3.0 (??/??/????)
