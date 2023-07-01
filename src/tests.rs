@@ -3450,3 +3450,43 @@ fn multi_controlled_multi_rotate_z_01() {
     multi_controlled_multi_rotate_z(qureg, &[0, 1], &[0, 3], 0.).unwrap_err();
     multi_controlled_multi_rotate_z(qureg, &[0, 3], &[2, 3], 0.).unwrap_err();
 }
+
+#[test]
+fn multi_controlled_multi_rotate_pauli_01() {
+    use PauliOpType::PAULI_Z;
+
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+
+    // Initialize `|1111>`
+    init_zero_state(qureg);
+    (0..4).try_for_each(|i| pauli_x(qureg, i)).unwrap();
+
+    let tar_paul = &[PAULI_Z, PAULI_Z];
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 3], tar_paul, 0.)
+        .unwrap();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 2], &[1, 3], tar_paul, 0.)
+        .unwrap();
+    multi_controlled_multi_rotate_pauli(qureg, &[2, 1], &[3, 0], tar_paul, 0.)
+        .unwrap();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 0], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 2], tar_paul, 0.)
+        .unwrap_err();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[-1, 1], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 4], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[-1, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 4], tar_paul, 0.)
+        .unwrap_err();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[0, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 3], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+}

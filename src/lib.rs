@@ -3556,12 +3556,37 @@ pub fn multi_controlled_multi_rotate_z(
     })
 }
 
-/// Desc.
+/// Apply a multi-controlled multi-target multi-Pauli rotation.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_Z;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+///
+/// // Initialize `|1111>`
+/// init_zero_state(qureg);
+/// (0..4).try_for_each(|i| pauli_x(qureg, i)).unwrap();
+///
+/// let control_qubits = &[0, 1];
+/// let target_qubits = &[2, 3];
+/// let target_paulis = &[PAULI_Z, PAULI_Z];
+/// let angle = 2. * PI;
+/// multi_controlled_multi_rotate_pauli(
+///     qureg,
+///     control_qubits,
+///     target_qubits,
+///     target_paulis,
+///     angle,
+/// )
+/// .unwrap();
+///
+/// // the state is now `-1. * |1111>`
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp + 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3570,12 +3595,15 @@ pub fn multi_controlled_multi_rotate_z(
 pub fn multi_controlled_multi_rotate_pauli(
     qureg: &mut Qureg,
     control_qubits: &[i32],
-    num_controls: i32,
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
-    num_targets: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
+    let num_controls = control_qubits.len() as i32;
+    let num_targets = target_qubits.len() as i32;
+    if target_paulis.len() != target_qubits.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiRotatePauli(
             qureg.reg,

@@ -298,6 +298,7 @@ API breaking changes:
 
 - Fix typo in the function name: `apply_trotter_circuit()` (was:
   `apply_trotter_circuitit()`).
+- Function: `multi_controlled_multi_rotate_pauli()` changes signature.
 
 ### v0.2.1 (01/07/2023)
 
