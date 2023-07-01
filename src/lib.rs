@@ -1494,12 +1494,16 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     .expect("get_environment_string should always succeed")
 }
 
-/// Desc.
+/// Copy the state-vector (or density matrix) from RAM to VRAM / GPU-memory.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// copy_state_to_gpu(qureg);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -1513,6 +1517,16 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 }
 
 /// In GPU mode, this copies the state-vector (or density matrix) from RAM.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// copy_state_from_gpu(qureg);
+/// ```
 ///
 /// See [QuEST API][1] for more information.
 ///
