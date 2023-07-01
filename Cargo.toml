@@ -6,7 +6,7 @@ license = "MIT"
 name = "quest_bind"
 readme = "README.md"
 repository = "https://github.com/marek-miller/quest-bind.git"
-version = "0.2.0"
+version = "0.2.1"
 
 [features]
 f32 = []

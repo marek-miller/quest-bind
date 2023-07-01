@@ -277,7 +277,7 @@ Here's a few things to know if you'd like to contribute to `quest-bind`.
 
 ## Releases
 
-### v0.2.1 (??/07/2023)
+### v0.2.1 (01/07/2023)
 
 New features/improvements:
 
