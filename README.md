@@ -255,15 +255,6 @@ documentation for the module `std::ffi` in Rust's Standard Library:
 rustup doc
 ```
 
-## TODO
-
-- Expand and improve documentation.
-- Expand test suite
-- Design test for MPI and GPU modes
-- Add non-blocking API: `*_nonblk()` functions.
-- Publish to `crates.io`
-- Generic nummerical traits from `num_traits`
-
 ## Contributing
 
 Here's a few things to know if you'd like to contribute to `quest-bind`.
@@ -276,6 +267,13 @@ Here's a few things to know if you'd like to contribute to `quest-bind`.
   ```sh
   just lint
   ```
+
+## TODO
+
+- Expand and improve documentation.
+- Expand test suite
+- Design test for MPI and GPU modes
+- Add non-blocking API: `*_nonblk()` functions.
 
 ## Releases
 
