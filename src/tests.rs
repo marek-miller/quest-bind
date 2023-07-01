@@ -3322,3 +3322,25 @@ fn apply_pauli_hamil_02() {
 
     apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap_err();
 }
+
+#[test]
+fn apply_trotter_circuit_01() {
+    use PauliOpType::PAULI_X;
+
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg);
+
+    let hamil = &mut PauliHamil::try_new(1, 1).unwrap();
+    let coeffs = &[1.];
+    let codes = &[PAULI_X];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_trotter_circuit(qureg, hamil, 0., 1, 1).unwrap();
+    apply_trotter_circuit(qureg, hamil, 0., 2, 1).unwrap();
+    apply_trotter_circuit(qureg, hamil, 0., 1, 2).unwrap();
+
+    apply_trotter_circuit(qureg, hamil, 0., -1, 1).unwrap_err();
+    apply_trotter_circuit(qureg, hamil, 0., 1, 0).unwrap_err();
+    apply_trotter_circuit(qureg, hamil, 0., 1, -1).unwrap_err();
+}

@@ -4553,7 +4553,12 @@ pub fn apply_pauli_sum(
     })
 }
 
-/// Desc.
+/// Modifies `out_qureg` to be the result of applying `PauliHamil` (a Hermitian
+/// but not  necessarily unitary operator) to `in_qureg`.
+///
+/// In theory, `in_qureg` is unchanged though its state is temporarily modified
+/// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
+/// small numerical errors. The initial state in `out_qureg` is not used.
 ///
 /// # Examples
 ///
@@ -4595,36 +4600,32 @@ pub fn apply_pauli_hamil(
     })
 }
 
-#[test]
-fn apply_trotter_circuit_01() {
-    use PauliOpType::{
-        PAULI_I,
-        PAULI_X,
-    };
-    let env = &QuestEnv::new();
-    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
-    init_zero_state(in_qureg);
-    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
-
-    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
-    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
-    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
-    init_pauli_hamil(hamil, coeffs, codes).unwrap();
-
-    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
-
-    // out_qureg is now in `|01> + |10>` state:
-    let qb1 = measure(out_qureg, 0).unwrap();
-    let qb2 = measure(out_qureg, 1).unwrap();
-    assert!(qb1 != qb2);
-}
-
-/// Desc.
+/// Applies a trotterisation of unitary evolution `$\exp(-i \, \text{hamil} \,
+/// \text{time})$` to `qureg`.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::PAULI_X;
+///
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(1, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let hamil = &mut PauliHamil::try_new(1, 1).unwrap();
+/// let coeffs = &[1.];
+/// let codes = &[PAULI_X];
+/// init_pauli_hamil(hamil, coeffs, codes).unwrap();
+///
+/// let time = PI / 2.;
+/// let order = 1;
+/// let reps = 1;
+/// apply_trotter_circuit(qureg, hamil, time, order, reps).unwrap();
+///
+/// // qureg is now in `|1>` state:
+/// let qb1 = measure(qureg, 0).unwrap();
+/// assert_eq!(qb1, 1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
