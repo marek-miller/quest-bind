@@ -283,6 +283,8 @@ Here's a few things to know if you'd like to contribute to `quest-bind`.
 
 New features/improvements:
 
+- Expand and improve documentation and test suite
+
 ### v0.2.0 (24/06/2023)
 
 New features/improvements:
