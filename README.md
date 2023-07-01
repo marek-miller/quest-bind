@@ -284,6 +284,12 @@ API breaking changes:
 
   This function returns now `Result<(), QuestError>`.
 
+- Change signature of the following functions:
+  - `apply_pauli_sum()`
+  - `applu_pauli_hamil()`
+  These function take argument `in_qureg` as `&mut` now (instead of a shared
+  reference).
+
 ### v0.2.0 (24/06/2023)
 
 New features/improvements:

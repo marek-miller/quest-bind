@@ -4513,7 +4513,7 @@ pub fn set_weighted_qureg(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_sum(
-    in_qureg: &Qureg,
+    in_qureg: &mut Qureg,
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
     out_qureg: &mut Qureg,
@@ -4542,7 +4542,7 @@ pub fn apply_pauli_sum(
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_hamil(
-    in_qureg: &Qureg,
+    in_qureg: &mut Qureg,
     hamil: &PauliHamil,
     out_qureg: &mut Qureg,
 ) -> Result<(), QuestError> {
