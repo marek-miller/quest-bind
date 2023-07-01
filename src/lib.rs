@@ -4501,12 +4501,34 @@ pub fn set_weighted_qureg(
     })
 }
 
-/// Desc.
+/// Modifies `out_qureg` to be the result of applying the weighted sum of Pauli
+/// products.
+///
+/// In theory, `in_qureg` is unchanged though its state is temporarily modified
+/// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
+/// small numerical errors. The initial state in `out_qureg` is not used.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::{
+///     PAULI_I,
+///     PAULI_X,
+/// };
+/// let env = &QuestEnv::new();
+/// let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(in_qureg);
+/// let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+/// let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+///
+/// apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+///
+/// // out_qureg is now in `|01> + |10>` state:
+/// let qb1 = measure(out_qureg, 0).unwrap();
+/// let qb2 = measure(out_qureg, 1).unwrap();
+/// assert!(qb1 != qb2);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4528,6 +4550,27 @@ pub fn apply_pauli_sum(
             out_qureg.reg,
         );
     })
+}
+
+#[test]
+fn apply_pauli_hamil_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+
+    // out_qureg is now in `|01> + |10>` state:
+    let qb1 = measure(out_qureg, 0).unwrap();
+    let qb2 = measure(out_qureg, 1).unwrap();
+    assert!(qb1 != qb2);
 }
 
 /// Desc.

@@ -3231,3 +3231,55 @@ fn multi_controlled_multi_qubit_unitary_01() {
     let amp = get_real_amp(qureg, 15).unwrap();
     assert!((amp - 1.).abs() < EPSILON);
 }
+
+#[test]
+fn apply_pauli_sum_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+}
+
+#[test]
+fn apply_pauli_sum_02() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(3, env).unwrap();
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    // in_ and out_qureg' dimensions are different
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg)
+        .unwrap_err();
+}
+
+#[test]
+fn apply_pauli_sum_03() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    // wrong number of codes
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+}
