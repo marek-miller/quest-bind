@@ -255,14 +255,25 @@ documentation for the module `std::ffi` in Rust's Standard Library:
 rustup doc
 ```
 
+## Contributing
+
+Here's a few things to know if you'd like to contribute to `quest-bind`.
+
+- The Rust codebase is formatted according to the settings in `./rustfmt.toml`.
+  We enable some unstable features of `rustfmt`. To format your patches
+  correctly, you will need the nightly version of the Rust compiler. Before
+  opening a pull request, remove lint from the code by running:
+
+  ```sh
+  just lint
+  ```
+
 ## TODO
 
 - Expand and improve documentation.
 - Expand test suite
 - Design test for MPI and GPU modes
 - Add non-blocking API: `*_nonblk()` functions.
-- Publish to `crates.io`
-- Generic nummerical traits from `num_traits`
 
 ## Releases
 
@@ -294,6 +305,12 @@ API breaking changes:
 
 - Fix typo in the function name: `apply_trotter_circuit()` (was:
   `apply_trotter_circuitit()`).
+
+### v0.2.1 (01/07/2023)
+
+New features/improvements:
+
+- Expand and improve documentation and test suite
 
 ### v0.2.0 (24/06/2023)
 
