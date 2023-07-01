@@ -864,10 +864,14 @@ pub fn calc_expec_diagonal_op(
     .map(Into::into)
 }
 
+/// Print the current state vector of probability amplitudes for a set of qubits
+/// to file.
 pub fn report_state(qureg: &Qureg) {
     unsafe { ffi::reportState(qureg.reg) }
 }
 
+/// Print the current state vector of probability amplitudes for a set of qubits
+/// to standard out.
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -876,12 +880,15 @@ pub fn report_state_to_screen(
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
 }
 
+/// Report metainformation about a set of qubits: number of qubits, number of
+/// probability amplitudes.
 pub fn report_qureg_params(qureg: &Qureg) {
     unsafe {
         ffi::reportQuregParams(qureg.reg);
     }
 }
 
+/// Print the `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::reportPauliHamil(hamil.0);
@@ -3687,12 +3694,38 @@ pub fn calc_expec_pauli_hamil(
     })
 }
 
-/// Desc.
+///  Apply a general two-qubit unitary (including a global phase factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let target_qubit1 = 1;
+/// let target_qubit2 = 2;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// two_qubit_unitary(qureg, target_qubit1, target_qubit2, u).unwrap();
+///
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3704,17 +3737,58 @@ pub fn two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if !((0..num_qubits_rep).contains(&target_qubit1)
+        && (0..num_qubits_rep).contains(&target_qubit2))
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::twoQubitUnitary(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
 }
 
-/// Desc.
+/// Apply a general controlled two-qubit unitary (including a global phase
+/// factor).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+///
+/// let control_qubit = 0;
+/// let target_qubit1 = 1;
+/// let target_qubit2 = 2;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// controlled_two_qubit_unitary(
+///     qureg,
+///     control_qubit,
+///     target_qubit1,
+///     target_qubit2,
+///     u,
+/// )
+/// .unwrap();
+///
+/// let amp = get_real_amp(qureg, 7).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3727,6 +3801,13 @@ pub fn controlled_two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
+    if !((0..num_qubits_rep).contains(&target_qubit1)
+        && (0..num_qubits_rep).contains(&target_qubit2)
+        && (0..num_qubits_rep).contains(&control_qubit))
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledTwoQubitUnitary(
             qureg.reg,
@@ -3738,12 +3819,48 @@ pub fn controlled_two_qubit_unitary(
     })
 }
 
-/// Desc.
+/// Apply a general multi-qubit unitary (including a global phase factor) with
+/// any number of target qubits.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(4, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 0).unwrap();
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let control_qubits = &[0, 1];
+/// let target_qubit1 = 2;
+/// let target_qubit2 = 3;
+/// let u = &ComplexMatrix4::new(
+///     [
+///         [0., 0., 0., 1.],
+///         [0., 1., 0., 0.],
+///         [0., 0., 1., 0.],
+///         [1., 0., 0., 0.],
+///     ],
+///     [
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///         [0., 0., 0., 0.],
+///     ],
+/// );
+///
+/// multi_controlled_two_qubit_unitary(
+///     qureg,
+///     control_qubits,
+///     target_qubit1,
+///     target_qubit2,
+///     u,
+/// )
+/// .unwrap();
+///
+/// let amp = get_real_amp(qureg, 15).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -3756,7 +3873,18 @@ pub fn multi_controlled_two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
+    let num_qubits_rep = qureg.num_qubits_represented();
     let num_control_qubits = control_qubits.len() as i32;
+    for idx in control_qubits {
+        if !(0..num_qubits_rep).contains(idx) {
+            return Err(QuestError::QubitIndexError);
+        }
+    }
+    if !((0..num_qubits_rep).contains(&target_qubit1)
+        && (0..num_qubits_rep).contains(&target_qubit2))
+    {
+        return Err(QuestError::QubitIndexError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledTwoQubitUnitary(
             qureg.reg,
@@ -3882,37 +4010,6 @@ pub fn controlled_multi_qubit_unitary(
             u.0,
         );
     })
-}
-
-#[test]
-fn multi_controlled_multi_qubit_unitary_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(4, env).unwrap();
-    init_zero_state(qureg);
-    pauli_x(qureg, 0).unwrap();
-    pauli_x(qureg, 1).unwrap();
-
-    let u = &mut ComplexMatrixN::try_new(2).unwrap();
-    let zero_row = &[0., 0., 0., 0.];
-    init_complex_matrix_n(
-        u,
-        &[
-            &[0., 0., 0., 1.],
-            &[0., 1., 0., 0.],
-            &[0., 0., 1., 0.],
-            &[1., 0., 0., 0.],
-        ],
-        &[zero_row, zero_row, zero_row, zero_row],
-    )
-    .unwrap();
-
-    let ctrls = &[0, 1];
-    let targs = &[2, 3];
-    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
-
-    // Check if the register is now in the state `|1111>`
-    let amp = get_real_amp(qureg, 15).unwrap();
-    assert!((amp - 1.).abs() < EPSILON);
 }
 
 /// Apply a general multi-controlled multi-qubit unitary (including a global
@@ -4668,13 +4765,24 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
-/// Induces a phase change upon each amplitude of \p qureg, determined by the
-/// passed exponential polynomial "phase function".
+/// Induces a phase change upon each amplitude of `qureg`, determined by the
+/// passed exponential polynomial *phase function*.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[0., 2.];
+///
+/// apply_phase_func(qureg, qubits, encoding, coeffs, exponents).unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4706,13 +4814,36 @@ pub fn apply_phase_func(
     })
 }
 
-/// Induces a phase change upon each amplitude of \p qureg, determined by the
-/// passed exponential polynomial "phase function".
+/// Induces a phase change upon each amplitude of `qureg`, determined by the
+/// passed  exponential polynomial "phase function", and an explicit set of
+/// 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[-2., 2.];
+/// let override_inds = &[0];
+/// let override_phases = &[0.];
+///
+/// apply_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     encoding,
+///     coeffs,
+///     exponents,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4755,12 +4886,35 @@ pub fn apply_phase_func_overrides(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of `qureg`, determined by a
+/// multi-variable exponential polynomial "phase function".
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[2., 2.];
+/// let num_terms_per_reg = &[1, 1];
+///
+/// apply_multi_var_phase_func(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     coeffs,
+///     exponents,
+///     num_terms_per_reg,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4791,12 +4945,40 @@ pub fn apply_multi_var_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// multi-variable exponential polynomial "phase function", and an explicit set
+/// of 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let coeffs = &[0.5, 0.5];
+/// let exponents = &[2., 2.];
+/// let num_terms_per_reg = &[1, 1];
+/// let override_inds = &[0, 1, 0, 1];
+/// let override_phases = &[0., 0.];
+///
+/// apply_multi_var_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     coeffs,
+///     exponents,
+///     num_terms_per_reg,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4815,7 +4997,7 @@ pub fn apply_multi_var_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyMultiVarPhaseFuncOverrides(
             qureg.reg,
@@ -4833,12 +5015,30 @@ pub fn apply_multi_var_phase_func_overrides(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of `qureg`, determined by a
+/// named (and potentially multi-variable) phase function.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::DISTANCE;
+///
+/// apply_named_phase_func(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4850,7 +5050,7 @@ pub fn apply_named_phase_func(
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
     function_name_code: PhaseFunc,
-) {
+) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFunc(
@@ -4862,15 +5062,37 @@ pub fn apply_named_phase_func(
             function_name_code,
         );
     })
-    .expect("apply_named_phase_func should always succeed");
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named (and potentially multi-variable) phase function, and an explicit set
+/// of 'overriding' values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::DISTANCE;
+/// let override_inds = &[0, 1, 0, 1];
+/// let override_phases = &[0., 0.];
+///
+/// apply_named_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4887,7 +5109,7 @@ pub fn apply_named_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFuncOverrides(
             qureg.reg,
@@ -4903,12 +5125,32 @@ pub fn apply_named_phase_func_overrides(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named, paramaterized (and potentially multi-variable) phase function.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::SCALED_INVERSE_SHIFTED_NORM;
+/// let params = &[0., 0., 0., 0.];
+///
+/// apply_param_named_phase_func(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+///     params,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4939,12 +5181,37 @@ pub fn apply_param_named_phase_func(
     })
 }
 
-/// Desc.
+/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// named, parameterised (and potentially multi-variable) phase function, and an
+/// explicit set of "overriding" values at specific state indices.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[0, 1];
+/// let num_qubits_per_reg = &[1, 1];
+/// let encoding = BitEncoding::UNSIGNED;
+/// let function_name_code = PhaseFunc::SCALED_INVERSE_SHIFTED_NORM;
+/// let params = &[0., 0., 0., 0.];
+/// let override_inds = &[0, 1, 0, 1];
+/// let override_phases = &[0., 0.];
+///
+/// apply_param_named_phase_func_overrides(
+///     qureg,
+///     qubits,
+///     num_qubits_per_reg,
+///     encoding,
+///     function_name_code,
+///     params,
+///     override_inds,
+///     override_phases,
+/// )
+/// .unwrap();
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4963,7 +5230,7 @@ pub fn apply_param_named_phase_func_overrides(
 ) -> Result<(), QuestError> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_params = params.len() as i32;
-    let num_overrides = override_inds.len() as i32;
+    let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyParamNamedPhaseFuncOverrides(
             qureg.reg,

@@ -2248,6 +2248,638 @@ fn multi_rotate_pauli_01() {
 }
 
 #[test]
+fn apply_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_phase_func(
+        qureg,
+        &[0, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap();
+    apply_phase_func(
+        qureg,
+        &[1, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap();
+
+    apply_phase_func(
+        qureg,
+        &[0, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+    apply_phase_func(
+        qureg,
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+
+    apply_phase_func(
+        qureg,
+        &[0, 2],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+    apply_phase_func(
+        qureg,
+        &[-1, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[0., 2.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_phase_func_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    // exponents contains a fractional number despite \p encoding <b>=</b>
+    // ::TWOS_COMPLEMENT
+    apply_phase_func(
+        qureg,
+        &[0, 1],
+        BitEncoding::TWOS_COMPLEMENT,
+        &[0.5, 0.5],
+        &[0., 0.5],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[0],
+        &[0.],
+    )
+    .unwrap();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[0],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[0],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[0],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_phase_func_overrides(
+        qureg,
+        &[0, 9],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[1., 2.],
+        &[0],
+        &[0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_multi_var_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+    )
+    .unwrap();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[-1, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 3],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[1, 1],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 0],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_multi_var_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1, 0, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1, 0, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1, 0, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[1, 0, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[0, 1],
+        &[1, 0, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[-2., 2.],
+        &[1, 1],
+        &[1, 0, 1, 0],
+        &[0.],
+    )
+    .unwrap_err();
+
+    apply_multi_var_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        &[0.5, 0.5],
+        &[2., 2.],
+        &[1, 1],
+        &[0, 9, 0, 1],
+        &[0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn appply_named_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_named_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+    )
+    .unwrap();
+
+    apply_named_phase_func(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+    )
+    .unwrap_err();
+
+    apply_named_phase_func(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+    )
+    .unwrap_err();
+
+    apply_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+    )
+    .unwrap_err();
+
+    apply_named_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 3],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_named_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::DISTANCE,
+        &[0, 9, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_param_named_phase_func_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        // wrong number of parameters
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func(
+        qureg,
+        &[0, 4],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn apply_param_named_phase_func_overrides_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 1],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[-1, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 4],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 9],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        // wrong number of parameters
+        &[0., 0.],
+        &[0, 1, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+
+    apply_param_named_phase_func_overrides(
+        qureg,
+        &[0, 0],
+        &[1, 1],
+        BitEncoding::UNSIGNED,
+        PhaseFunc::SCALED_INVERSE_SHIFTED_NORM,
+        &[0., 0., 0., 0.],
+        &[0, 9, 0, 1],
+        &[0., 0.],
+    )
+    .unwrap_err();
+}
+
+#[test]
 fn calc_expec_pauli_prod_01() {
     use PauliOpType::PAULI_X;
     let env = &QuestEnv::new();
@@ -2356,4 +2988,246 @@ fn calc_expec_pauli_hamil_02() {
         .unwrap();
 
     calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap_err();
+}
+
+#[test]
+fn two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    two_qubit_unitary(qureg, 0, 1, u).unwrap_err();
+    two_qubit_unitary(qureg, 1, 2, u).unwrap_err();
+
+    two_qubit_unitary(qureg, 0, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, -1, 0, u).unwrap_err();
+    two_qubit_unitary(qureg, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn controlled_two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 2, u).unwrap();
+    controlled_two_qubit_unitary(qureg, 1, 2, 0, u).unwrap();
+    controlled_two_qubit_unitary(qureg, 2, 0, 1, u).unwrap();
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, -1, 0, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 4, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, -1, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn controlled_two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 2, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 1, 2, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 2, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, 1, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, -1, 0, 1, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 4, 0, 1, u).unwrap_err();
+
+    controlled_two_qubit_unitary(qureg, 0, -1, 0, u).unwrap_err();
+    controlled_two_qubit_unitary(qureg, 0, 0, 4, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_two_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &ComplexMatrix4::new(
+        [
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 2, 3, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 0], 3, 2, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 2], 0, 3, u).unwrap();
+    multi_controlled_two_qubit_unitary(qureg, &[3, 0], 2, 1, u).unwrap();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 0], 1, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 1, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[-1, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[5, 1], 2, 3, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], -1, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 5, 3, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_two_qubit_unitary_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    // This matrix is not unitary
+    let u = &ComplexMatrix4::new(
+        [
+            [11., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+        ],
+        [
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+            [0., 0., 0., 0.],
+        ],
+    );
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 0], 3, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[1, 2], 0, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[3, 0], 2, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 0], 1, 2, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 1, 1, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[-1, 1], 2, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[5, 1], 2, 3, u).unwrap_err();
+
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], -1, 3, u).unwrap_err();
+    multi_controlled_two_qubit_unitary(qureg, &[0, 1], 5, 3, u).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_multi_qubit_unitary_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 0).unwrap();
+    pauli_x(qureg, 1).unwrap();
+
+    let u = &mut ComplexMatrixN::try_new(2).unwrap();
+    let zero_row = &[0., 0., 0., 0.];
+    init_complex_matrix_n(
+        u,
+        &[
+            &[0., 0., 0., 1.],
+            &[0., 1., 0., 0.],
+            &[0., 0., 1., 0.],
+            &[1., 0., 0., 0.],
+        ],
+        &[zero_row, zero_row, zero_row, zero_row],
+    )
+    .unwrap();
+
+    let ctrls = &[0, 1];
+    let targs = &[2, 3];
+    multi_controlled_multi_qubit_unitary(qureg, ctrls, targs, u).unwrap();
+
+    // Check if the register is now in the state `|1111>`
+    let amp = get_real_amp(qureg, 15).unwrap();
+    assert!((amp - 1.).abs() < EPSILON);
 }
