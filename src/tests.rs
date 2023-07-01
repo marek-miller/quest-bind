@@ -1,5 +1,7 @@
 #![allow(clippy::cast_sign_loss)]
 
+use num::Zero;
+
 use super::*;
 
 #[test]
@@ -3343,4 +3345,83 @@ fn apply_trotter_circuit_01() {
     apply_trotter_circuit(qureg, hamil, 0., -1, 1).unwrap_err();
     apply_trotter_circuit(qureg, hamil, 0., 1, 0).unwrap_err();
     apply_trotter_circuit(qureg, hamil, 0., 1, -1).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_01() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    let qureg2 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap();
+}
+
+#[test]
+fn set_weighted_qureg_02() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    // dimensions are not equal
+    let qureg2 = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_03() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    let qureg2 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    // dimensions are not equal
+    let out = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_04() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    // all quregs should either state vectors of density matrices
+    let qureg2 = &mut Qureg::try_new_density(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
 }

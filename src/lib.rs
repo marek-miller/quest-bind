@@ -4470,12 +4470,38 @@ pub fn calc_hilbert_schmidt_distance(
     })
 }
 
-/// Desc.
+/// Modifies qureg \p out to the result of `$(\p facOut \p out + \p fac1 \p
+/// qureg1 + \p fac2 \p qureg2)$`, imposing no constraints on normalisation.
+///
+/// Works for both state-vectors and density matrices. Note that afterward, \p
+/// out may not longer be normalised and ergo no longer a valid  state-vector or
+/// density matrix. Users must therefore be careful passing \p out to other
+/// QuEST functions which assume normalisation in order to function correctly.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// # use num::Zero;
+/// let env = &QuestEnv::new();
+/// let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+/// init_zero_state(qureg1);
+/// let qureg2 = &mut Qureg::try_new(1, env).unwrap();
+/// init_zero_state(qureg2);
+/// pauli_x(qureg2, 0).unwrap();
+///
+/// let out = &mut Qureg::try_new(1, env).unwrap();
+/// init_zero_state(out);
+///
+/// let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+/// let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+/// let fac_out = Qcomplex::zero();
+///
+/// set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap();
+///
+/// hadamard(out, 0).unwrap();
+/// let amp = get_real_amp(out, 0).unwrap();
+/// assert!((amp - 1.).abs() < 10. * EPSILON);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
