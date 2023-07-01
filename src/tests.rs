@@ -3283,3 +3283,42 @@ fn apply_pauli_sum_03() {
 
     apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
 }
+
+#[test]
+fn apply_pauli_hamil_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
+}
+
+#[test]
+fn apply_pauli_hamil_02() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    // out_qureg is of different dimension
+    let out_qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap_err();
+}

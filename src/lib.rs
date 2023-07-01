@@ -4516,6 +4516,7 @@ pub fn set_weighted_qureg(
 ///     PAULI_I,
 ///     PAULI_X,
 /// };
+///
 /// let env = &QuestEnv::new();
 /// let in_qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(in_qureg);
@@ -4552,33 +4553,33 @@ pub fn apply_pauli_sum(
     })
 }
 
-#[test]
-fn apply_pauli_hamil_01() {
-    use PauliOpType::{
-        PAULI_I,
-        PAULI_X,
-    };
-    let env = &QuestEnv::new();
-    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
-    init_zero_state(in_qureg);
-    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
-    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
-    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
-
-    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
-
-    // out_qureg is now in `|01> + |10>` state:
-    let qb1 = measure(out_qureg, 0).unwrap();
-    let qb2 = measure(out_qureg, 1).unwrap();
-    assert!(qb1 != qb2);
-}
-
 /// Desc.
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
+/// use PauliOpType::{
+///     PAULI_I,
+///     PAULI_X,
+/// };
+///
+/// let env = &QuestEnv::new();
+/// let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(in_qureg);
+/// let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+/// let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+/// let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+/// init_pauli_hamil(hamil, coeffs, codes).unwrap();
+///
+/// apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
+///
+/// // out_qureg is now in `|01> + |10>` state:
+/// let qb1 = measure(out_qureg, 0).unwrap();
+/// let qb2 = measure(out_qureg, 1).unwrap();
+/// assert!(qb1 != qb2);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4592,6 +4593,30 @@ pub fn apply_pauli_hamil(
     catch_quest_exception(|| unsafe {
         ffi::applyPauliHamil(in_qureg.reg, hamil.0, out_qureg.reg);
     })
+}
+
+#[test]
+fn apply_trotter_circuit_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
+
+    // out_qureg is now in `|01> + |10>` state:
+    let qb1 = measure(out_qureg, 0).unwrap();
+    let qb2 = measure(out_qureg, 1).unwrap();
+    assert!(qb1 != qb2);
 }
 
 /// Desc.
