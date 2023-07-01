@@ -4562,7 +4562,7 @@ pub fn apply_pauli_hamil(
 /// See [QuEST API][1] for more information.
 ///
 /// [1]: https://quest-kit.github.io/QuEST/modules.html
-pub fn apply_trotter_circuitit(
+pub fn apply_trotter_circuit(
     qureg: &mut Qureg,
     hamil: &PauliHamil,
     time: Qreal,
