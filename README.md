@@ -264,6 +264,19 @@ rustup doc
 - Publish to `crates.io`
 - Generic nummerical traits from `num_traits`
 
+## Contributing
+
+Here's a few things to know if you'd like to contribute to `quest-bind`.
+
+- The Rust codebase is formatted according to the settings in `./rustfmt.toml`.
+  We enable some unstable features of `rustfmt`. To format your patches
+  correctly, you will need the nightly version of the Rust compiler. Before
+  opening a pull request, remove lint from the code by running:
+
+  ```sh
+  just lint
+  ```
+
 ## Releases
 
 ### v0.2.1 (??/07/2023)
