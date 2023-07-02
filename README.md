@@ -1,4 +1,4 @@
-# quest-bind
+# quest_bind
 
 [![Test](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml)
 [![Docs](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml)
@@ -18,10 +18,10 @@ cargo new testme
 cd testme/
 ```
 
-Add `quest-bind` to your project's dependencies:
+Add `quest_bind` to your project's dependencies:
 
 ```sh
-cargo add quest_bind --git https://github.com/marek-miller/quest-bind.git
+cargo add quest_bind
 ```
 
 Now write some code and put it in `./src/main.rs`:
@@ -93,7 +93,7 @@ They match!
 ## Distributed and GPU-accelerated mode
 
 QuEST support for MPI and GPU-accelerated computation ca be enabled in
-`quest-bind` by setting appropriate feature flags. To enable QuEST's MPI mode,
+`quest_bind` by setting appropriate feature flags. To enable QuEST's MPI mode,
 set the `mpi` feature for `quest_bind`. Simply edit `Cargo.toml` of your binary
 crate:
 
@@ -104,7 +104,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-quest_bind = { git = "https://github.com/marek-miller/quest-bind.git", features = ["mpi",] }
+quest_bind = { features = ["mpi"] }
 ```
 
 Now if you compile and run the above program again, the output should be:
@@ -136,7 +136,7 @@ Then run:
 cargo test
 ```
 
-Note that `quest-bind` will not run `QuEST`'s test suite, nor will it check
+Note that `quest_bind` will not run `QuEST`'s test suite, nor will it check
 `QuEST`'s correctness. The tests here are intended to check if the C API is
 invoked correctly, and if Rust's types are passed safely back and forth across
 the FFI boundary.
@@ -150,7 +150,7 @@ cargo clean
 cargo test --features=f32
 ```
 
-By defualt, `quest-bind` uses Rust's double precision floating-point type:
+By defualt, `quest_bind` uses Rust's double precision floating-point type:
 `f64`. See [Numercal types](#numerical-types) section below.
 
 You can also try the available examples by running, e.g.:
@@ -171,7 +171,7 @@ In the typical case when it's the numerical computation that dominates the CPU
 usage, and not API calls, there should be no discernible difference in
 performance between programs calling QuEST routines directly and analogous
 applications using `quest_bind`. Remember, however, to enable optimizations for
-both `quest-bind` and `QuEST` by compiling your code using the "release"
+both `quest_bind` and `QuEST` by compiling your code using the "release"
 profile:
 
 ```sh
@@ -231,7 +231,7 @@ for more information.
 
 ## Numerical types
 
-For now, numerical types used by `quest-bind` match exactly the C types that
+For now, numerical types used by `quest_bind` match exactly the C types that
 QuEST uses on `x86_64`. This is a safe, but not very portable strategy. We pass
 Rust types directly to QuEST without casting, assuming the following type
 definitions:
@@ -245,7 +245,7 @@ pub type c_ulong = u64;
 ```
 
 This should work for many different architectures. If your system uses slightly
-different numerical types, `quest-bind` simply won't compile and there is not
+different numerical types, `quest_bind` simply won't compile and there is not
 much you can do besides manually altering the source code.
 
 To check what C types are defined by your Rust installation, see the local
@@ -257,7 +257,7 @@ rustup doc
 
 ## Contributing
 
-Here's a few things to know if you'd like to contribute to `quest-bind`.
+Here's a few things to know if you'd like to contribute to `quest_bind`.
 
 - The Rust codebase is formatted according to the settings in `./rustfmt.toml`.
   We enable some unstable features of `rustfmt`. To format your patches
