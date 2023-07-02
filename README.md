@@ -56,9 +56,8 @@ fn main() -> Result<(), QuestError> {
 }
 ```
 
-You can read the available documentation locally or refer to
-[QuEST headers](https://github.com/QuEST-Kit/QuEST/blob/v3.5.0/QuEST/include/QuEST.h)
-for the full description of the C API:
+The documentation is available
+[online](https://docs.rs/quest_bind/latest/quest_bind/), as well as locally:
 
 ```sh
 cargo doc --open
