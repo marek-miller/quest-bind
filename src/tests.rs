@@ -15,6 +15,13 @@ fn create_qureg_01() -> Result<(), QuestError> {
 }
 
 #[test]
+fn create_qureg_negative_num_qubits() {
+    let env = &QuestEnv::new();
+    let _ = Qureg::try_new(-1, env).unwrap_err();
+    let _ = Qureg::try_new_density(-1, env).unwrap_err();
+}
+
+#[test]
 fn create_density_qureg_01() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
     {
