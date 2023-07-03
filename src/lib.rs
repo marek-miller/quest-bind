@@ -4576,8 +4576,7 @@ pub fn set_weighted_qureg(
     })
 }
 
-/// Modifies `out_qureg` to be the result of applying the weighted sum of Pauli
-/// products.
+/// Apply the weighted sum of Pauli products.
 ///
 /// In theory, `in_qureg` is unchanged though its state is temporarily modified
 /// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
@@ -4628,8 +4627,10 @@ pub fn apply_pauli_sum(
     })
 }
 
+/// Apply Hamiltonian `PauliHamil`.
+///
 /// Modifies `out_qureg` to be the result of applying `PauliHamil` (a Hermitian
-/// but not  necessarily unitary operator) to `in_qureg`.
+/// but not necessarily unitary operator) to `in_qureg`.
 ///
 /// In theory, `in_qureg` is unchanged though its state is temporarily modified
 /// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
@@ -4675,10 +4676,10 @@ pub fn apply_pauli_hamil(
     })
 }
 
-/// Applies a trotterisation of unitary evolution `$\exp(-i \, \text{hamil} \,
-/// \text{time})$` to `qureg`.
+/// Applies a trotterisation of unitary evolution.
 ///
-/// # Examples
+/// The unitary evelution `$\exp(-i \, \text{hamil} \, \text{time})$` is applied
+/// to `qureg`. # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
@@ -4806,8 +4807,9 @@ pub fn apply_matrix4(
     })
 }
 
-/// Apply a general N-by-N matrix, which may be non-unitary, on any number of
-/// target qubits.
+/// Apply a general N-by-N matrix on any number of target qubits.
+///
+/// The matrix need not be unitary.
 ///
 /// # Examples
 ///
@@ -4923,6 +4925,8 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
+/// Apply a phase function.
+///
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
 /// passed exponential polynomial *phase function*.
 ///
@@ -4972,6 +4976,8 @@ pub fn apply_phase_func(
     })
 }
 
+/// Apply a phase function with overrides.
+///
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
 /// passed  exponential polynomial "phase function", and an explicit set of
 /// 'overriding' values at specific state indices.
@@ -5044,8 +5050,7 @@ pub fn apply_phase_func_overrides(
     })
 }
 
-/// Induces a phase change upon each amplitude of `qureg`, determined by a
-/// multi-variable exponential polynomial "phase function".
+/// Apply a multi-variable exponential polynomial.
 ///
 /// # Examples
 ///
@@ -5103,9 +5108,11 @@ pub fn apply_multi_var_phase_func(
     })
 }
 
+/// Apply a multi-variable exponential polynomial with overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
-/// multi-variable exponential polynomial "phase function", and an explicit set
-/// of 'overriding' values at specific state indices.
+/// phase function, and an explicit set of 'overriding' values at specific
+/// state indices.
 ///
 /// # Examples
 ///
@@ -5173,8 +5180,10 @@ pub fn apply_multi_var_phase_func_overrides(
     })
 }
 
-/// Induces a phase change upon each amplitude of `qureg`, determined by a
-/// named (and potentially multi-variable) phase function.
+/// Apply a named phase function.
+///
+/// Induces a phase change upon each amplitude of `qureg`, determined by a named
+/// (and potentially multi-variable) phase function.
 ///
 /// # Examples
 ///
@@ -5222,6 +5231,8 @@ pub fn apply_named_phase_func(
     })
 }
 
+/// Apply a named phase function with overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named (and potentially multi-variable) phase function, and an explicit set
 /// of 'overriding' values at specific state indices.
@@ -5283,6 +5294,8 @@ pub fn apply_named_phase_func_overrides(
     })
 }
 
+/// Apply a parametrized phase function.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named, paramaterized (and potentially multi-variable) phase function.
 ///
@@ -5339,6 +5352,8 @@ pub fn apply_param_named_phase_func(
     })
 }
 
+/// Apply a parametrized phase function wi overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named, parameterised (and potentially multi-variable) phase function, and an
 /// explicit set of "overriding" values at specific state indices.
