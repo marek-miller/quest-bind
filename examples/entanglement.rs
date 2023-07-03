@@ -2,7 +2,6 @@ use quest_bind::{
     controlled_not,
     hadamard,
     init_zero_state,
-    measure,
     report_quest_env,
     report_qureg_params,
     QuestEnv,
@@ -24,8 +23,8 @@ fn main() -> Result<(), QuestError> {
     hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
 
     // Measure each qubit
-    let outcome0 = measure(qureg, 0)?;
-    let outcome1 = measure(qureg, 1)?;
+    let outcome0 = qureg.qubit(0).unwrap().measure().unwrap();
+    let outcome1 = qureg.qubit(1).unwrap().measure().unwrap();
 
     println!("Qubit \"0\" measured in state: |{outcome0}>");
     println!("Qubit \"1\" measured in state: |{outcome1}>");

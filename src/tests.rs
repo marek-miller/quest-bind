@@ -921,10 +921,10 @@ fn measure_01() {
 
     init_zero_state(qureg);
 
-    let _ = measure(qureg, 0).unwrap();
-    let _ = measure(qureg, 1).unwrap();
-    let _ = measure(qureg, -1).unwrap_err();
-    let _ = measure(qureg, 3).unwrap_err();
+    let _ = qureg.qubit(0).unwrap().measure().unwrap();
+    let _ = qureg.qubit(1).unwrap().measure().unwrap();
+    assert!(qureg.qubit(-1).is_none());
+    assert!(qureg.qubit(3).is_none());
 }
 
 #[test]
