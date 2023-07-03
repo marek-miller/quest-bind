@@ -12,14 +12,15 @@ fn main() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
     report_quest_env(env);
 
-    // Create a 2-qubit register in |00> state
+    // Create a 2-qubit register and report its parameters
     let qureg = &mut Qureg::try_new(2, env)?;
-    init_zero_state(qureg);
-    // Report the state to screen
     report_qureg_params(qureg);
+    // Initialize |00> state and print out the state to screen
+    init_zero_state(qureg);
+    report_state_to_screen(qureg, env, 0);
 
     // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
-    // on qubit 0, and then NOT on qubit 1 controlled by qubit 0.
+    // on qubit 0, then NOT on qubit 1, controlled by qubit 0.
     println!("---\nPrepare Bell state: |00> + |11>");
     hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
 
