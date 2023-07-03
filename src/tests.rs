@@ -11,6 +11,7 @@ fn create_qureg_01() -> Result<(), QuestError> {
     let _ = Qureg::try_new(5, env)?;
 
     let _ = Qureg::try_new(0, env).unwrap_err();
+    let _ = Qureg::try_new(-1, env).unwrap_err();
     Ok(())
 }
 
@@ -22,6 +23,7 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
         let _ = Qureg::try_new_density(5, env)?;
 
         let _ = Qureg::try_new_density(0, env).unwrap_err();
+        let _ = Qureg::try_new_density(-1, env).unwrap_err();
     }
     Ok(())
 }

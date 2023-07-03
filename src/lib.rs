@@ -24,6 +24,8 @@ pub use precision::{
     TAU,
 };
 
+pub mod qubit;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
     /// An exception thrown by the C library.  From QuEST documentation:
