@@ -1,37 +1,43 @@
-use quest_bind::{
-    controlled_not,
-    hadamard,
-    init_zero_state,
-    measure,
-    report_quest_env,
-    report_qureg_params,
-    QuestEnv,
-    QuestError,
-    Qureg,
-};
+//! This is a basic example showing how to initialize QuEST environment
+//! and perform a operations on a quantum register consisting of 2 qubits.
+//!
+//! We entangle the qubits by preparing a Bell state `|00> + |11>`.
+//! Next, we measure both qubits in the computational basis.  Because qubits are
+//! entangled, after the measurement they are both in the same, equally probable
+//! state `0` or `1`.
+use quest_bind::*;
 
 fn main() -> Result<(), QuestError> {
-    // Initialize QuEST environment
+    // Initialize QuEST environment and report to screen
     let env = &QuestEnv::new();
     report_quest_env(env);
 
-    // Initialize 2-qubit register in |00> state
+    // Create a 2-qubit register in |00> state
     let qureg = &mut Qureg::try_new(2, env)?;
-    report_qureg_params(qureg);
     init_zero_state(qureg);
+    // Report the state to screen
+    report_qureg_params(qureg);
 
+    // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
+    // on qubit 0, and then NOT on qubit 1 controlled by qubit 0.
     println!("---\nPrepare Bell state: |00> + |11>");
     hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
 
-    // Measure each qubit
+    // Measure both qubits
     let outcome0 = measure(qureg, 0)?;
     let outcome1 = measure(qureg, 1)?;
+    println!("Qubit \"0\" measured in state: |{}>", outcome0);
+    println!("Qubit \"1\" measured in state: |{}>", outcome1);
 
-    println!("Qubit \"0\" measured in state: |{outcome0}>");
-    println!("Qubit \"1\" measured in state: |{outcome1}>");
-    assert_eq!(outcome0, outcome1);
-    println!("They match!");
+    // Because the state was entangled, the outcomes
+    // should always be the same
+    if outcome0 == outcome1 {
+        println!("They match!");
+        Ok(())
+    } else {
+        panic!("qubits in Bell state should be perfectly correlated");
+    }
 
-    // Both `env` and `qureg` are safely discarded here
-    Ok(())
+    // At this point both `qureg` and `env` are dropped and
+    // the allocated memory is freed.
 }
