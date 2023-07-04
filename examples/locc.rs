@@ -20,23 +20,23 @@ fn main() -> Result<(), QuestError> {
 
     let mut qb0 = Qubit::new(qureg, 0).unwrap();
     let mut qb1 = Qubit::new(qureg, 1).unwrap();
-
     let (tx, rx) = channel();
+    
     thread::scope(|s| {
         s.spawn(|| {
-            println!("[A] performs local measurement...");
+            println!("[A] Perform local measurement...");
             if let Ok(outcome) = qb0.measure() {
                 println!("[A] Qubit measured in state: |{outcome}>");
 
                 println!("[A] Send result via classical channel to B");
                 tx.send(outcome).unwrap();
             } else {
-                eprint!("[A] Error while measuring qubit");
+                eprintln!("[A] Error while measuring qubit");
             }
         });
 
         s.spawn(move || {
-            println!("[B] performs local measurement...");
+            println!("[B] Perform local measurement...");
             if let Ok(outcome) = qb1.measure() {
                 println!("[B] Qubit measured in state: |{outcome}>");
 
@@ -46,7 +46,7 @@ fn main() -> Result<(), QuestError> {
                 assert!(msg == outcome);
                 println!("[B] They match!");
             } else {
-                eprint!("[B] Error while measuring qubit");
+                eprintln!("[B] Error while measuring qubit");
             }
         });
     });
