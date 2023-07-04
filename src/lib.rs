@@ -864,14 +864,12 @@ pub fn calc_expec_diagonal_op(
     .map(Into::into)
 }
 
-/// Print the current state vector of probability amplitudes for a set of qubits
-/// to file.
+/// Print the current state vector of probability amplitudes to file.
 pub fn report_state(qureg: &Qureg) {
     unsafe { ffi::reportState(qureg.reg) }
 }
 
-/// Print the current state vector of probability amplitudes for a set of qubits
-/// to standard out.
+/// Print the current state vector of probability amplitudes.
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -880,15 +878,16 @@ pub fn report_state_to_screen(
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
 }
 
-/// Report metainformation about a set of qubits: number of qubits, number of
-/// probability amplitudes.
+/// Report information about a set of qubits.
+///
+/// This function reports: number of qubits, number of probability amplitudes.
 pub fn report_qureg_params(qureg: &Qureg) {
     unsafe {
         ffi::reportQuregParams(qureg.reg);
     }
 }
 
-/// Print the `hamil` to screen.
+/// Print the Hamiltonian `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::reportPauliHamil(hamil.0);
@@ -1219,7 +1218,7 @@ pub fn clone_qureg(
     })
 }
 
-/// Shift the phase between `|0>` and `|1>` of a single qubit by a given angle.
+/// Shift the phase of a single qubit by a given angle.
 ///
 /// # Examples
 ///
@@ -1693,8 +1692,7 @@ pub fn get_density_amp(
         .map(Into::into)
 }
 
-/// A debugging function which calculates the probability of the qubits in
-/// `qureg`
+/// A debugging function which calculates the total probability of the qubits.
 ///
 /// This function should always be 1 for correctly normalised states
 /// (hence returning a real number).
@@ -2029,8 +2027,7 @@ pub fn controlled_rotate_z(
     })
 }
 
-/// Applies a controlled rotation by a given angle around a given vector of the
-/// Bloch-sphere.
+/// Applies a controlled rotation by  around a given vector of the Bloch-sphere.
 ///
 /// # Examples
 ///
@@ -2486,8 +2483,7 @@ pub fn controlled_pauli_y(
     })
 }
 
-/// Gives the probability of a specified qubit being measured in the given
-/// outcome (0 or 1).
+/// Gives the probability of a qubit being measured in the given outcome.
 ///
 /// # Examples
 ///
@@ -2516,8 +2512,7 @@ pub fn calc_prob_of_outcome(
     })
 }
 
-/// Populates `outcome_probs` with the probabilities of every outcome of the
-/// sub-register.
+/// Calculate probabilities of every outcome of the sub-register.
 ///
 /// # Examples
 ///
@@ -2564,8 +2559,7 @@ pub fn calc_prob_of_all_outcomes(
     })
 }
 
-/// Updates `qureg` to be consistent with measuring `measure_qubit`  in the
-/// given `outcome`: (0, 1).
+/// Updates `qureg` to be consistent with measuring qubit in the given outcome.
 ///
 /// # Examples
 ///
@@ -2723,6 +2717,8 @@ pub fn calc_density_inner_product(
     })
 }
 
+/// Seed the random number generator.
+///
 /// Seeds the random number generator with the (master node) current time and
 /// process ID.
 ///
@@ -3350,8 +3346,7 @@ pub fn sqrt_swap_gate(
     })
 }
 
-/// Apply a general single-qubit unitary with multiple control qubits,
-/// conditioned upon a specific bit sequence.
+/// Apply a general single-qubit unitary with multiple control qubits.
 ///
 /// # Examples
 ///
@@ -3410,8 +3405,7 @@ pub fn multi_state_controlled_unitary(
     })
 }
 
-/// Apply a multi-qubit Z rotation, also known as a phase gadget, on a selected
-/// number of qubits.
+/// Apply a multi-qubit Z rotation on selected qubits.
 ///
 /// # Examples
 ///
@@ -3449,7 +3443,7 @@ pub fn multi_rotate_z(
     })
 }
 
-/// Apply a multi-qubit multi-Pauli rotation, also known as a Pauli gadget.
+/// Apply a multi-qubit multi-Pauli rotation.
 ///
 /// # Examples
 ///
@@ -3882,8 +3876,7 @@ pub fn controlled_two_qubit_unitary(
     })
 }
 
-/// Apply a general multi-qubit unitary (including a global phase factor) with
-/// any number of target qubits.
+/// Apply a general multi-qubit unitary with any number of target qubits.
 ///
 /// # Examples
 ///
@@ -3960,8 +3953,7 @@ pub fn multi_controlled_two_qubit_unitary(
     })
 }
 
-/// Apply a general multi-qubit unitary (including a global phase factor) with
-/// any number of target qubits.
+/// Apply a general multi-qubit unitary with any number of target qubits.
 ///
 /// # Examples
 ///
@@ -4490,8 +4482,7 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     })
 }
 
-/// Computes the Hilbert Schmidt distance between two density matrices `a` and
-/// `b`, defined as the Frobenius norm of the difference between them.
+/// Computes the Hilbert Schmidt distance between two density matrices.
 ///
 /// # Examples
 ///
@@ -4519,7 +4510,9 @@ pub fn calc_hilbert_schmidt_distance(
     })
 }
 
-/// Modifies qureg \p out to the result of `$(\p facOut \p out + \p fac1 \p
+/// Set `qureg` to a weighted sum of states.
+///
+/// Modifies qureg `out` to the result of `$(\p facOut \p out + \p fac1 \p
 /// qureg1 + \p fac2 \p qureg2)$`, imposing no constraints on normalisation.
 ///
 /// Works for both state-vectors and density matrices. Note that afterward, \p
@@ -5479,7 +5472,7 @@ pub fn apply_qft(
     })
 }
 
-/// Force the target \p qubit of \p qureg into the given classical `outcome`
+/// Force the target qubit of qureg into the given classical outcome.
 ///
 /// # Examples
 ///
