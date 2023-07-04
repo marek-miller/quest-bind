@@ -81,6 +81,30 @@ impl<'a, 'env> Qubit<'a, 'env> {
         }
     }
 
+    /// Check if `other qubit` belongs to the same `Qureg`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg1 = &Qureg::try_new(2, env).unwrap();
+    /// let qureg2 = &Qureg::try_new(2, env).unwrap();
+    ///
+    /// let qubit = qureg1.qubit(0).unwrap();
+    /// let other_qubit = qureg1.qubit(1).unwrap();
+    /// assert!(qubit.is_same_qureg(&other_qubit));
+    ///
+    /// let other_qubit = qureg2.qubit(1).unwrap();
+    /// assert!(!qubit.is_same_qureg(&other_qubit));
+    /// ```
+    pub fn is_same_qureg(
+        &self,
+        other_qubit: &Qubit,
+    ) -> bool {
+        std::ptr::eq(self.qureg, other_qubit.qureg)
+    }
+
     /// Index of this qubit in the underlying [`Qureg`](crate::Qureg).
     ///
     /// # Examples
