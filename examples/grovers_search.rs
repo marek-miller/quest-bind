@@ -6,7 +6,6 @@
 
 use quest_bind::{
     get_prob_amp,
-    hadamard,
     init_plus_state,
     multi_controlled_phase_flip,
     multi_qubit_not,
@@ -50,7 +49,7 @@ fn apply_oracle(
         .and(multi_qubit_not(qureg, sol_ctrls))
 }
 
-fn apply_diffuser(qubits: &[&mut Qubit]) -> Result<(), QuestError> {
+fn apply_diffuser(_qubits: &[&mut Qubit]) -> Result<(), QuestError> {
     // // apply H to transform |+> into |0>
     // tensor_gate(hadamard, qubits)
     //     // apply X to transform |11..1> into |00..0>

@@ -1043,7 +1043,7 @@ fn start_recording_qasm_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     start_recording_qasm(qureg);
-    
+
     let qb0 = &mut Qubit::new_unchecked(qureg, 0);
     let qb1 = &mut Qubit::new_unchecked(qureg, 1);
 

@@ -17,7 +17,7 @@ fn main() -> Result<(), QuestError> {
 
     let qb0 = &mut Qubit::new(qureg, 0).unwrap();
     let qb1 = &mut Qubit::new(qureg, 1).unwrap();
-    
+
     println!("---\nPrepare Bell state: |00> + |11>");
     hadamard(qb0).and(controlled_not(qb0, qb1))?;
 
