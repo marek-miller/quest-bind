@@ -138,7 +138,8 @@ impl<'a, 'env> Qubit<'a, 'env> {
 /// let qureg = &mut Qureg::try_new(2, env).unwrap();
 /// init_zero_state(qureg);
 ///
-/// hadamard(qureg, 0).unwrap();
+/// let qubit = &mut qureg.qubit(0).unwrap();
+/// hadamard(qubit).unwrap();
 ///
 /// let amp = get_real_amp(qureg, 0).unwrap();
 /// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
@@ -160,15 +161,22 @@ pub fn hadamard(qubit: &mut Qubit) -> Result<(), QuestError> {
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-/// init_zero_state(qureg);
-/// pauli_x(qureg, 1).unwrap();
+/// let mut qureg = Qureg::try_new(2, env).unwrap();
+/// init_zero_state(&mut qureg);
+/// pauli_x(&mut qureg, 0).unwrap();
 ///
-/// controlled_not(qureg, 1, 0).unwrap();
+/// let control_qubit = &mut qureg.qubit(0).unwrap();
+/// let target_qubit = &mut qureg.qubit(1).unwrap();
+/// controlled_not(control_qubit, target_qubit).unwrap();
 ///
-/// let amp = get_real_amp(qureg, 3).unwrap();
+/// let amp = get_real_amp(&mut qureg, 3).unwrap();
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
+///
+/// # Returns
+///
+/// This functions returns `QuestError::DifferentQureg`, if
+/// `control qubit` and `target_qubit` belong to a different `Qureg`.
 ///
 /// See [QuEST API][1] for more information.
 ///
