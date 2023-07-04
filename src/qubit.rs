@@ -2,11 +2,10 @@ use super::Qureg;
 use crate::{
     exceptions::catch_quest_exception,
     ffi,
-    hadamard,
-    report_state_to_screen,
-    QuestEnv,
     QuestError,
 };
+
+unsafe impl<'a> Sync for Qureg<'a> {}
 
 /// Represents a mutable qubit in a register [`Qureg`][1].
 ///
@@ -14,9 +13,7 @@ use crate::{
 /// register `Qureg` at a specified index. Because this
 /// qubit might be entangled with other qubits in the register, any
 /// operation on the qubit may potentially change the state of the whole quantum
-/// register. Hence, in order to even create a qubit, the user has to provide a
-/// mutable reference to the underlying register.  A qubit type holding only a
-/// shared reference to its `Qureg` would be virtually useless!
+/// register. TODO: explain shared ref. trick (atomic QuEST API calls).
 ///
 /// A `Qubit` is bound by two lifetimes: `'a` and `'env`, where `'a` must
 /// outlive `'env`.  The lifetime `'a` refers to the mutable reference to a
@@ -27,7 +24,7 @@ use crate::{
 /// [2]: crate::Qureg::try_new()
 #[derive(Debug)]
 pub struct Qubit<'a, 'env: 'a> {
-    qureg: &'a mut Qureg<'env>,
+    qureg: &'a Qureg<'env>,
     index: i32,
 }
 
@@ -63,11 +60,10 @@ impl<'a, 'env> Qubit<'a, 'env> {
     /// [1]: crate::Qureg::num_qubits_represented()
     /// [2]: crate::Qureg::qubit()
     pub fn new(
-        qureg: &'a mut Qureg<'env>,
+        qureg: &'a Qureg<'env>,
         index: i32,
     ) -> Option<Self> {
-        let num_qubits_represented = qureg.num_qubits_represented();
-        if index < 0 || index >= num_qubits_represented {
+        if index < 0 || index >= qureg.num_qubits_represented() {
             None
         } else {
             Some(Self::new_unchecked(qureg, index))
@@ -75,7 +71,7 @@ impl<'a, 'env> Qubit<'a, 'env> {
     }
 
     pub fn new_unchecked(
-        qureg: &'a mut Qureg<'env>,
+        qureg: &'a Qureg<'env>,
         index: i32,
     ) -> Self {
         Self {
@@ -131,37 +127,6 @@ impl<'a, 'env> Qubit<'a, 'env> {
     }
 }
 
-pub trait SingleQubitGate: Fn(&mut Qubit) -> Result<(), QuestError> {}
-impl<G> SingleQubitGate for G where G: Fn(&mut Qubit) -> Result<(), QuestError> {}
-
-pub fn tensor_gate<G>(
-    qureg: &mut Qureg,
-    gate: G,
-) -> Result<(), QuestError>
-where
-    G: SingleQubitGate,
-{
-    for i in 0..qureg.num_qubits_represented() {
-        gate(&mut Qubit::new_unchecked(qureg, i))?;
-    }
-    Ok(())
-}
-
-pub fn hadamard_gate(qubit: &mut Qubit) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::hadamard(qubit.qureg.reg, qubit.index);
-    })
-}
-
-#[test]
-fn tensor_gate_01() {
-    let env = &QuestEnv::new();
-    let mut qureg = Qureg::try_new(3, env).unwrap();
-
-    tensor_gate(&mut qureg, hadamard_gate).unwrap();
-    report_state_to_screen(&qureg, env, 0);
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -187,7 +152,7 @@ mod tests {
         let mut qureg = Qureg::try_new(2, env).unwrap();
         init_zero_state(&mut qureg);
 
-        let qubit = Qubit::new(&mut qureg, 0).unwrap();
+        let qubit = Qubit::new(&qureg, 0).unwrap();
 
         // init_zero_state(&mut qureg);
         // drop(qureg);
