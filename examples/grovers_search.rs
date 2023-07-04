@@ -11,6 +11,7 @@ use quest_bind::{
     multi_controlled_phase_flip,
     multi_qubit_not,
     Qreal,
+    Qubit,
     QuestEnv,
     QuestError,
     Qureg,
@@ -22,14 +23,13 @@ const NUM_QUBITS: i32 = 0x10;
 const NUM_ELEMS: i64 = 1 << NUM_QUBITS;
 
 fn tensor_gate<F>(
-    qureg: &mut Qureg<'_>,
     gate: F,
-    qubits: &[i32],
+    qubits: &mut [&mut Qubit],
 ) -> Result<(), QuestError>
 where
-    F: Fn(&mut Qureg, i32) -> Result<(), QuestError>,
+    F: Fn(&mut Qubit) -> Result<(), QuestError>,
 {
-    qubits.iter().try_for_each(|&q| gate(qureg, q))
+    qubits.iter_mut().try_for_each(|q| gate(q))
 }
 
 fn apply_oracle(
@@ -50,19 +50,17 @@ fn apply_oracle(
         .and(multi_qubit_not(qureg, sol_ctrls))
 }
 
-fn apply_diffuser(
-    qureg: &mut Qureg,
-    qubits: &[i32],
-) -> Result<(), QuestError> {
-    // apply H to transform |+> into |0>
-    tensor_gate(qureg, hadamard, qubits)
-        // apply X to transform |11..1> into |00..0>
-        .and(multi_qubit_not(qureg, qubits))?;
+fn apply_diffuser(qubits: &[&mut Qubit]) -> Result<(), QuestError> {
+    // // apply H to transform |+> into |0>
+    // tensor_gate(hadamard, qubits)
+    //     // apply X to transform |11..1> into |00..0>
+    //     .and(multi_qubit_not(qureg, qubits))?;
 
-    // effect |11..1> -> -|11..1>
-    multi_controlled_phase_flip(qureg, qubits)?;
+    // // effect |11..1> -> -|11..1>
+    // multi_controlled_phase_flip(qureg, qubits)?;
 
-    multi_qubit_not(qureg, qubits).and(tensor_gate(qureg, hadamard, qubits))
+    // multi_qubit_not(qureg, qubits).and(tensor_gate(qureg, hadamard, qubits))
+    Ok(())
 }
 
 fn main() -> Result<(), QuestError> {
@@ -86,7 +84,7 @@ fn main() -> Result<(), QuestError> {
     // apply Grover's algorithm
     (0..num_reps).try_for_each(|_| {
         apply_oracle(qureg, qubits, sol_elem)
-            .and(apply_diffuser(qureg, qubits))
+            // .and(apply_diffuser(qureg, qubits))
             .and(get_prob_amp(qureg, sol_elem))
             .map(|prob| {
                 println!("prob of solution |{sol_elem}> = {:.8}", prob);
