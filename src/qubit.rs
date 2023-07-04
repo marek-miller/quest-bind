@@ -185,7 +185,9 @@ pub fn controlled_not(
     control_qubit: &mut Qubit,
     target_qubit: &mut Qubit,
 ) -> Result<(), QuestError> {
-    assert!(control_qubit.qureg as *const _ == target_qubit.qureg as *const _);
+    if control_qubit.qureg as *const _ != target_qubit.qureg as *const _ {
+        return Err(QuestError::DifferentQureg);
+    }
     catch_quest_exception(|| unsafe {
         ffi::controlledNot(
             target_qubit.qureg.reg,
@@ -205,7 +207,7 @@ mod tests {
     };
 
     #[test]
-    fn qubit_into_01() {
+    fn qubit_index_01() {
         let env = &QuestEnv::new();
         let qureg = &mut Qureg::try_new(2, env).unwrap();
         init_zero_state(qureg);
@@ -242,5 +244,18 @@ mod tests {
         let qubit = &mut Qubit::new(qureg, 1).unwrap();
         let outcome = qubit.measure().unwrap();
         assert_eq!(outcome, 1);
+    }
+
+    #[test]
+    fn controlled_not_different_qureg() {
+        let env = &QuestEnv::new();
+        let qureg1 = &Qureg::try_new(2, env).unwrap();
+        let qureg2 = &Qureg::try_new(2, env).unwrap();
+
+        let qb1 = &mut qureg1.qubit(0).unwrap();
+        let qb2 = &mut qureg2.qubit(1).unwrap();
+
+        assert_eq!(controlled_not(qb1, qb2), Err(QuestError::DifferentQureg));
+        assert_eq!(controlled_not(qb2, qb1), Err(QuestError::DifferentQureg));
     }
 }

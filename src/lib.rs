@@ -58,6 +58,7 @@ pub enum QuestError {
     QubitIndexError,
     NotDensityMatrix,
     NegativeProbability,
+    DifferentQureg,
 }
 
 pub type Qcomplex = num::Complex<Qreal>;
