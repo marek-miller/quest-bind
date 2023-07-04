@@ -21,9 +21,9 @@ fn main() -> Result<(), QuestError> {
     let mut qb0 = Qubit::new(qureg, 0).unwrap();
     let mut qb1 = Qubit::new(qureg, 1).unwrap();
     let (tx, rx) = channel();
-    
+
     thread::scope(|s| {
-        s.spawn(|| {
+        s.spawn(move || {
             println!("[A] Perform local measurement...");
             if let Ok(outcome) = qb0.measure() {
                 println!("[A] Qubit measured in state: |{outcome}>");
