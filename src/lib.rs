@@ -24,6 +24,9 @@ pub use precision::{
     TAU,
 };
 
+mod qubit;
+pub use qubit::Qubit;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
     /// An exception thrown by the C library.  From QuEST documentation:
@@ -459,7 +462,7 @@ pub struct Qureg<'a> {
     reg: ffi::Qureg,
 }
 
-impl<'a> Qureg<'a> {
+impl<'env> Qureg<'env> {
     /// Creates a state-vector Qureg object.
     ///
     /// # Examples
@@ -480,7 +483,7 @@ impl<'a> Qureg<'a> {
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
-        env: &'a QuestEnv,
+        env: &'env QuestEnv,
     ) -> Result<Self, QuestError> {
         if num_qubits < 0 {
             return Err(QuestError::QubitIndexError);
@@ -513,7 +516,7 @@ impl<'a> Qureg<'a> {
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(
         num_qubits: i32,
-        env: &'a QuestEnv,
+        env: &'env QuestEnv,
     ) -> Result<Self, QuestError> {
         if num_qubits < 0 {
             return Err(QuestError::QubitIndexError);
@@ -535,9 +538,64 @@ impl<'a> Qureg<'a> {
     pub fn num_qubits_represented(&self) -> i32 {
         self.reg.numQubitsRepresented
     }
+
+    /// Return a new representation [`Qubit`][1] of a qubit in the register.
+    ///
+    /// The `index` must be strictly positive and smaller than
+    /// [`qureg.num_qubits_represented()`][2].
+    ///
+    /// See also [`Qubit::new()`][3] for another method to create a `Qubit`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// init_zero_state(qureg);
+    ///
+    /// assert!(qureg.qubit(0).is_some());
+    /// assert!(qureg.qubit(1).is_some());
+    ///
+    /// assert!(qureg.qubit(2).is_none());
+    /// assert!(qureg.qubit(-1).is_none());
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// Returns a new `Qubit` wrapped in `Some`, if the specified index is
+    /// strictly positive and strictly smaller than
+    /// [`qureg.num_qubits_represented()`][2].  Otherwise returns `None`.
+    ///
+    /// [1]: crate::Qubit
+    /// [2]: crate::Qureg::num_qubits_represented()
+    /// [3]: crate::Qubit::new()
+    pub fn qubit(
+        &mut self,
+        index: i32,
+    ) -> Option<Qubit<'_, 'env>> {
+        Qubit::new(self, index)
+    }
 }
 
-impl<'a> Drop for Qureg<'a> {
+#[test]
+fn qureg_qubit_at_idx_01() {
+    let env = &QuestEnv::new();
+
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg);
+    pauli_x(qureg, 1).unwrap();
+
+    let mut qubit = qureg.qubit(0).unwrap();
+    let x = qubit.measure().unwrap();
+    assert_eq!(x, 0);
+
+    let mut qubit = qureg.qubit(1).unwrap();
+    let x = qubit.measure().unwrap();
+    assert_eq!(x, 1);
+}
+
+impl<'env> Drop for Qureg<'env> {
     fn drop(&mut self) {
         catch_quest_exception(|| {
             unsafe { ffi::destroyQureg(self.reg, self.env.0) };
@@ -2604,36 +2662,6 @@ pub fn collapse_to_outcome(
     })
 }
 
-/// Measures a single qubit, collapsing it randomly to 0 or 1.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-///
-/// // Prepare an entangled state `|00> + |11>`
-/// init_zero_state(qureg);
-/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-///
-/// // Qubits are entangled now
-/// let outcome1 = measure(qureg, 0).unwrap();
-/// let outcome2 = measure(qureg, 1).unwrap();
-///
-/// assert_eq!(outcome1, outcome2);
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
-pub fn measure(
-    qureg: &mut Qureg,
-    measure_qubit: i32,
-) -> Result<i32, QuestError> {
-    catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
-}
-
 /// Measures a single qubit, collapsing it randomly to 0 or 1, and
 /// additionally gives the probability of that outcome.
 ///
@@ -3298,7 +3326,7 @@ pub fn calc_fidelity(
 /// // swap to |01>
 /// swap_gate(qureg, 0, 1).unwrap();
 ///
-/// let outcome = measure(qureg, 0).unwrap();
+/// let outcome = qureg.qubit(0).unwrap().measure().unwrap();
 /// assert_eq!(outcome, 0);
 /// ```
 ///
@@ -3333,7 +3361,7 @@ pub fn swap_gate(
 /// init_classical_state(qureg, 1).unwrap();
 /// sqrt_swap_gate(qureg, 0, 1).unwrap();
 /// sqrt_swap_gate(qureg, 0, 1).unwrap();
-/// let outcome = measure(qureg, 0).unwrap();
+/// let outcome = qureg.qubit(0).unwrap().measure().unwrap();
 /// assert_eq!(outcome, 0);
 /// ```
 ///
@@ -4608,9 +4636,9 @@ pub fn set_weighted_qureg(
 /// apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
 ///
 /// // out_qureg is now in `|01> + |10>` state:
-/// let qb1 = measure(out_qureg, 0).unwrap();
-/// let qb2 = measure(out_qureg, 1).unwrap();
-/// assert!(qb1 != qb2);
+/// let qb0 = out_qureg.qubit(0).unwrap().measure().unwrap();
+/// let qb1 = out_qureg.qubit(1).unwrap().measure().unwrap();
+/// assert!(qb0 != qb1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4663,9 +4691,9 @@ pub fn apply_pauli_sum(
 /// apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
 ///
 /// // out_qureg is now in `|01> + |10>` state:
-/// let qb1 = measure(out_qureg, 0).unwrap();
-/// let qb2 = measure(out_qureg, 1).unwrap();
-/// assert!(qb1 != qb2);
+/// let qb0 = out_qureg.qubit(0).unwrap().measure().unwrap();
+/// let qb1 = out_qureg.qubit(1).unwrap().measure().unwrap();
+/// assert!(qb0 != qb1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
@@ -4705,8 +4733,8 @@ pub fn apply_pauli_hamil(
 /// apply_trotter_circuit(qureg, hamil, time, order, reps).unwrap();
 ///
 /// // qureg is now in `|1>` state:
-/// let qb1 = measure(qureg, 0).unwrap();
-/// assert_eq!(qb1, 1);
+/// let qb0 = qureg.qubit(0).unwrap().measure().unwrap();
+/// assert_eq!(qb0, 1);
 /// ```
 ///
 /// See [QuEST API][1] for more information.
