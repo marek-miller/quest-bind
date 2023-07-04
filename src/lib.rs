@@ -575,7 +575,7 @@ impl<'env> Qureg<'env> {
     /// [2]: crate::Qureg::num_qubits_represented()
     /// [3]: crate::Qubit::new()
     pub fn qubit(
-        &mut self,
+        &self,
         index: i32,
     ) -> Option<Qubit<'_, 'env>> {
         Qubit::new(self, index)
