@@ -2,6 +2,9 @@ use super::Qureg;
 use crate::{
     exceptions::catch_quest_exception,
     ffi,
+    hadamard,
+    report_state_to_screen,
+    QuestEnv,
     QuestError,
 };
 
@@ -67,10 +70,17 @@ impl<'a, 'env> Qubit<'a, 'env> {
         if index < 0 || index >= num_qubits_represented {
             None
         } else {
-            Some(Self {
-                qureg,
-                index,
-            })
+            Some(Self::new_unchecked(qureg, index))
+        }
+    }
+
+    pub fn new_unchecked(
+        qureg: &'a mut Qureg<'env>,
+        index: i32,
+    ) -> Self {
+        Self {
+            qureg,
+            index,
         }
     }
 
@@ -119,6 +129,37 @@ impl<'a, 'env> Qubit<'a, 'env> {
             ffi::measure(self.qureg.reg, self.index)
         })
     }
+}
+
+pub trait SingleQubitGate: Fn(&mut Qubit) -> Result<(), QuestError> {}
+impl<G> SingleQubitGate for G where G: Fn(&mut Qubit) -> Result<(), QuestError> {}
+
+pub fn tensor_gate<G>(
+    qureg: &mut Qureg,
+    gate: G,
+) -> Result<(), QuestError>
+where
+    G: SingleQubitGate,
+{
+    for i in 0..qureg.num_qubits_represented() {
+        gate(&mut Qubit::new_unchecked(qureg, i))?;
+    }
+    Ok(())
+}
+
+pub fn hadamard_gate(qubit: &mut Qubit) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::hadamard(qubit.qureg.reg, qubit.index);
+    })
+}
+
+#[test]
+fn tensor_gate_01() {
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(3, env).unwrap();
+
+    tensor_gate(&mut qureg, hadamard_gate).unwrap();
+    report_state_to_screen(&qureg, env, 0);
 }
 
 #[cfg(test)]
