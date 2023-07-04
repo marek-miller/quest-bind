@@ -791,10 +791,8 @@ fn hadamard_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
     init_zero_state(qureg);
 
-    hadamard(qureg, 0).unwrap();
-    hadamard(qureg, 1).unwrap();
-    hadamard(qureg, 2).unwrap_err();
-    hadamard(qureg, -1).unwrap_err();
+    hadamard(&mut Qubit::new_unchecked(qureg, 0)).unwrap();
+    hadamard(&mut Qubit::new_unchecked(qureg, 1)).unwrap();
 }
 
 #[test]
@@ -804,14 +802,26 @@ fn controlled_not_01() {
     init_zero_state(qureg);
     pauli_x(qureg, 1).unwrap();
 
-    controlled_not(qureg, 1, 0).unwrap();
-    controlled_not(qureg, 0, 1).unwrap();
-
-    controlled_not(qureg, 0, 0).unwrap_err();
-    controlled_not(qureg, 1, 1).unwrap_err();
-    controlled_not(qureg, 1, 2).unwrap_err();
-    controlled_not(qureg, 2, 4).unwrap_err();
-    controlled_not(qureg, 2, -1).unwrap_err();
+    controlled_not(
+        &mut Qubit::new_unchecked(qureg, 1),
+        &mut Qubit::new_unchecked(qureg, 0),
+    )
+    .unwrap();
+    controlled_not(
+        &mut Qubit::new_unchecked(qureg, 0),
+        &mut Qubit::new_unchecked(qureg, 1),
+    )
+    .unwrap();
+    controlled_not(
+        &mut Qubit::new_unchecked(qureg, 0),
+        &mut Qubit::new_unchecked(qureg, 0),
+    )
+    .unwrap_err();
+    controlled_not(
+        &mut Qubit::new_unchecked(qureg, 1),
+        &mut Qubit::new_unchecked(qureg, 1),
+    )
+    .unwrap_err();
 }
 
 #[test]
@@ -1033,7 +1043,11 @@ fn start_recording_qasm_01() {
     let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     start_recording_qasm(qureg);
-    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+    
+    let qb0 = &mut Qubit::new_unchecked(qureg, 0);
+    let qb1 = &mut Qubit::new_unchecked(qureg, 1);
+
+    hadamard(qb0).and(controlled_not(qb0, qb1)).unwrap();
     stop_recording_qasm(qureg);
 
     print_recorded_qasm(qureg);

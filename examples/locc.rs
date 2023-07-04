@@ -15,11 +15,12 @@ fn main() -> Result<(), QuestError> {
     report_qureg_params(qureg);
     init_zero_state(qureg);
 
+    let qb0 = &mut Qubit::new(qureg, 0).unwrap();
+    let qb1 = &mut Qubit::new(qureg, 1).unwrap();
+    
     println!("---\nPrepare Bell state: |00> + |11>");
-    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
+    hadamard(qb0).and(controlled_not(qb0, qb1))?;
 
-    let mut qb0 = Qubit::new(qureg, 0).unwrap();
-    let mut qb1 = Qubit::new(qureg, 1).unwrap();
     let (tx, rx) = channel();
 
     thread::scope(|s| {

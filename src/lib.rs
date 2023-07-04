@@ -25,7 +25,11 @@ pub use precision::{
 };
 
 mod qubit;
-pub use qubit::Qubit;
+pub use qubit::{
+    controlled_not,
+    hadamard,
+    Qubit,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
@@ -2357,72 +2361,6 @@ pub fn pauli_z(
     }
     catch_quest_exception(|| unsafe {
         ffi::pauliZ(qureg.reg, target_qubit);
-    })
-}
-
-/// Apply the single-qubit Hadamard gate.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-/// init_zero_state(qureg);
-///
-/// hadamard(qureg, 0).unwrap();
-///
-/// let amp = get_real_amp(qureg, 0).unwrap();
-/// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
-pub fn hadamard(
-    qureg: &mut Qureg,
-    target_qubit: i32,
-) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    catch_quest_exception(|| unsafe {
-        ffi::hadamard(qureg.reg, target_qubit);
-    })
-}
-
-/// Apply the controlled not (single control, single target) gate.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-/// init_zero_state(qureg);
-/// pauli_x(qureg, 1).unwrap();
-///
-/// controlled_not(qureg, 1, 0).unwrap();
-///
-/// let amp = get_real_amp(qureg, 3).unwrap();
-/// assert!((amp - 1.).abs() < EPSILON);
-/// ```
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
-pub fn controlled_not(
-    qureg: &mut Qureg,
-    control_qubit: i32,
-    target_qubit: i32,
-) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented()
-        || control_qubit >= qureg.num_qubits_represented()
-    {
-        return Err(QuestError::QubitIndexError);
-    }
-    catch_quest_exception(|| unsafe {
-        ffi::controlledNot(qureg.reg, control_qubit, target_qubit);
     })
 }
 

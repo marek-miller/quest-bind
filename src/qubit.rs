@@ -5,6 +5,7 @@ use crate::{
     QuestError,
 };
 
+// TODO: Document this!
 unsafe impl<'a> Sync for Qureg<'a> {}
 
 /// Represents a mutable qubit in a register [`Qureg`][1].
@@ -125,6 +126,65 @@ impl<'a, 'env> Qubit<'a, 'env> {
             ffi::measure(self.qureg.reg, self.index)
         })
     }
+}
+
+/// Apply the single-qubit Hadamard gate.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// hadamard(qureg, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 0).unwrap();
+/// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
+pub fn hadamard(qubit: &mut Qubit) -> Result<(), QuestError> {
+    catch_quest_exception(|| unsafe {
+        ffi::hadamard(qubit.qureg.reg, qubit.index);
+    })
+}
+
+/// Apply the controlled not (single control, single target) gate.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+/// init_zero_state(qureg);
+/// pauli_x(qureg, 1).unwrap();
+///
+/// controlled_not(qureg, 1, 0).unwrap();
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 1.).abs() < EPSILON);
+/// ```
+///
+/// See [QuEST API][1] for more information.
+///
+/// [1]: https://quest-kit.github.io/QuEST/modules.html
+pub fn controlled_not(
+    control_qubit: &mut Qubit,
+    target_qubit: &mut Qubit,
+) -> Result<(), QuestError> {
+    assert!(control_qubit.qureg as *const _ == target_qubit.qureg as *const _);
+    catch_quest_exception(|| unsafe {
+        ffi::controlledNot(
+            target_qubit.qureg.reg,
+            control_qubit.index,
+            target_qubit.index,
+        );
+    })
 }
 
 #[cfg(test)]
