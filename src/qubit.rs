@@ -5,7 +5,23 @@ use crate::{
     QuestError,
 };
 
-/// Represents a mutable qubit in a register `Qureg`
+/// Represents a mutable qubit in a register [`Qureg`][1].
+///
+/// The type `Qubit` represent a single two-level system in a quantum
+/// register `Qureg` at a specified index. Because this
+/// qubit might be entangled with other qubits in the register, any
+/// operation on the qubit may potentially change the state of the whole quantum
+/// register. Hence, in order to even create a qubit, the user has to provide a
+/// mutable reference to the underlying register.  A qubit type holding only a
+/// shared reference to its `Qureg` would be virtually useless!
+///
+/// A `Qubit` is bound by two lifetimes: `'a` and `'env`, where `'a` must
+/// outlive `'env`.  The lifetime `'a` refers to the mutable reference to a
+/// `Qureg` the qubit will hold, and the `'env` is the lifetime of the QuEST
+/// global environment the Qureg is bound to.  See also [`Qureg::try_new()`][2]
+///
+/// [1]: crate::Qureg
+/// [2]: crate::Qureg::try_new()
 #[derive(Debug)]
 pub struct Qubit<'a, 'env: 'a> {
     qureg: &'a mut Qureg<'env>,
@@ -13,6 +29,36 @@ pub struct Qubit<'a, 'env: 'a> {
 }
 
 impl<'a, 'env> Qubit<'a, 'env> {
+    /// Creates a new qubit.
+    ///
+    /// The `index` must be strictly positive and smaller than
+    /// [`qureg.num_qubits_represented()`][1].
+    ///
+    /// See also [`Qureg::qubit()`][2] for another method to create a `Qubit`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// init_zero_state(qureg);
+    ///
+    /// assert!(Qubit::new(qureg, 0).is_some());
+    /// assert!(Qubit::new(qureg, 1).is_some());
+    ///
+    /// assert!(Qubit::new(qureg, 2).is_none());
+    /// assert!(Qubit::new(qureg, -1).is_none());
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// Returns a new `Qubit` wrapped in `Some`, if the specified index is
+    /// strictly positive and strictly smaller than
+    /// [`qureg.num_qubits_represented()`][1].  Otherwise returns `None`.
+    ///
+    /// [1]: crate::Qureg::num_qubits_represented()
+    /// [2]: crate::Qureg::qubit()
     pub fn new(
         qureg: &'a mut Qureg<'env>,
         index: i32,
@@ -28,11 +74,24 @@ impl<'a, 'env> Qubit<'a, 'env> {
         }
     }
 
+    /// Index of this qubit in the underlying [`Qureg`](crate::Qureg).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// init_zero_state(qureg);
+    ///
+    /// let qubit = Qubit::new(qureg, 1).unwrap();
+    /// assert_eq!(qubit.index(), 1);
+    /// ```
     pub fn index(&self) -> i32 {
         self.index
     }
 
-    /// Measures a single qubit, collapsing it randomly to 0 or 1.
+    /// Measures the qubit, collapsing it randomly to 0 or 1.
     ///
     /// # Examples
     ///
@@ -70,27 +129,6 @@ mod tests {
         pauli_x,
         QuestEnv,
     };
-
-    #[test]
-    fn qubit_init_01() {
-        let env = &QuestEnv::new();
-        let qureg = &mut Qureg::try_new(2, env).unwrap();
-        init_zero_state(qureg);
-
-        assert!(Qubit::new(qureg, 0).is_some());
-        assert!(Qubit::new(qureg, 1).is_some());
-    }
-
-    #[test]
-    fn qubit_init_02() {
-        let env = &QuestEnv::new();
-        let qureg = &mut Qureg::try_new(2, env).unwrap();
-        init_zero_state(qureg);
-
-        assert!(Qubit::new(qureg, 2).is_none());
-        assert!(Qubit::new(qureg, 3).is_none());
-        assert!(Qubit::new(qureg, -1).is_none());
-    }
 
     #[test]
     fn qubit_into_01() {

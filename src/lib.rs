@@ -539,7 +539,37 @@ impl<'env> Qureg<'env> {
         self.reg.numQubitsRepresented
     }
 
-    /// Return qubit at given index or `None` if index is invalid
+    /// Return a new representation [`Qubit`][1] of a qubit in the register.
+    ///
+    /// The `index` must be strictly positive and smaller than
+    /// [`qureg.num_qubits_represented()`][2].
+    ///
+    /// See also [`Qubit::new()`][3] for another method to create a `Qubit`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// init_zero_state(qureg);
+    ///
+    /// assert!(qureg.qubit(0).is_some());
+    /// assert!(qureg.qubit(1).is_some());
+    ///
+    /// assert!(qureg.qubit(2).is_none());
+    /// assert!(qureg.qubit(-1).is_none());
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// Returns a new `Qubit` wrapped in `Some`, if the specified index is
+    /// strictly positive and strictly smaller than
+    /// [`qureg.num_qubits_represented()`][2].  Otherwise returns `None`.
+    ///
+    /// [1]: crate::Qubit
+    /// [2]: crate::Qureg::num_qubits_represented()
+    /// [3]: crate::Qubit::new()
     pub fn qubit(
         &mut self,
         index: i32,
