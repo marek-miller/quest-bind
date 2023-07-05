@@ -270,6 +270,11 @@ Here's a few things to know if you'd like to contribute to `quest_bind`.
 
 ## Releases
 
+### v0.3.2 (??/07/2023)
+
+- Expand and improve documentation
+- Fix bugs in tests
+
 ### v0.3.1 (02/07/2023)
 
 - Publish to [crates.io](https://crates.io/crates/quest_bind)
