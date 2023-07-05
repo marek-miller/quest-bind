@@ -540,6 +540,13 @@ impl<'a> Drop for Qureg<'a> {
     }
 }
 
+// SAFETY: Any Qureg managed by QuEST is inherently mutable, and no amount of
+// borrow checking can prevent that.  However, the way we handle API
+// calls to QuEST by locking the exception handler makes each call
+// atomic and prevent data races.  The promise of this API is that functions
+// that take a shared reference to Qureg do not modify the QuEST qureg state.
+unsafe impl<'a> Sync for Qureg<'a> {}
+
 #[derive(Debug)]
 pub struct QuestEnv(ffi::QuESTEnv);
 
