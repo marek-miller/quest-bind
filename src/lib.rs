@@ -1493,7 +1493,7 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     .expect("get_environment_string should always succeed")
 }
 
-/// Copy the state-vector (or density matrix) from RAM to VRAM / GPU-memory.
+/// Copy the state-vector (or density matrix) into GPU memory.
 ///
 /// # Examples
 ///
@@ -1515,7 +1515,7 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     .expect("copy_state_to_gpu should always succeed");
 }
 
-/// In GPU mode, this copies the state-vector (or density matrix) from RAM.
+/// Copy the state-vector (or density matrix) from GPU memory.
 ///
 /// # Examples
 ///
@@ -1535,8 +1535,7 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
         .expect("copy_state_from_gpu should always succeed");
 }
 
-/// In GPU mode, this copies the state-vector (or density matrix) from GPU
-/// memory.
+/// Copy a part the state-vector (or density matrix) into GPU memory.
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -1551,8 +1550,7 @@ pub fn copy_substate_to_gpu(
     })
 }
 
-/// In GPU mode, this copies a substate of the state-vector (or density matrix)
-/// from RAM.
+/// Copy a part the state-vector (or density matrix) from GPU memory.
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -1592,7 +1590,7 @@ pub fn get_amp(
         .map(Into::into)
 }
 
-/// Get the real component of the complex probability amplitude at an index in
+/// Get the real part of the probability amplitude at an index in
 /// the state vector.
 ///
 /// # Examples
@@ -1617,7 +1615,7 @@ pub fn get_real_amp(
     catch_quest_exception(|| unsafe { ffi::getRealAmp(qureg.reg, index) })
 }
 
-/// Get the imaginary component of the complex probability amplitude at an index
+/// Get the imaginary part of the probability amplitude at an index
 /// in the state vector.
 ///
 /// # Examples
@@ -2119,7 +2117,7 @@ pub fn controlled_compact_unitary(
     })
 }
 
-/// Apply a general controlled unitary which can include a global phase factor.
+/// Apply a general controlled unitary.
 ///
 /// # Examples
 ///
@@ -2622,8 +2620,9 @@ pub fn measure(
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
-/// Measures a single qubit, collapsing it randomly to 0 or 1, and
-/// additionally gives the probability of that outcome.
+/// Measures a single qubit, collapsing it randomly to 0 or 1
+///
+/// Additionally, the function gives the probability of that outcome.
 ///
 /// # Examples
 ///
@@ -3031,7 +3030,7 @@ pub fn mix_two_qubit_dephasing(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit homogeneous
+/// Mixes a density matrix to induce single-qubit homogeneous
 /// depolarising noise.
 ///
 /// # Examples
@@ -3069,8 +3068,7 @@ pub fn mix_depolarising(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit amplitude damping
-/// (decay to 0 state).
+///  Mixes a density matrix to induce single-qubit amplitude damping.
 ///
 /// # Examples
 ///
@@ -3108,7 +3106,7 @@ pub fn mix_damping(
     })
 }
 
-/// Mixes a density matrix `qureg` to induce two-qubit homogeneous depolarising
+/// Mixes a density matrix to induce two-qubit homogeneous depolarising
 /// noise.
 ///
 /// # Examples
@@ -3153,7 +3151,7 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
-/// Mixes a density matrix `qureg` to induce general single-qubit Pauli noise.
+/// Mixes a density matrix to induce general single-qubit Pauli noise.
 ///
 /// # Examples
 ///
@@ -3193,9 +3191,9 @@ pub fn mix_pauli(
     })
 }
 
-/// Modifies `combine_qureg` with `other_qureg`
+/// Modifies `combine_qureg` with `other_qureg`.
 ///
-/// to become `(1-prob) combine_qureg +  prob other_qureg`.
+/// The state becomes `(1-prob) combine_qureg +  prob other_qureg`.
 ///
 /// # Examples
 ///
@@ -3805,8 +3803,7 @@ pub fn two_qubit_unitary(
     })
 }
 
-/// Apply a general controlled two-qubit unitary (including a global phase
-/// factor).
+/// Apply a general controlled two-qubit unitary.
 ///
 /// # Examples
 ///
@@ -4137,8 +4134,9 @@ pub fn multi_controlled_multi_qubit_unitary(
     })
 }
 
-/// Apply a general single-qubit Kraus map to a density matrix, as specified by
-/// at most four Kraus operators.
+/// Apply a general single-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most four Kraus operators.
 ///
 /// # Examples
 ///
@@ -4180,8 +4178,9 @@ pub fn mix_kraus_map(
     })
 }
 
-/// Apply a general two-qubit Kraus map to a density matrix, as specified by at
-/// most sixteen Kraus operators.
+/// Apply a general two-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most sixteen Kraus operators.
 ///
 /// # Examples
 ///
@@ -4246,8 +4245,9 @@ pub fn mix_two_qubit_kraus_map(
     })
 }
 
-/// Apply a general N-qubit Kraus map to a density matrix, as specified by at
-/// most `(2N)^2` Kraus operators.
+/// Apply a general N-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most `(2N)^2` Kraus operators.
 ///
 /// # Examples
 ///
@@ -4312,8 +4312,10 @@ pub fn mix_multi_qubit_kraus_map(
     })
 }
 
-/// Apply a general non-trace-preserving single-qubit Kraus map to a density
-/// matrix,  as specified by at most four operators,
+/// Apply a general non-trace-preserving single-qubit Kraus map.
+///
+/// The state must be a density matrix, and the map is specified by at most four
+/// operators.
 ///
 /// # Examples
 ///
@@ -4350,8 +4352,10 @@ pub fn mix_nontp_kraus_map(
     })
 }
 
-/// Apply a general non-trace-preserving two-qubit Kraus map to a density
-/// matrix, as specified by at most sixteen operators,
+/// Apply a general non-trace-preserving two-qubit Kraus map.
+///
+/// The state must be a density matrix, and the map is specified
+/// by at most 16 operators.
 ///
 /// # Examples
 ///
@@ -4416,8 +4420,10 @@ pub fn mix_nontp_two_qubit_kraus_map(
     })
 }
 
-/// Apply a general N-qubit non-trace-preserving Kraus map to a density matrix,
-/// as specified by at most `(2N)^2` operators.
+/// Apply a general N-qubit non-trace-preserving Kraus map.
+///
+/// The state must be a density matrix, and the map is specified
+/// by at most `2^(2N)` operators.
 ///
 /// # Examples
 ///
