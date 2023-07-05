@@ -870,14 +870,12 @@ pub fn calc_expec_diagonal_op(
     .map(Into::into)
 }
 
-/// Print the current state vector of probability amplitudes for a set of qubits
-/// to file.
+/// Print the current state vector of probability amplitudes to file.
 pub fn report_state(qureg: &Qureg) {
     unsafe { ffi::reportState(qureg.reg) }
 }
 
-/// Print the current state vector of probability amplitudes for a set of qubits
-/// to standard out.
+/// Print the current state vector of probability amplitudes.
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -886,15 +884,16 @@ pub fn report_state_to_screen(
     unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
 }
 
-/// Report metainformation about a set of qubits: number of qubits, number of
-/// probability amplitudes.
+/// Report information about a set of qubits.
+///
+/// This function reports: number of qubits, number of probability amplitudes.
 pub fn report_qureg_params(qureg: &Qureg) {
     unsafe {
         ffi::reportQuregParams(qureg.reg);
     }
 }
 
-/// Print the `hamil` to screen.
+/// Print the Hamiltonian `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::reportPauliHamil(hamil.0);
@@ -1225,7 +1224,7 @@ pub fn clone_qureg(
     })
 }
 
-/// Shift the phase between `|0>` and `|1>` of a single qubit by a given angle.
+/// Shift the phase of a single qubit by a given angle.
 ///
 /// # Examples
 ///
@@ -1500,7 +1499,7 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     .expect("get_environment_string should always succeed")
 }
 
-/// Copy the state-vector (or density matrix) from RAM to VRAM / GPU-memory.
+/// Copy the state-vector (or density matrix) into GPU memory.
 ///
 /// # Examples
 ///
@@ -1522,7 +1521,7 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     .expect("copy_state_to_gpu should always succeed");
 }
 
-/// In GPU mode, this copies the state-vector (or density matrix) from RAM.
+/// Copy the state-vector (or density matrix) from GPU memory.
 ///
 /// # Examples
 ///
@@ -1542,8 +1541,7 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
         .expect("copy_state_from_gpu should always succeed");
 }
 
-/// In GPU mode, this copies the state-vector (or density matrix) from GPU
-/// memory.
+/// Copy a part the state-vector (or density matrix) into GPU memory.
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -1558,8 +1556,7 @@ pub fn copy_substate_to_gpu(
     })
 }
 
-/// In GPU mode, this copies a substate of the state-vector (or density matrix)
-/// from RAM.
+/// Copy a part the state-vector (or density matrix) from GPU memory.
 ///
 /// See [QuEST API][1] for more information.
 ///
@@ -1599,7 +1596,7 @@ pub fn get_amp(
         .map(Into::into)
 }
 
-/// Get the real component of the complex probability amplitude at an index in
+/// Get the real part of the probability amplitude at an index in
 /// the state vector.
 ///
 /// # Examples
@@ -1624,7 +1621,7 @@ pub fn get_real_amp(
     catch_quest_exception(|| unsafe { ffi::getRealAmp(qureg.reg, index) })
 }
 
-/// Get the imaginary component of the complex probability amplitude at an index
+/// Get the imaginary part of the probability amplitude at an index
 /// in the state vector.
 ///
 /// # Examples
@@ -1699,8 +1696,7 @@ pub fn get_density_amp(
         .map(Into::into)
 }
 
-/// A debugging function which calculates the probability of the qubits in
-/// `qureg`
+/// A debugging function which calculates the total probability of the qubits.
 ///
 /// This function should always be 1 for correctly normalised states
 /// (hence returning a real number).
@@ -2035,8 +2031,7 @@ pub fn controlled_rotate_z(
     })
 }
 
-/// Applies a controlled rotation by a given angle around a given vector of the
-/// Bloch-sphere.
+/// Applies a controlled rotation by  around a given vector of the Bloch-sphere.
 ///
 /// # Examples
 ///
@@ -2128,7 +2123,7 @@ pub fn controlled_compact_unitary(
     })
 }
 
-/// Apply a general controlled unitary which can include a global phase factor.
+/// Apply a general controlled unitary.
 ///
 /// # Examples
 ///
@@ -2492,8 +2487,7 @@ pub fn controlled_pauli_y(
     })
 }
 
-/// Gives the probability of a specified qubit being measured in the given
-/// outcome (0 or 1).
+/// Gives the probability of a qubit being measured in the given outcome.
 ///
 /// # Examples
 ///
@@ -2522,8 +2516,7 @@ pub fn calc_prob_of_outcome(
     })
 }
 
-/// Populates `outcome_probs` with the probabilities of every outcome of the
-/// sub-register.
+/// Calculate probabilities of every outcome of the sub-register.
 ///
 /// # Examples
 ///
@@ -2570,8 +2563,7 @@ pub fn calc_prob_of_all_outcomes(
     })
 }
 
-/// Updates `qureg` to be consistent with measuring `measure_qubit`  in the
-/// given `outcome`: (0, 1).
+/// Updates `qureg` to be consistent with measuring qubit in the given outcome.
 ///
 /// # Examples
 ///
@@ -2634,8 +2626,9 @@ pub fn measure(
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
-/// Measures a single qubit, collapsing it randomly to 0 or 1, and
-/// additionally gives the probability of that outcome.
+/// Measures a single qubit, collapsing it randomly to 0 or 1
+///
+/// Additionally, the function gives the probability of that outcome.
 ///
 /// # Examples
 ///
@@ -2729,6 +2722,8 @@ pub fn calc_density_inner_product(
     })
 }
 
+/// Seed the random number generator.
+///
 /// Seeds the random number generator with the (master node) current time and
 /// process ID.
 ///
@@ -3041,7 +3036,7 @@ pub fn mix_two_qubit_dephasing(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit homogeneous
+/// Mixes a density matrix to induce single-qubit homogeneous
 /// depolarising noise.
 ///
 /// # Examples
@@ -3079,8 +3074,7 @@ pub fn mix_depolarising(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit amplitude damping
-/// (decay to 0 state).
+///  Mixes a density matrix to induce single-qubit amplitude damping.
 ///
 /// # Examples
 ///
@@ -3118,7 +3112,7 @@ pub fn mix_damping(
     })
 }
 
-/// Mixes a density matrix `qureg` to induce two-qubit homogeneous depolarising
+/// Mixes a density matrix to induce two-qubit homogeneous depolarising
 /// noise.
 ///
 /// # Examples
@@ -3163,7 +3157,7 @@ pub fn mix_two_qubit_depolarising(
     })
 }
 
-/// Mixes a density matrix `qureg` to induce general single-qubit Pauli noise.
+/// Mixes a density matrix to induce general single-qubit Pauli noise.
 ///
 /// # Examples
 ///
@@ -3203,9 +3197,9 @@ pub fn mix_pauli(
     })
 }
 
-/// Modifies `combine_qureg` with `other_qureg`
+/// Modifies `combine_qureg` with `other_qureg`.
 ///
-/// to become `(1-prob) combine_qureg +  prob other_qureg`.
+/// The state becomes `(1-prob) combine_qureg +  prob other_qureg`.
 ///
 /// # Examples
 ///
@@ -3356,8 +3350,7 @@ pub fn sqrt_swap_gate(
     })
 }
 
-/// Apply a general single-qubit unitary with multiple control qubits,
-/// conditioned upon a specific bit sequence.
+/// Apply a general single-qubit unitary with multiple control qubits.
 ///
 /// # Examples
 ///
@@ -3416,8 +3409,7 @@ pub fn multi_state_controlled_unitary(
     })
 }
 
-/// Apply a multi-qubit Z rotation, also known as a phase gadget, on a selected
-/// number of qubits.
+/// Apply a multi-qubit Z rotation on selected qubits.
 ///
 /// # Examples
 ///
@@ -3455,7 +3447,7 @@ pub fn multi_rotate_z(
     })
 }
 
-/// Apply a multi-qubit multi-Pauli rotation, also known as a Pauli gadget.
+/// Apply a multi-qubit multi-Pauli rotation.
 ///
 /// # Examples
 ///
@@ -3817,8 +3809,7 @@ pub fn two_qubit_unitary(
     })
 }
 
-/// Apply a general controlled two-qubit unitary (including a global phase
-/// factor).
+/// Apply a general controlled two-qubit unitary.
 ///
 /// # Examples
 ///
@@ -3888,8 +3879,7 @@ pub fn controlled_two_qubit_unitary(
     })
 }
 
-/// Apply a general multi-qubit unitary (including a global phase factor) with
-/// any number of target qubits.
+/// Apply a general multi-qubit unitary with any number of target qubits.
 ///
 /// # Examples
 ///
@@ -3966,8 +3956,7 @@ pub fn multi_controlled_two_qubit_unitary(
     })
 }
 
-/// Apply a general multi-qubit unitary (including a global phase factor) with
-/// any number of target qubits.
+/// Apply a general multi-qubit unitary with any number of target qubits.
 ///
 /// # Examples
 ///
@@ -4151,8 +4140,9 @@ pub fn multi_controlled_multi_qubit_unitary(
     })
 }
 
-/// Apply a general single-qubit Kraus map to a density matrix, as specified by
-/// at most four Kraus operators.
+/// Apply a general single-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most four Kraus operators.
 ///
 /// # Examples
 ///
@@ -4194,8 +4184,9 @@ pub fn mix_kraus_map(
     })
 }
 
-/// Apply a general two-qubit Kraus map to a density matrix, as specified by at
-/// most sixteen Kraus operators.
+/// Apply a general two-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most sixteen Kraus operators.
 ///
 /// # Examples
 ///
@@ -4260,8 +4251,9 @@ pub fn mix_two_qubit_kraus_map(
     })
 }
 
-/// Apply a general N-qubit Kraus map to a density matrix, as specified by at
-/// most `(2N)^2` Kraus operators.
+/// Apply a general N-qubit Kraus map to a density matrix.
+///
+/// The map is specified by at most `(2N)^2` Kraus operators.
 ///
 /// # Examples
 ///
@@ -4326,8 +4318,10 @@ pub fn mix_multi_qubit_kraus_map(
     })
 }
 
-/// Apply a general non-trace-preserving single-qubit Kraus map to a density
-/// matrix,  as specified by at most four operators,
+/// Apply a general non-trace-preserving single-qubit Kraus map.
+///
+/// The state must be a density matrix, and the map is specified by at most four
+/// operators.
 ///
 /// # Examples
 ///
@@ -4364,8 +4358,10 @@ pub fn mix_nontp_kraus_map(
     })
 }
 
-/// Apply a general non-trace-preserving two-qubit Kraus map to a density
-/// matrix, as specified by at most sixteen operators,
+/// Apply a general non-trace-preserving two-qubit Kraus map.
+///
+/// The state must be a density matrix, and the map is specified
+/// by at most 16 operators.
 ///
 /// # Examples
 ///
@@ -4430,8 +4426,10 @@ pub fn mix_nontp_two_qubit_kraus_map(
     })
 }
 
-/// Apply a general N-qubit non-trace-preserving Kraus map to a density matrix,
-/// as specified by at most `(2N)^2` operators.
+/// Apply a general N-qubit non-trace-preserving Kraus map.
+///
+/// The state must be a density matrix, and the map is specified
+/// by at most `2^(2N)` operators.
 ///
 /// # Examples
 ///
@@ -4496,8 +4494,7 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     })
 }
 
-/// Computes the Hilbert Schmidt distance between two density matrices `a` and
-/// `b`, defined as the Frobenius norm of the difference between them.
+/// Computes the Hilbert Schmidt distance between two density matrices.
 ///
 /// # Examples
 ///
@@ -4525,7 +4522,9 @@ pub fn calc_hilbert_schmidt_distance(
     })
 }
 
-/// Modifies qureg \p out to the result of `$(\p facOut \p out + \p fac1 \p
+/// Set `qureg` to a weighted sum of states.
+///
+/// Modifies qureg `out` to the result of `$(\p facOut \p out + \p fac1 \p
 /// qureg1 + \p fac2 \p qureg2)$`, imposing no constraints on normalisation.
 ///
 /// Works for both state-vectors and density matrices. Note that afterward, \p
@@ -4582,8 +4581,7 @@ pub fn set_weighted_qureg(
     })
 }
 
-/// Modifies `out_qureg` to be the result of applying the weighted sum of Pauli
-/// products.
+/// Apply the weighted sum of Pauli products.
 ///
 /// In theory, `in_qureg` is unchanged though its state is temporarily modified
 /// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
@@ -4634,8 +4632,10 @@ pub fn apply_pauli_sum(
     })
 }
 
+/// Apply Hamiltonian `PauliHamil`.
+///
 /// Modifies `out_qureg` to be the result of applying `PauliHamil` (a Hermitian
-/// but not  necessarily unitary operator) to `in_qureg`.
+/// but not necessarily unitary operator) to `in_qureg`.
 ///
 /// In theory, `in_qureg` is unchanged though its state is temporarily modified
 /// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
@@ -4681,10 +4681,10 @@ pub fn apply_pauli_hamil(
     })
 }
 
-/// Applies a trotterisation of unitary evolution `$\exp(-i \, \text{hamil} \,
-/// \text{time})$` to `qureg`.
+/// Applies a trotterisation of unitary evolution.
 ///
-/// # Examples
+/// The unitary evelution `$\exp(-i \, \text{hamil} \, \text{time})$` is applied
+/// to `qureg`. # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
@@ -4812,8 +4812,9 @@ pub fn apply_matrix4(
     })
 }
 
-/// Apply a general N-by-N matrix, which may be non-unitary, on any number of
-/// target qubits.
+/// Apply a general N-by-N matrix on any number of target qubits.
+///
+/// The matrix need not be unitary.
 ///
 /// # Examples
 ///
@@ -4929,6 +4930,8 @@ pub fn apply_multi_controlled_matrix_n(
     })
 }
 
+/// Apply a phase function.
+///
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
 /// passed exponential polynomial *phase function*.
 ///
@@ -4978,6 +4981,8 @@ pub fn apply_phase_func(
     })
 }
 
+/// Apply a phase function with overrides.
+///
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
 /// passed  exponential polynomial "phase function", and an explicit set of
 /// 'overriding' values at specific state indices.
@@ -5050,8 +5055,7 @@ pub fn apply_phase_func_overrides(
     })
 }
 
-/// Induces a phase change upon each amplitude of `qureg`, determined by a
-/// multi-variable exponential polynomial "phase function".
+/// Apply a multi-variable exponential polynomial.
 ///
 /// # Examples
 ///
@@ -5109,9 +5113,11 @@ pub fn apply_multi_var_phase_func(
     })
 }
 
+/// Apply a multi-variable exponential polynomial with overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
-/// multi-variable exponential polynomial "phase function", and an explicit set
-/// of 'overriding' values at specific state indices.
+/// phase function, and an explicit set of 'overriding' values at specific
+/// state indices.
 ///
 /// # Examples
 ///
@@ -5179,8 +5185,10 @@ pub fn apply_multi_var_phase_func_overrides(
     })
 }
 
-/// Induces a phase change upon each amplitude of `qureg`, determined by a
-/// named (and potentially multi-variable) phase function.
+/// Apply a named phase function.
+///
+/// Induces a phase change upon each amplitude of `qureg`, determined by a named
+/// (and potentially multi-variable) phase function.
 ///
 /// # Examples
 ///
@@ -5228,6 +5236,8 @@ pub fn apply_named_phase_func(
     })
 }
 
+/// Apply a named phase function with overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named (and potentially multi-variable) phase function, and an explicit set
 /// of 'overriding' values at specific state indices.
@@ -5289,6 +5299,8 @@ pub fn apply_named_phase_func_overrides(
     })
 }
 
+/// Apply a parametrized phase function.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named, paramaterized (and potentially multi-variable) phase function.
 ///
@@ -5345,6 +5357,8 @@ pub fn apply_param_named_phase_func(
     })
 }
 
+/// Apply a parametrized phase function wi overrides.
+///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named, parameterised (and potentially multi-variable) phase function, and an
 /// explicit set of "overriding" values at specific state indices.
@@ -5470,7 +5484,7 @@ pub fn apply_qft(
     })
 }
 
-/// Force the target \p qubit of \p qureg into the given classical `outcome`
+/// Force the target qubit of qureg into the given classical outcome.
 ///
 /// # Examples
 ///
