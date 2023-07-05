@@ -34,6 +34,9 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
+        if num_qubits < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -64,6 +67,9 @@ impl<'a> Qureg<'a> {
         num_qubits: i32,
         env: &'a QuestEnv,
     ) -> Result<Self, QuestError> {
+        if num_qubits < 0 {
+            return Err(QuestError::QubitIndexError);
+        }
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
