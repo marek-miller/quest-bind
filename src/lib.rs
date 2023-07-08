@@ -27,6 +27,9 @@ pub use precision::{
 mod qureg;
 pub use qureg::Qureg;
 
+mod questenv;
+pub use questenv::QuestEnv;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum QuestError {
     /// An exception thrown by the C library.  From QuEST documentation:
@@ -453,35 +456,6 @@ impl<'a> Drop for DiagonalOp<'a> {
             ffi::destroyDiagonalOp(self.op, self.env.0);
         })
         .expect("dropping DiagonalOp should always succeed");
-    }
-}
-
-#[derive(Debug)]
-pub struct QuestEnv(ffi::QuESTEnv);
-
-impl QuestEnv {
-    #[must_use]
-    pub fn new() -> Self {
-        Self(unsafe { ffi::createQuESTEnv() })
-    }
-
-    pub fn sync(&self) {
-        unsafe {
-            ffi::syncQuESTEnv(self.0);
-        }
-    }
-}
-
-impl Default for QuestEnv {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Drop for QuestEnv {
-    fn drop(&mut self) {
-        catch_quest_exception(|| unsafe { ffi::destroyQuESTEnv(self.0) })
-            .expect("dropping QuestEnv should always succeed")
     }
 }
 
