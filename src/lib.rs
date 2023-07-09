@@ -5362,6 +5362,47 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 
 /// Applies the quantum Fourier transform (QFT) to a specific subset of qubits.
 ///
+/// The order of qubits affects the ultimate unitary.
+/// The canonical full-state QFT ([`apply_full_qft()`][api-apply-full-qft]) is
+/// achieved by targeting every qubit in increasing order.
+///
+/// - If `qureg` is a state-vector, the output amplitudes are a kronecker
+///   product of the discrete Fourier transform (DFT) acting upon the targeted
+///   amplitudes.
+/// - If `qureg` is a density matrix, it will be changed under the unitary
+///   action of the QFT. This can be imagined as each mixed state-vector
+///   undergoing the DFT on its amplitudes. This is true even if `qureg` is
+///   unnormalised.
+///
+/// This function merges contiguous controlled-phase gates into single
+/// invocations of [apply_named_phase_func()][api-apply-named-phase-func], and
+/// hence is significantly faster than performing
+/// the QFT circuit directly.
+///
+///
+/// Furthermore, in distributed mode, this function requires only `log2(#nodes)`
+/// rounds of pair-wise communication, and hence is exponentially faster than
+/// directly performing the DFT on the amplitudes of `qureg`.
+///
+/// See [`apply_full_qft()`][api-apply-full-qft] to apply the QFT to he entirety
+/// of `qureg`.
+///
+/// # Parameters
+///
+/// `qureg`: a state-vector or density matrix to modify
+/// `qubits` a list of the qubits to operate the QFT upon
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`][quest-error-array-len], if the length of `qubits` is
+///   less than [`qureg.num_qubits_represented()`][qureg-num-qubits]
+/// - [`QubitIndexError`][quest-error-index], if any of `qubits` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except], if `qubits` contains any
+///   repetitions
+///
+/// See [QuEST API][quest-api] for more information.
+///
 /// # Examples
 ///
 /// ```rust
@@ -5373,9 +5414,13 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// apply_qft(qureg, &[0, 1]).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-apply-full-qft]: crate::apply_full_qft()
+/// [api-apply-named-phase-func]: crate::apply_named_phase_func()
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_qft(
     qureg: &mut Qureg,
     qubits: &[i32],
