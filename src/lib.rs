@@ -5310,7 +5310,34 @@ pub fn apply_param_named_phase_func_overrides(
     })
 }
 
-/// Applies the quantum Fourier transform (QFT) to the entirety `qureg`.
+/// Apply the full quantum Fourier transform (QFT).
+///
+/// - If `qureg` is a state-vector, the output amplitudes are the discrete
+///   Fourier transform (DFT) of the input amplitudes, in the exact ordering.
+///   This is true even if `qureg` is unnormalised.
+///
+/// - If `qureg` is a density matrix, it will be changed under the unitary
+///   action of the QFT. This can be imagined as each mixed state-vector
+///   undergoing the DFT on its amplitudes. This is true even if `qureg` is
+///   unnormalised.
+///
+/// This function merges contiguous controlled-phase gates into single
+/// invocations of [apply_named_phase_func()][api-apply-named-phase-func], and
+/// hence is significantly faster than performing
+/// the QFT circuit directly.
+///
+/// Furthermore, in distributed mode, this function requires only `log2(#nodes)`
+/// rounds of pair-wise communication, and hence is exponentially faster than
+/// directly performing the DFT on the amplitudes of `qureg`.
+///
+/// See [`apply_qft()`][api-apply-qft] to apply the QFT to a sub-register of
+/// `qureg`.
+///
+/// # Parameters
+///
+/// - `qureg`: a state-vector or density matrix to modify
+///
+/// See [QuEST API][quest-api] for more information.
 ///
 /// # Examples
 ///
@@ -5323,9 +5350,9 @@ pub fn apply_param_named_phase_func_overrides(
 /// apply_full_qft(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-apply-named-phase-func]: crate::apply_named_phase_func()
+/// [api-apply-qft]: crate::apply_qft()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_full_qft(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::applyFullQFT(qureg.reg);
