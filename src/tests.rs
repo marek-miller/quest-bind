@@ -1,5 +1,7 @@
 #![allow(clippy::cast_sign_loss)]
 
+use num::Zero;
+
 use super::*;
 
 #[test]
@@ -10,6 +12,13 @@ fn create_qureg_01() -> Result<(), QuestError> {
 
     let _ = Qureg::try_new(0, env).unwrap_err();
     Ok(())
+}
+
+#[test]
+fn create_qureg_negative_num_qubits() {
+    let env = &QuestEnv::new();
+    let _ = Qureg::try_new(-1, env).unwrap_err();
+    let _ = Qureg::try_new_density(-1, env).unwrap_err();
 }
 
 #[test]
@@ -3230,4 +3239,261 @@ fn multi_controlled_multi_qubit_unitary_01() {
     // Check if the register is now in the state `|1111>`
     let amp = get_real_amp(qureg, 15).unwrap();
     assert!((amp - 1.).abs() < EPSILON);
+}
+
+#[test]
+fn apply_pauli_sum_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+}
+
+#[test]
+fn apply_pauli_sum_02() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(3, env).unwrap();
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    // in_ and out_qureg' dimensions are different
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg)
+        .unwrap_err();
+}
+
+#[test]
+fn apply_pauli_sum_03() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    // wrong number of codes
+    let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X];
+    let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+}
+
+#[test]
+fn apply_pauli_hamil_01() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
+}
+
+#[test]
+fn apply_pauli_hamil_02() {
+    use PauliOpType::{
+        PAULI_I,
+        PAULI_X,
+    };
+    let env = &QuestEnv::new();
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(in_qureg);
+    // out_qureg is of different dimension
+    let out_qureg = &mut Qureg::try_new(3, env).unwrap();
+
+    let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
+    let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
+    let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap_err();
+}
+
+#[test]
+fn apply_trotter_circuit_01() {
+    use PauliOpType::PAULI_X;
+
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg);
+
+    let hamil = &mut PauliHamil::try_new(1, 1).unwrap();
+    let coeffs = &[1.];
+    let codes = &[PAULI_X];
+    init_pauli_hamil(hamil, coeffs, codes).unwrap();
+
+    apply_trotter_circuit(qureg, hamil, 0., 1, 1).unwrap();
+    apply_trotter_circuit(qureg, hamil, 0., 2, 1).unwrap();
+    apply_trotter_circuit(qureg, hamil, 0., 1, 2).unwrap();
+
+    apply_trotter_circuit(qureg, hamil, 0., -1, 1).unwrap_err();
+    apply_trotter_circuit(qureg, hamil, 0., 1, 0).unwrap_err();
+    apply_trotter_circuit(qureg, hamil, 0., 1, -1).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_01() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    let qureg2 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap();
+}
+
+#[test]
+fn set_weighted_qureg_02() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    // dimensions are not equal
+    let qureg2 = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_03() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    let qureg2 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    // dimensions are not equal
+    let out = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
+
+#[test]
+fn set_weighted_qureg_04() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
+    init_zero_state(qureg1);
+    // all quregs should either state vectors of density matrices
+    let qureg2 = &mut Qureg::try_new_density(1, env).unwrap();
+    init_zero_state(qureg2);
+    pauli_x(qureg2, 0).unwrap();
+
+    let out = &mut Qureg::try_new(2, env).unwrap();
+    init_zero_state(out);
+
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
+
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_multi_rotate_z_01() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+
+    // Initialize `|1111>`
+    init_zero_state(qureg);
+    (0..4).try_for_each(|i| pauli_x(qureg, i)).unwrap();
+
+    multi_controlled_multi_rotate_z(qureg, &[0, 1], &[2, 3], 0.).unwrap();
+    multi_controlled_multi_rotate_z(qureg, &[0, 2], &[1, 3], 0.).unwrap();
+    multi_controlled_multi_rotate_z(qureg, &[2, 1], &[3, 0], 0.).unwrap();
+
+    multi_controlled_multi_rotate_z(qureg, &[0, 0], &[2, 3], 0.).unwrap_err();
+    multi_controlled_multi_rotate_z(qureg, &[0, 1], &[2, 2], 0.).unwrap_err();
+
+    multi_controlled_multi_rotate_z(qureg, &[-1, 1], &[2, 3], 0.).unwrap_err();
+    multi_controlled_multi_rotate_z(qureg, &[0, 4], &[2, 3], 0.).unwrap_err();
+    multi_controlled_multi_rotate_z(qureg, &[0, 1], &[-1, 3], 0.).unwrap_err();
+    multi_controlled_multi_rotate_z(qureg, &[0, 1], &[2, 4], 0.).unwrap_err();
+
+    multi_controlled_multi_rotate_z(qureg, &[0, 1], &[0, 3], 0.).unwrap_err();
+    multi_controlled_multi_rotate_z(qureg, &[0, 3], &[2, 3], 0.).unwrap_err();
+}
+
+#[test]
+fn multi_controlled_multi_rotate_pauli_01() {
+    use PauliOpType::PAULI_Z;
+
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
+
+    // Initialize `|1111>`
+    init_zero_state(qureg);
+    (0..4).try_for_each(|i| pauli_x(qureg, i)).unwrap();
+
+    let tar_paul = &[PAULI_Z, PAULI_Z];
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 3], tar_paul, 0.)
+        .unwrap();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 2], &[1, 3], tar_paul, 0.)
+        .unwrap();
+    multi_controlled_multi_rotate_pauli(qureg, &[2, 1], &[3, 0], tar_paul, 0.)
+        .unwrap();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 0], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 2], tar_paul, 0.)
+        .unwrap_err();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[-1, 1], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 4], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[-1, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[2, 4], tar_paul, 0.)
+        .unwrap_err();
+
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 1], &[0, 3], tar_paul, 0.)
+        .unwrap_err();
+    multi_controlled_multi_rotate_pauli(qureg, &[0, 3], &[2, 3], tar_paul, 0.)
+        .unwrap_err();
 }

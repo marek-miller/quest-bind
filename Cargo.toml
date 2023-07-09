@@ -1,16 +1,20 @@
 [package]
-name = "quest_bind"
-version = "0.2.0"
+description = "Wrapper around the Quantum Exact Simulation Toolkit (QuEST)"
 edition = "2021"
+homepage = "https://github.com/marek-miller/quest-bind"
+keywords = ["quantum", "circuit", "simulator", "wrapper"]
+license = "MIT"
+name = "quest_bind"
+readme = "README.md"
+repository = "https://github.com/marek-miller/quest-bind.git"
+version = "0.3.2"
 
 [features]
 f32 = []
 gpu = []
 mpi = []
 
-
 [dependencies]
-env_logger = "0.10.0"
 log = "0.4.19"
 num = "0.4.0"
 rand = "0.8.5"
