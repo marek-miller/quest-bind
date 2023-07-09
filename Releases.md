@@ -1,6 +1,6 @@
 # Releases
 
-## v0.3.2 (??/07/2023)
+## v0.3.2 (09/07/2023)
 
 - Expand and improve documentation
 - Various bug fixes
