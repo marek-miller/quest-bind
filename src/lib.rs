@@ -5484,7 +5484,36 @@ pub fn apply_qft(
     })
 }
 
-/// Force the target qubit of qureg into the given classical outcome.
+/// Apply a projector.
+///
+/// Force the target `qubit` of `qureg` into the given classical `outcome`,
+/// via a non-renormalising projection.
+///
+/// This function zeroes all amplitudes in the state-vector or density-matrix
+/// which correspond to the opposite `outcome` given. Unlike
+/// [`collapse_to_outcome()`][api-collapse-to-outcome], it does not
+/// thereafter normalise `qureg`, and hence may leave it in a non-physical
+/// state.
+///
+/// Note there is no requirement that the `outcome` state has a non-zero
+/// proability, and hence this function may leave `qureg` in a blank state,
+/// like that produced by [`init_blank_state()`][api-init-blank-state].
+///
+/// See [`collapse_to_outcome()`][api-collapse-to-outcome] for a norm-preserving
+/// equivalent, like a forced   measurement
+///
+/// # Parameters
+///
+/// - `qureg`:  a state-vector or density matrix to modify
+/// - `qubit`: the qubit to which to apply the projector
+/// - `outcome`: the single-qubit outcome (`0` or `1`) to project `qubit`
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except], if `outcome` is not in
+///   {0,1}
 ///
 /// # Examples
 ///
@@ -5500,9 +5529,14 @@ pub fn apply_qft(
 /// assert!(amp.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-collapse-to-outcome]: crate::collapse_to_outcome()
+/// [api-init-blank-state]: crate::init_blank_state()
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_projector(
     qureg: &mut Qureg,
     qubit: i32,
