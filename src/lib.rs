@@ -2183,6 +2183,24 @@ pub fn pauli_z(
 
 /// Apply the single-qubit Hadamard gate.
 ///
+/// This function applies the following unitary on `qubit`:
+///
+/// ```text
+/// SQRT_2.recip() *
+///     [ 1  1 ]
+///     [ 1 -1 ]
+/// ```
+///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// Returns [`QubitIndexError`][error-qubit-index] if `target_qubit` is
+/// outside [0, [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -2197,14 +2215,16 @@ pub fn pauli_z(
 /// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [error-qubit-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn hadamard(
     qureg: &mut Qureg,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() {
+    if target_qubit < 0 || target_qubit >= qureg.num_qubits_represented() {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -5241,7 +5261,7 @@ pub fn apply_param_named_phase_func(
     })
 }
 
-/// Apply a parametrized phase function wi overrides.
+/// Apply a parametrized phase function with overrides.
 ///
 /// Induces a phase change upon each amplitude of \p qureg, determined by a
 /// named, parameterised (and potentially multi-variable) phase function, and an
