@@ -3132,7 +3132,31 @@ pub fn mix_density_matrix(
     })
 }
 
-/// Calculates the purity of a density matrix.
+/// Calculate the purity of a density matrix.
+///
+/// The purity of a density matrix is calculated by taking the trace of the
+/// density matrix squared. Returns `Tr (\rho^2)`.
+/// For a pure state, this =1.
+/// For a mixed state, the purity is less than 1 and is lower bounded by
+/// `1/2^n`, where n is the number of qubits. The minimum purity is achieved for
+/// the maximally mixed state `identity/2^n`.
+///
+/// This function does not accept state-vectors, which clearly have purity 1.
+///
+/// Note this function will give incorrect results for non-Hermitian Quregs
+/// (i.e. invalid density matrices), which will disagree with
+/// `Tr(\rho^2)`. Instead, this function returns `\sum_{ij}
+/// |\rho_{ij}|^2`.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix of which to measure the purity
+///
+/// # Errors
+///
+/// Returns [`InvalidQuESTInputError`][quest-error-except],
+///
+/// - if the argument `qureg` is not a density matrix
 ///
 /// # Examples
 ///
@@ -3146,14 +3170,51 @@ pub fn mix_density_matrix(
 /// assert!((purity - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
 /// Calculates the fidelity of `qureg` (a state-vector or density matrix).
+///
+/// Calculates the fidelity against a reference pure state (necessarily a
+/// state-vector).
+///
+/// - If `qureg` is a state-vector, this function computes
+///
+/// ```latex
+///  |\langle \text{qureg} | \text{pure_state} \rangle|^2
+/// ```
+///
+/// - If `qureg` is a density matrix, this function computes
+///
+/// ```latex
+///  \langle \text{pure_state} | \text{qureg} | \text{pure_state} \rangle
+/// ```
+///
+/// In either case, the returned fidelity lies in `[0, 1]` (assuming both input
+/// states have valid normalisation). If any of the input `Qureg`s are not
+/// normalised, this function will return the real component of the correct
+/// linear algebra calculation.
+///
+/// The number of qubits represented in `qureg` and `pure_state` must match.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix or state vector
+/// - `pure_state`: a state vector
+///
+/// Returns the fidelity between the input registers
+///
+/// # Errors
+///
+/// Returns [`InvalidQuESTInputError`][quest-error-except],
+///
+/// - if the second argument `pure_state` is not a state-vector
+/// - if the number of qubits `qureg` and `pure_state` do not match
 ///
 /// # Examples
 ///
@@ -3170,9 +3231,10 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 /// assert!((fidelity - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_fidelity(
     qureg: &Qureg,
     pure_state: &Qureg,
@@ -3183,6 +3245,32 @@ pub fn calc_fidelity(
 }
 
 /// Performs a SWAP gate between `qubit1` and `qubit2`.
+
+/// This effects
+///
+/// ```text
+/// [1 0 0 0]
+/// [0 0 1 0]
+/// [0 1 0 0]
+/// [0 0 0 1]
+/// ```
+///
+/// on the designated qubits, though is performed internally by three CNOT
+/// gates.
+///
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `qubit1`: qubit to swap
+/// - `qubit2`: other qubit to swap
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if either `qubit1` or `qubit2` is
+///   outside [0, [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except], if `qubit1` and `qubit2`
+///   are equal
 ///
 /// # Examples
 ///
@@ -3200,9 +3288,12 @@ pub fn calc_fidelity(
 /// assert_eq!(outcome, 0);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn swap_gate(
     qureg: &mut Qureg,
     qubit1: i32,
