@@ -2,6 +2,7 @@
 
 ## v0.3.3 (??/??/2023)
 
+- Simplify handling QuEST exceptions 
 - Implement [`Sync`](https://doc.rust-lang.org/std/marker/trait.Sync.html)
   trait for QuestEnv
 
