@@ -1,12 +1,13 @@
 [package]
-description = "Wrapper for QuEST quantum circuit simulator"
+description = "Wrapper around the Quantum Exact Simulation Toolkit (QuEST)"
 edition = "2021"
 homepage = "https://github.com/marek-miller/quest-bind"
+keywords = ["quantum", "circuit", "simulator", "wrapper"]
 license = "MIT"
 name = "quest_bind"
 readme = "README.md"
 repository = "https://github.com/marek-miller/quest-bind.git"
-version = "0.3.1"
+version = "0.3.2"
 
 [features]
 f32 = []

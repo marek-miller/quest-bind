@@ -1,6 +1,12 @@
 # Releases
 
-## v0.3.2 (??/07/2023)
+## v0.3.3 (??/??/2023)
+
+- Simplify handling QuEST exceptions 
+- Implement [`Sync`](https://doc.rust-lang.org/std/marker/trait.Sync.html)
+  trait for QuestEnv
+
+## v0.3.2 (09/07/2023)
 
 - Expand and improve documentation
 - Various bug fixes
