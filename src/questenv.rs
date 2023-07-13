@@ -58,7 +58,6 @@ impl Drop for QuestEnv {
 }
 
 // SAFETY:  The way we handle API calls to QuEST by locking the exception
-// handler makes each call atomic and prevent data races.  The promise of this
-// API is that functions that take a shared reference to QuestEnv do not modify
-// the QuEST environment state.
+// handler makes each call atomic and prevents data races.
+unsafe impl Send for QuestEnv {}
 unsafe impl Sync for QuestEnv {}
