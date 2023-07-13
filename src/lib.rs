@@ -4943,8 +4943,8 @@ pub fn apply_multi_controlled_matrix_n(
 ///   fractional. For example,
 ///  
 ///   ```rust,no_run
-///   let coeffs = [1, -3.14];
-///   let exponents = [2, -5.5];
+///   let coeffs = [1., -3.14];
+///   let exponents = [2., -5.5];
 ///   ```
 ///  
 ///   constitutes the function: `f(r) =  1 * r^2 - 3.14 * r^(-5.5)`.  Note
@@ -5079,6 +5079,65 @@ pub fn apply_phase_func(
 /// passed  exponential polynomial "phase function", and an explicit set of
 /// 'overriding' values at specific state indices.
 ///
+/// See [`apply_phase_func()`][api-apply-phase-func] for a full desctiption.
+///
+/// - As in `apply_phase_func()`, the arguments `coeffs` and `exponents` specify
+///   a phase function `f(r)`, where `r` is determined by `qubits` and
+///   `encoding` for each basis state of `qureg`.
+/// - Additionally, `override_inds` is a list specifying the values of `r` for
+///   which to explicitly set the induced phase change. The overriding phase
+///   changes are specified in the corresponding elements of `override_phases`.
+/// - Note that if `encoding` is `TWOS_COMPLEMENT`, and `f(r)` features a
+///   fractional exponent, then every negative phase index must be overriden.
+///   This is checked and enforced by QuEST's validation, unless there are more
+///   than 16 targeted qubits, in which case valid input is assumed (due to an
+///   otherwise prohibitive performance overhead).
+/// - Overriding phases are checked at each computational basis state of `qureg`
+///   *before* evaluating the phase function `f(r)`, and hence are useful for
+///   avoiding singularities or errors at diverging values of `r`.
+/// - The interpreted phase function and list of overrides can be previewed in
+///   the QASM log, as a comment.
+///
+/// # Parameters
+///
+/// - `qureg`:  the state-vector or density matrix to be modified
+/// - `qubits`: a list of the indices of the qubits which will inform `r` for
+///   each amplitude in `qureg`
+/// - `encoding`: [`BitEncoding`][api-bit-encoding] under which to infer the
+///   binary value `r` from the bits of `qubits` in each basis state of `qureg`
+/// - `coeffs`: the coefficients of the exponential polynomial phase function
+///   `f(r)`
+/// - `exponents`: the exponents of the exponential polynomial phase function
+///   `f(r)`
+/// - `override_inds`: a list of sub-state indices (values of `r` of which to
+///   explicit set the phase change
+/// - `override_phases`: a list of replacement phase changes, for the
+///   corresponding `r` values in `override_inds` (one to one)
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`][quest-error-array-len],
+///   - if the length of `coeffs` is different than that of `exponents`
+///   - if the length of `override_inds` is different than that of
+///     `override_phases`
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
+///     <= qubit < qureg.num_qubits_represented()`
+///   - if the elements of `qubits` are not unique
+///   - if `qubits.len() >= qureg.num_qubits_represented()`
+///   - if `encoding` is not compatible with `qubits.len()` (e.g.
+///     `TWOS_COMPLEMENT` with only 1 qubit)
+///   - if `exponents` contains a fractional number despite `encoding` being
+///     `TWOS_COMPLEMENT` (you must instead use `apply_phase_func_overrides()`
+///     and override all negative indices)
+///   - if `exponents` contains a negative power and the (consequently
+///     diverging) zero index is not contained in `override_inds`
+///   - if any value in `override_inds` is not producible by `qubits` under the
+///     given `encoding` (e.g. 2 unsigned qubits cannot represent index 9)
+///   - if `encoding` is `TWOS_COMPLEMENT`, and `exponents` contains a
+///     fractional number, but `override_inds` does not contain every possible
+///     negative index (checked only up to 16 targeted qubits)
+///
 /// # Examples
 ///
 /// ```rust
@@ -5107,9 +5166,13 @@ pub fn apply_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-apply-phase-func]: crate::apply_phase_func()
+/// [api-bit-encoding]: crate::BitEncoding
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
     qureg: &mut Qureg,
